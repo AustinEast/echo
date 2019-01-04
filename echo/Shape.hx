@@ -1,4 +1,4 @@
-package echo.shape;
+package echo;
 
 import echo.shape.*;
 import hxmath.math.Vector2;
@@ -21,16 +21,15 @@ class Shape {
   public var right(get, null):Float;
 
   public static function get(options:ShapeOptions):Shape {
+    options = glib.Data.copy_fields(options, defaults);
     switch (options.type) {
       case RECT:
-        Rect.get();
+        return Rect.get(options.offset_x, options.offset_y, options.width, options.height);
       case CIRCLE:
-
+        return Circle.get(options.offset_x, options.offset_y, options.radius);
       case POLYGON:
-        throw 'Not Implemented';
+        throw 'Polygon Shape has not been implemented';
     }
-
-    return Rect.get();
   }
 
   public static inline function rect(?x:Float, ?y:Float, ?width:Float, ?height:Float) return Rect.get(x, y, width, height);
@@ -81,9 +80,9 @@ class Shape {
 
   static function get_defaults():ShapeOptions return {
     type: RECT,
-    radius: 8,
-    width: 16,
-    height: 16,
+    radius: 4,
+    width: 8,
+    height: 8,
     points: [],
     rotation: 0,
     offset_x: 0,
@@ -92,7 +91,7 @@ class Shape {
 }
 
 typedef ShapeOptions = {
-  var type:ShapeType;
+  var ?type:ShapeType;
   var ?radius:Float;
   var ?width:Float;
   var ?height:Float;

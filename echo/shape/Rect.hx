@@ -43,6 +43,7 @@ class Rect extends Shape implements IPooled {
     super();
     ex = 0;
     ey = 0;
+    type = RECT;
   }
 
   override function put() {

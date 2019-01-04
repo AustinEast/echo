@@ -1,10 +1,10 @@
 package echo;
 
 import hxmath.math.Vector2;
-import echo.shape.Shape;
+import echo.Shape;
 
 class Body {
-  public var shape:Shape;
+  public var shape:Null<Shape>;
   public var collides:Bool;
   public var moves:Bool;
   public var solid:Bool;
@@ -24,7 +24,9 @@ class Body {
 
   public function load(?options:BodyOptions) {
     if (options == null) options = {};
-    if (options.shape != null) shape = Shape.get(options.shape);
+    shape = Shape.get(options.shape);
+    x = options.x == null ? 0 : options.x;
+    y = options.y == null ? 0 : options.y;
   }
 
   public function dispose() {

@@ -5,3 +5,5 @@
 # libraries
 -lib echo
 -lib heaps
+# flags
+-debug

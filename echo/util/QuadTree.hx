@@ -1,8 +1,7 @@
 package echo.util;
 
-import echo.Collisions;
 import glib.Pool;
-import echo.shape.Shape;
+import echo.Shape;
 import echo.shape.Rect;
 /**
  * Simple QuadTree implementation to assist with broad-phase 2D collisions.

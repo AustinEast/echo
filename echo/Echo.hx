@@ -1,11 +1,12 @@
 package echo;
 
+import echo.State.StateOptions;
 import haxe.ds.Vector;
 
 class Echo {
   // var states:History;
   // var observers:
-  public static function start(?options:StateOptions):State {
+  public static function start(options:StateOptions):State {
     return new State(options);
   }
 
@@ -31,32 +32,4 @@ class Echo {
 
   // returns observable
   public static function listen() {}
-}
-
-typedef StateOptions = {
-  var width:Float;
-  var height:Float;
-  var ?bodies:Array<Body>;
-  var ?iterations:Int;
-  var ?history:Int;
-}
-
-class State {
-  var width:Float;
-  var height:Float;
-  var bodies:Array<Body>;
-  var iterations:Int;
-  var history:Vector<Array<Body>>;
-
-  public function new(?options:StateOptions) {}
-
-  public function add(body:Body):Body {
-    bodies.remove(body);
-    bodies.push(body);
-    return body;
-  }
-
-  public function remove(body:Body):Body {
-    return body;
-  }
 }

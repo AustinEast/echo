@@ -1,0 +1,14 @@
+{
+    "name": "echo",
+    "license": "MIT",
+    "tags": [],
+    "contributors": [
+      "austineast"
+    ],
+    "releasenote": "initial release",
+    "version": "0.0.1",
+    "dependencies": {
+      "ghostlib": "",
+      "hxmath": ""
+    }
+  }

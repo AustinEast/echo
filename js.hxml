@@ -1,0 +1,5 @@
+# import base.xml
+sample.hxml
+# output
+-js sample/bin/game.js
+# -cmd open ./index.html

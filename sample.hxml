@@ -1,0 +1,7 @@
+# class paths
+-cp sample/src
+# entry point
+-main Main
+# libraries
+-lib echo
+-lib heaps

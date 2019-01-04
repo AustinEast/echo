@@ -1,0 +1,31 @@
+{
+    "indentation": {
+        "character": "  ",
+        "conditionalPolicy": "aligned"
+    },
+    "sameLine": {
+        "anonFunctionBody": "keep",
+        "ifBody": "same",
+        "ifElse": "next",
+        "elseBody": "same",
+        "elseIf": "same",
+        "caseBody": "keep",
+        "doWhile": "same",
+        "doWhileBody": "same",
+        "whileBody": "same",
+        "forBody": "same",
+        "tryBody": "same",
+        "catchBody": "same",
+        "functionBody": "keep"
+    },
+    "emptyLines": {
+        "afterLeftCurly": "remove",
+        "beforeDocCommentEmptyLines": "none",
+        "afterImportsUsing": 1,
+        "afterPackage": 1,
+        "finalNewline": true,
+        "classEmptyLines": {
+            "betweenFunctions": 1
+        }
+    }
+}

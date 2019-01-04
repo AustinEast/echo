@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>echo samples</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <style>
+        body,html { 
+            font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+            margin:0; 
+            padding:0; 
+            width:100%; 
+            height:100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center; 
+        }
+        canvas#webgl { 
+            height:auto; 
+        }
+        .dark {
+            color: white;
+            background: #222034;
+        }
+    </style>
+</head>
+<body class="dark">
+    <h1>Echo</h1>
+    <p>Simple Arcade Physics Engine</p>
+    <canvas width="320" height="180" id="webgl"></canvas>
+    <!-- <p style="font-style:italic;">spacebar: next sample || enter: reset sample</p> -->
+</body>
+<script src="sample/bin/game.js"></script>
+<script>
+    function resize() {
+        var canvas = document.getElementById('webgl')
+        canvas.style.width = '50%';
+    }
+    // Resize the canvas on window resize
+    window.addEventListener('resize', resize(), false);
+    resize();
+</script>
+</html>

@@ -80,9 +80,9 @@ class Shape {
 
   static function get_defaults():ShapeOptions return {
     type: RECT,
-    radius: 4,
-    width: 8,
-    height: 8,
+    radius: 8,
+    width: 16,
+    height: 16,
     points: [],
     rotation: 0,
     offset_x: 0,

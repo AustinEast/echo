@@ -27,7 +27,8 @@ class Debug {
             var r:Rect = cast body.shape;
             draw_rect(r.x + body.x, r.y + body.y, r.width, r.height, shape_fill_color, shape_color, 0.2);
           case CIRCLE:
-
+            var c:Circle = cast body.shape;
+            draw_circle(c.x + body.x, c.y + body.y, c.radius, shape_fill_color, shape_color, 0.2);
           case POLYGON:
         }
       }
@@ -62,14 +63,14 @@ class HeapsDebug extends Debug {
 
   override public inline function draw_rect(x:Float, y:Float, width:Float, height:Float, color:Int, ?stroke:Int, alpha:Float = 1.) {
     canvas.beginFill(color, alpha);
-    stroke != null ? canvas.lineStyle(1, stroke, alpha) : canvas.lineStyle();
+    stroke != null ? canvas.lineStyle(1, stroke, 1) : canvas.lineStyle();
     canvas.drawRect(x, y, width, height);
     canvas.endFill();
   }
 
   override public inline function draw_circle(x:Float, y:Float, radius:Float, color:Int, ?stroke:Int, alpha:Float = 1.) {
     canvas.beginFill(color, alpha);
-    stroke != null ? canvas.lineStyle(1, stroke, alpha) : canvas.lineStyle();
+    stroke != null ? canvas.lineStyle(1, stroke, 1) : canvas.lineStyle();
     canvas.drawCircle(x, y, radius);
     canvas.endFill();
   }

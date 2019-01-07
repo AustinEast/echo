@@ -1,6 +1,7 @@
 package echo.util;
 
 import glib.Pool;
+import echo.Body;
 import echo.Shape;
 import echo.shape.Rect;
 /**
@@ -188,13 +189,14 @@ class QuadTree extends Rect implements IPooled {
   static function get_pool():IPool<QuadTree> return _pool;
 }
 
-typedef QuadTreeData = {
+typedef QuadTreeData = TypedQuadTreeData<Dynamic>;
+
+typedef TypedQuadTreeData<T> = {
   /**
-   * Dynamic Data to store.
-   *
-   * TODO: Make this abstract so quadtree data can be variable[][][][][][][][][][][][][][][][][][][][][]
+   * Data to store.
    */
-  var ?data:Dynamic;
+  var ?data:T;
+  var ?body:Body;
   /**
    * Bounds of the Data.
    */

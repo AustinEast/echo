@@ -1,9 +1,12 @@
 package echo;
 
+using hxmath.math.MathUtil;
+
 class Physics {
-  public static function step() {
+  public static function step(state:State, dt:Float) {
     // Integrate
   }
+
   // public static function resolve(e1:CollisionItem, e2:CollisionItem, cd:CollisionData) {
   //   // Calculate relative velocity
   //   var rv = e1.motion.velocity - e2.motion.velocity;
@@ -39,19 +42,19 @@ class Physics {
   //   var correction = (Math.max(cd.overlap - lerp, 0) / e.motion.inv_mass) * correction_percent * cd.normal;
   //   e.transform.subtract(e.motion.inv_mass * correction);
   // }
-  // public static inline function compute_velocity(v:Float, a:Float, d:Float, m:Float) {
-  //   // Apply Acceleration to Velocity
-  //   if (a != 0) {
-  //     v += a;
-  //   }
-  //   // Otherwise Apply Drag to Velocity
-  //   else if (d != 0) {
-  //     if (v - d > 0) v -= d;
-  //     else if (v + d < 0) v += d;
-  //     else v = 0;
-  //   }
-  //   // Clamp Velocity if it has a Max
-  //   if (m != 0) v = v.clamp(-m, m);
-  //   return v;
-  // }
+  public static inline function compute_velocity(v:Float, a:Float, d:Float, m:Float) {
+    // Apply Acceleration to Velocity
+    if (a != 0) {
+      v += a;
+    }
+    // Otherwise Apply Drag to Velocity
+    else if (d != 0) {
+      if (v - d > 0) v -= d;
+      else if (v + d < 0) v += d;
+      else v = 0;
+    }
+    // Clamp Velocity if it has a Max
+    if (m != 0) v = v.clamp(-m, m);
+    return v;
+  }
 }

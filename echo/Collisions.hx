@@ -1,7 +1,8 @@
 package echo;
 
-import hxmath.math.Vector2;
+import echo.Body;
 import echo.shape.*;
+import hxmath.math.Vector2;
 
 using hxmath.math.MathUtil;
 
@@ -152,6 +153,12 @@ class Collisions {
       overlap: rad - d
     };
   }
+}
+
+typedef Collision = {
+  var a:Body;
+  var b:Body;
+  var data:CollisionData;
 }
 
 typedef CollisionData = {

@@ -20,7 +20,7 @@ class Debug {
   public function draw(state:State) {
     clear();
     for (tree in state.quadtrees) draw_quadtree(tree);
-    for (body in state.bodies) {
+    for (body in state.members) {
       if (body.shape != null) {
         switch (body.shape.type) {
           case RECT:

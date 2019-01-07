@@ -12,6 +12,7 @@ class Echo {
 
   public static function step(state:State, dt:Float) {
     // Broadphase
+    for (collider in state.colliders.members) {}
 
     // Narrowphase
 

@@ -1,26 +1,26 @@
 package echo;
 
-import echo.util.QuadTree;
+import glib.Disposable;
 
-class Group {
-  public var bodies:Array<Body>;
-  public var quadtrees:Array<QuadTree>;
+class Group implements IDisposable {
+  public var members:Array<Body>;
 
-  public function new(?bodies:Array<Body>) {
-    this.bodies = bodies == null ? [] : bodies;
-    this.quadtrees = [];
+  public function new(?members:Array<Body>) {
+    this.members = members == null ? [] : members;
   }
 
   public function add(body:Body):Body {
-    if (body != null) {
-      bodies.remove(body);
-      bodies.push(body);
-    }
+    members.remove(body);
+    members.push(body);
     return body;
   }
 
   public function remove(body:Body):Body {
-    bodies.remove(body);
+    members.remove(body);
     return body;
+  }
+
+  public function dispose() {
+    members = null;
   }
 }

@@ -6,9 +6,6 @@ import echo.Listener;
 import echo.Echo;
 import haxe.ds.Vector;
 
-/**
- * TODO: Update Listeners on World Bound Updates
- */
 class World extends Group {
   public var width:Float;
   public var height:Float;

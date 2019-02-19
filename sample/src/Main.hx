@@ -12,8 +12,10 @@ class Main extends BaseApp {
   public static var state_text:h2d.Text;
 
   var width:Int = 640;
-  var height:Int = 320;
+  var height:Int = 360;
   var world:World;
+  var members_text:h2d.Text;
+  var fps_text:h2d.Text;
 
   override function init() {
     // Create a World to hold all the Physics Bodies
@@ -23,14 +25,12 @@ class Main extends BaseApp {
       gravity_y: 20,
       iterations: 5
     });
-    // Create a listener for collisions between the Physics Bodies
-    world.listen();
-    // Create a State Manager and add the first Sample
+    // Create a State Manager and pass it the World and the first Sample
     fsm = new FSM<World>(world, Type.createInstance(sample_states[index], null));
     // Create a Debug drawer to display debug graphics
     debug = new HeapsDebug(s2d);
     // Set the Background color of the Scene
-    engine.backgroundColor = 0xff222034;
+    engine.backgroundColor = 0x45283c;
     // Set the Heaps Scene size
     s2d.setFixedSize(width, height);
     // Get a static reference to the Heaps scene so we can access it later
@@ -46,6 +46,9 @@ class Main extends BaseApp {
     Echo.step(world, dt);
     // Draw the new World
     debug.draw(world);
+    // Update GUI text
+    members_text.text = 'Bodies: ${world.members.length}';
+    fps_text.text = 'FPS: ${engine.fps}';
   }
 
   function add_ui() {
@@ -58,8 +61,10 @@ class Main extends BaseApp {
     bui.padding = 5;
     bui.verticalSpacing = 5;
     bui.isVertical = true;
-    bui.y = s2d.height - 50;
+    bui.y = s2d.height - 90;
     state_text = addText("Sample: ", bui);
+    members_text = addText("Bodies: ", bui);
+    fps_text = addText("FPS: ", bui);
     var buttons = new h2d.Flow(bui);
     buttons.horizontalSpacing = 2;
 

@@ -4,6 +4,8 @@ import glib.Disposable;
 import echo.Echo;
 /**
  * Container for storing a collection of Bodies. Use these to group Bodies for a `Listener`
+ *
+ * TODO: Make a `Typed` version of this
  */
 class Group implements IEcho implements IDisposable {
   public var members:Array<Body>;

@@ -1,7 +1,8 @@
 {
     "name": "echo",
     "license": "MIT",
-    "tags": [],
+    "tags": ["physics", "collisions"],
+    "description": "Simple Physics Engine written in Pure Haxe",
     "contributors": [
       "austineast"
     ],

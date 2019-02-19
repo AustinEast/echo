@@ -29,6 +29,11 @@ class World extends Group {
     iterations = options.iterations == null ? 5 : options.iterations;
   }
 
+  override function clear() {
+    super.clear();
+    listeners.clear();
+  }
+
   override function dispose() {
     super.dispose();
     gravity = null;

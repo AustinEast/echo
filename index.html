@@ -14,6 +14,8 @@
             padding:0; 
             width:100%; 
             height:100%;
+        }
+        main {
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -21,24 +23,38 @@
         }
         canvas#webgl { 
             height:auto; 
+            max-width: 720px;
+        }
+        a {
+            margin: 40px;
+            padding: 15px;
+            text-decoration: none;
+            font-size: 1.5em;
+            color: #45283c;
+            background-color: white;
         }
         .dark {
             color: white;
-            background: #222034;
+            background: #45283c;
         }
     </style>
 </head>
 <body class="dark">
-    <h1>Echo</h1>
-    <p>Simple Arcade Physics Engine</p>
-    <canvas width="320" height="180" id="webgl"></canvas>
-    <!-- <p style="font-style:italic;">spacebar: next sample || enter: reset sample</p> -->
+    <main>
+        <img src="./echo.png"></img>
+        <h1>Echo</h1>
+        <p>Simple Arcade Physics Engine for Haxe</p>
+        <canvas width="640" height="360" id="webgl"></canvas>
+        <a href="https://github.com/AustinEast/echo/">Get Started</a>
+    </main>
 </body>
 <script src="sample/bin/game.js"></script>
 <script>
     function resize() {
         var canvas = document.getElementById('webgl')
-        canvas.style.width = '50%';
+        
+        canvas.style.width = '100%';
+        // canvas.style.minWidth = '640px';
     }
     // Resize the canvas on window resize
     window.addEventListener('resize', resize(), false);

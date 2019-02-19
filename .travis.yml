@@ -1,0 +1,18 @@
+sudo: required
+dist: trusty
+
+language: haxe
+
+haxe:
+ - "3.4.7"
+ - "development"
+
+install:
+ - haxelib dev echo .
+
+deploy:
+ - provider: script
+   haxe: 3.4.7
+   script: bash ./release_haxelib.sh $HAXELIB_PWD
+   on:
+	 tags: true

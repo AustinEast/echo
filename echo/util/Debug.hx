@@ -3,6 +3,8 @@ package echo.util;
 import echo.shape.*;
 
 class Debug {
+  public var draw_bodies:Bool = true;
+  public var draw_quadtree:Bool = true;
   public var shape_color:Int;
   public var shape_fill_color:Int;
   public var shape_collided_color:Int;
@@ -19,8 +21,8 @@ class Debug {
 
   public function draw(world:World) {
     clear();
-    draw_quadtree(world.quadtree);
-    for (body in world.members) {
+    if (draw_quadtree) draw_qd(world.quadtree);
+    if (draw_bodies) for (body in world.members) {
       if (body.shape != null) {
         switch (body.shape.type) {
           case RECT:
@@ -35,9 +37,9 @@ class Debug {
     }
   }
 
-  function draw_quadtree(tree:QuadTree) for (child in tree.children) {
-    draw_rect(child.left, child.top, child.width, child.height, quadtree_fill_color, quadtree_color, 0.4);
-    draw_quadtree(child);
+  function draw_qd(tree:QuadTree) for (child in tree.children) {
+    draw_rect(child.left, child.top, child.width, child.height, quadtree_fill_color, quadtree_color, 0.2);
+    draw_qd(child);
   }
 }
 

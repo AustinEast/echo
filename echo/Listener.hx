@@ -59,6 +59,10 @@ class Listeners implements IDisposable {
     return listener;
   }
 
+  public function clear() {
+    members = [];
+  }
+
   public function dispose() {
     members = null;
   }

@@ -5,8 +5,15 @@ import echo.util.SAT;
 using hxmath.math.MathUtil;
 using hxmath.math.Vector2;
 using hxd.Math;
-
+/**
+ * Class containing methods for performing Physics simulations on a World
+ */
 class Physics {
+  /**
+   * Applies movement forces to a World's Bodies
+   * @param world World to step forward
+   * @param dt elapsed time since the last step
+   */
   public static function step(world:World, dt:Float) {
     for (member in world.members) {
       // Apply Gravity
@@ -24,13 +31,22 @@ class Physics {
       // member.rotational_acceleration = 0;
     }
   }
-
+  /**
+   * Separates a World's Bodies that have collided. Use `Collisions.query()` to query for collisions
+   * @param world
+   * @param dt
+   */
   public static function separate(world:World, dt:Float) {
-    for (collider in world.colliders.members) {
-      if (collider.separate) for (collision in collider.collisions) resolve(collision.a, collision.b, collision.data);
+    for (listener in world.listeners.members) {
+      if (listener.separate) for (collision in listener.collisions) resolve(collision.a, collision.b, collision.data);
     }
   }
-
+  /**
+   * Resolves a Collision between two Bodies, separating them if the conditions are correct.
+   * @param a the first `Body` in the Collision
+   * @param b the second `Body` in the Collision
+   * @param cd Data related to the Collision
+   */
   public static function resolve(a:Body, b:Body, cd:CollisionData) {
     // Do not resolve if either objects arent solid
     if (!a.solid || !b.solid || a.mass == 0 && b.mass == 0) return;
@@ -59,7 +75,7 @@ class Physics {
     b.position.addWith(b.inverse_mass * correction);
   }
 
-  public static inline function compute_velocity(v:Float, a:Float, d:Float, m:Float, im:Float, dt:Float) {
+  static inline function compute_velocity(v:Float, a:Float, d:Float, m:Float, im:Float, dt:Float) {
     // Apply Acceleration to Velocity
     if (a != 0) {
       v += a * im * dt;

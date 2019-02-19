@@ -4,7 +4,9 @@ import echo.shape.*;
 import hxmath.math.Vector2;
 
 using hxmath.math.MathUtil;
-
+/**
+ * Class containing methods to perform collision checks using the Separating Axis Thereom
+ */
 class SAT {
   public static inline function point_in_rect(p:Vector2, r:Rect):Bool {
     return r.left <= p.x && r.right >= p.x && r.top <= p.x && r.bottom >= p.y;

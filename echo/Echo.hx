@@ -1,39 +1,68 @@
 package echo;
 
 import echo.Body;
-import echo.Collider;
+import echo.Listener;
 import echo.Collisions;
 import echo.World;
 
 class Echo {
+  /**
+   * Shortcut for creating a new `World`
+   * @param options Options for the new `World`
+   * @return World the new created `World`
+   */
   public static function start(options:WorldOptions):World return new World(options);
-
-  public static function listen(world:World, ?a:IEcho, ?b:IEcho, ?options:ColliderOptions):Collider {
-    if (a == null) return b == null ? world.colliders.add(world, world, options) : world.colliders.add(b, b, options);
-    if (b == null) return world.colliders.add(a, a, options);
-    return world.colliders.add(a, b, options);
+  /**
+   * Shortcut for creating a new `Listener` for a set of Bodies in the `World`.
+   * @param world the `World` to add the Listener to
+   * @param a The first `Body` or `Group` to collide against
+   * @param b The second `Body` or `Group` to collide against
+   * @param options Options to define the Listener's behavior
+   * @return Listener
+   */
+  public static function listen(world:World, ?a:IEcho, ?b:IEcho, ?options:ListenerOptions):Listener {
+    if (a == null) return b == null ? world.listeners.add(world, world, options) : world.listeners.add(b, b, options);
+    if (b == null) return world.listeners.add(a, a, options);
+    return world.listeners.add(a, b, options);
   }
-
+  /**
+   * Steps a `World` forward.
+   * @param world
+   * @param dt
+   */
   public static function step(world:World, dt:Float) {
-    // Save WorldState to History
+    // TODO: Save WorldState to History
     var fdt = dt / world.iterations;
     for (i in 0...world.iterations) {
       Physics.step(world, fdt);
       Collisions.query(world);
       Physics.separate(world, fdt);
-      // Notify New World and Collisions to Listeners
+      Collisions.notify(world);
     }
   }
-
+  /**
+   * TODO: Undo a World's last step
+   * @param world
+   * @return World
+   */
   public static function undo(world:World):World {
     return world;
   }
-
+  /**
+   * TODO: Redo a World's last step
+   * @param world
+   * @return World
+   */
   public static function redo(world:World):World {
     return world;
   }
-
-  public static function collide(a:IEcho, b:IEcho, ?options:ColliderOptions) {}
+  /**
+   * TODO: Perform a collision check.
+   * @param a
+   * @param b
+   * @param options
+   */
+  public static function collide(a:IEcho, b:IEcho, ?options:ListenerOptions) {}
 }
 
 typedef WorldState = {

@@ -3,9 +3,12 @@ package echo;
 import echo.Body;
 import echo.util.SAT;
 import echo.util.QuadTree;
-
+/**
+ * Class containing methods for performing Collisions on a World
+ */
 class Collisions {
   /**
+   * Queries a World's Listeners for Collisions
    * TODO: Keep a Quadtree of Cached Static Objects
    */
   public static function query(world:World) {
@@ -20,35 +23,35 @@ class Collisions {
       }
     }
 
-    // Process the Colliders
-    for (collider in world.colliders.members) {
+    // Process the Listeners
+    for (listener in world.listeners.members) {
       // BroadPhase
       var results:Array<Collision> = [];
-      switch (collider.a.type) {
+      switch (listener.a.type) {
         case BODY:
-          switch (collider.b.type) {
+          switch (listener.b.type) {
             case BODY:
-              var col = body_and_body(cast collider.a, cast collider.b);
+              var col = body_and_body(cast listener.a, cast listener.b);
               if (col != null) results.push(col);
             case GROUP:
-              results = body_and_group(cast collider.a, cast collider.b, world.quadtree);
+              results = body_and_group(cast listener.a, cast listener.b, world.quadtree);
           }
         case GROUP:
-          switch (collider.b.type) {
+          switch (listener.b.type) {
             case BODY:
-              results = body_and_group(cast collider.a, cast collider.b, world.quadtree);
+              results = body_and_group(cast listener.a, cast listener.b, world.quadtree);
             case GROUP:
-              results = group_and_group(cast collider.a, cast collider.b, world.quadtree);
+              results = group_and_group(cast listener.a, cast listener.b, world.quadtree);
           }
       }
       // NarrowPhase
-      collider.last_collisions = collider.collisions.copy();
-      collider.collisions = [];
+      listener.last_collisions = listener.collisions.copy();
+      listener.collisions = [];
       for (result in results) {
         // Filter out self collisions
         if (result.a.id == result.b.id) continue;
         // Filter out duplicate pairs
-        if (collider.collisions.filter((pair) -> {
+        if (listener.collisions.filter((pair) -> {
             if (pair.a.id == result.a.id && pair.b.id == result.b.id) return true;
             if (pair.b.id == result.a.id && pair.a.id == result.b.id) return true;
             return false;
@@ -61,14 +64,21 @@ class Collisions {
         result.data = sa.collides(sb);
         if (result.data == null) continue;
         result.a.collided = result.b.collided = true;
-        collider.collisions.push(result);
+        listener.collisions.push(result);
         sa.put();
         sb.put();
       }
     }
   }
-
-  public static function notify(world) {}
+  /**
+   * Enacts the Callbacks defined in a World's Listeners
+   */
+  public static function notify(world:World) {
+    for (listener in world.listeners.members) {
+      if (listener.callback == null) continue;
+      for (collision in listener.collisions) listener.callback(collision.a, collision.b, cast collision.data);
+    }
+  }
 
   static function group_and_group(a:Group, b:Group, ?quadtree:QuadTree):Array<Collision> {
     if (a.members.length == 0 || b.members.length == 0) return [];

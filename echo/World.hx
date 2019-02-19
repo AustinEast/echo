@@ -2,12 +2,12 @@ package echo;
 
 import hxmath.math.Vector2;
 import echo.util.QuadTree;
-import echo.Collider;
+import echo.Listener;
 import echo.Echo;
 import haxe.ds.Vector;
 
 /**
- * TODO: Update Colliders on World Bound Updates
+ * TODO: Update Listeners on World Bound Updates
  */
 class World extends Group {
   public var width:Float;
@@ -16,7 +16,7 @@ class World extends Group {
   public var y:Float;
   public var gravity(default, null):Vector2;
   public var quadtree:QuadTree;
-  public var colliders:Colliders;
+  public var listeners:Listeners;
   public var iterations:Int;
   public var history:Vector<WorldState>;
 
@@ -28,7 +28,7 @@ class World extends Group {
     y = options.y == null ? 0 : options.y;
     gravity = new Vector2(options.gravity_x == null ? 0 : options.gravity_x, options.gravity_y == null ? 0 : options.gravity_y);
     quadtree = QuadTree.get();
-    colliders = new Colliders(this, options.colliders);
+    listeners = new Listeners(this, options.listeners);
     iterations = options.iterations == null ? 5 : options.iterations;
   }
 
@@ -36,8 +36,8 @@ class World extends Group {
     super.dispose();
     gravity = null;
     quadtree.put();
-    colliders.dispose();
-    colliders = null;
+    listeners.dispose();
+    listeners = null;
     history = null;
   }
 }
@@ -50,7 +50,7 @@ typedef WorldOptions = {
   var ?gravity_x:Float;
   var ?gravity_y:Float;
   var ?members:Array<Body>;
-  var ?colliders:Array<Collider>;
+  var ?listeners:Array<Listener>;
   var ?iterations:Int;
   var ?history:Int;
 }

@@ -1,6 +1,7 @@
 package echo;
 
 import echo.shape.*;
+import echo.util.SAT;
 import hxmath.math.Vector2;
 
 using echo.Collisions;

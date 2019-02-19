@@ -1,12 +1,15 @@
 package echo;
 
 import glib.Disposable;
+import echo.Echo;
 
-class Group implements IDisposable {
+class Group implements IEcho implements IDisposable {
   public var members:Array<Body>;
+  public var type(default, null):EchoType;
 
   public function new(?members:Array<Body>) {
     this.members = members == null ? [] : members;
+    type = GROUP;
   }
 
   public function add(body:Body):Body {
@@ -20,7 +23,9 @@ class Group implements IDisposable {
     return body;
   }
 
-  public function dispose() {
-    members = null;
+  public function clear() {
+    members = [];
   }
+
+  public function dispose() members = null;
 }

@@ -1,61 +1,73 @@
 package;
 
-import echo.Body;
-import echo.Echo;
-import echo.State;
+import echo.World;
 import echo.util.Debug;
-import glib.Random;
+import glib.FSM;
+import state.*;
 
-class Main extends hxd.App {
-  var body_count:Int = 500;
-  var state:State;
-  var debug:HeapsDebug;
-  /**
-   * Initialize the Scene
-   */
+using echo.Echo;
+
+class Main extends BaseApp {
+  public static var scene:h2d.Scene;
+  public static var state_text:h2d.Text;
+
+  var width:Int = 640;
+  var height:Int = 320;
+  var world:World;
+
   override function init() {
-    // Create a State to hold all the Physics Bodies
-    state = Echo.start({width: 320, height: 180});
-    // Add a bunch of Physics Bodies to the State
-    for (i in 0...body_count) {
-      state.add(new Body({
-        x: Random.range(0, state.width),
-        y: Random.range(0, state.height),
-        shape: {
-          type: Random.chance() ? CIRCLE : RECT,
-          radius: Random.range(4, 8),
-          width: Random.range(8, 16),
-          height: Random.range(8, 16),
-        }
-      }));
-    }
+    // Create a World to hold all the Physics Bodies
+    world = Echo.start({
+      width: width,
+      height: height,
+      gravity_y: 20,
+      iterations: 5
+    });
+    // Create a listener for collisions between the Physics Bodies
+    world.listen();
+    // Create a State Manager and add the first Sample
+    fsm = new FSM<World>(world, Type.createInstance(sample_states[index], null));
     // Create a Debug drawer to display debug graphics
     debug = new HeapsDebug(s2d);
     // Set the Background color of the Scene
     engine.backgroundColor = 0xff222034;
-    // Call `onResize()` to force a rescale to fit the window
-    onResize();
+    // Set the Heaps Scene size
+    s2d.setFixedSize(width, height);
+    // Get a static reference to the Heaps scene so we can access it later
+    scene = s2d;
+    // Add the UI elements
+    add_ui();
   }
-  /**
-   * Update the Scene
-   * @param dt Delta Time
-   */
+
   override function update(dt:Float) {
-    // Step the State Forward
-    Echo.step(state, dt);
-    // Draw the new State
-    debug.draw(state);
+    // Update the current Sample State
+    fsm.update(dt);
+    // Step the World Forward
+    Echo.step(world, dt);
+    // Draw the new World
+    debug.draw(world);
   }
-  /**
-   * Scale the debug canvas when the window is resized
-   */
-  override public function onResize() {
-    var scaleFactorX:Float = engine.width / state.width;
-    var scaleFactorY:Float = engine.height / state.height;
-    var scaleFactor:Float = Math.min(scaleFactorX, scaleFactorY);
-    if (scaleFactor < 1) scaleFactor = 1;
-    debug.canvas.setScale(scaleFactor);
-    debug.canvas.setPosition(engine.width * 0.5 - (state.width * scaleFactor) * 0.5, engine.height * 0.5 - (state.height * scaleFactor) * 0.5);
+
+  function add_ui() {
+    fui = new h2d.Flow(s2d);
+    fui.y = 5;
+    fui.padding = 5;
+    fui.verticalSpacing = 5;
+    fui.isVertical = true;
+    var bui = new h2d.Flow(s2d);
+    bui.padding = 5;
+    bui.verticalSpacing = 5;
+    bui.isVertical = true;
+    bui.y = s2d.height - 50;
+    state_text = addText("Sample: ", bui);
+    var buttons = new h2d.Flow(bui);
+    buttons.horizontalSpacing = 2;
+
+    addButton("Previous", previous_state, buttons);
+    addButton("Restart", reset_state, buttons);
+    addButton("Next", next_state, buttons);
+    addSlider("Gravity", () -> return world.gravity.y, (v) -> world.gravity.y = v, -100, 100);
+    addSlider("Iterations", () -> return world.iterations, (v) -> world.iterations = Std.int(v), 1, 10);
   }
 
   static function main() {

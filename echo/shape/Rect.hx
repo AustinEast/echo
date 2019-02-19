@@ -4,7 +4,7 @@ import echo.shape.*;
 import glib.Pool;
 import hxmath.math.Vector2;
 
-using echo.Collisions;
+using echo.util.SAT;
 
 typedef RectType = {
   var x:Float;

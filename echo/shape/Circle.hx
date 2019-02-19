@@ -4,7 +4,7 @@ import glib.Pool;
 import echo.shape.*;
 import hxmath.math.Vector2;
 
-using echo.Collisions;
+using echo.util.SAT;
 
 typedef CircleType = {
   var x:Float;

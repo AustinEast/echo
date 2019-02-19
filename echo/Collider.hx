@@ -1,25 +1,41 @@
 package echo;
 
-import haxe.ds.Either;
 import glib.Disposable;
+import echo.Echo;
+import echo.Collisions;
 
 typedef Collider = {
-  var a:Either<Body, Group>;
-  var b:Either<Body, Group>;
+  var a:IEcho;
+  var b:IEcho;
   var separate:Bool;
-  var ?callback:Dynamic->Dynamic->Void;
+  var collisions:Array<Collision>;
+  var last_collisions:Array<Collision>;
+  var ?callback:Dynamic->Dynamic->Collision->Void;
+  var ?condition:Dynamic->Dynamic->Collision->Bool;
 }
 
 class Colliders implements IDisposable {
-  public var members:Array<Collider>;
+  public static var collider_defaults(get, null):ColliderOptions;
 
-  public function new() {
-    members = [];
+  public var members:Array<Collider>;
+  public var world:World;
+
+  public function new(world:World, ?members:Array<Collider>) {
+    this.world = world;
+    this.members = members == null ? [] : members;
   }
 
-  public function add(a:Either<Body, Group>, b:Either<Body, Group>, separate:Bool = false, ?callback:Dynamic->Dynamic->Void):Collider {
-    var collider:Collider = {a: a, b: b, separate: separate};
-    if (callback != null) collider.callback = callback;
+  public function add(a:IEcho, b:IEcho, ?options:ColliderOptions):Collider {
+    options = glib.Data.copy_fields(options, collider_defaults);
+    var collider:Collider = {
+      a: a,
+      b: b,
+      separate: options.separate,
+      collisions: [],
+      last_collisions: []
+    };
+    if (options.callback != null) collider.callback = options.callback;
+    if (options.condition != null) collider.condition = options.condition;
     members.push(collider);
     return collider;
   }
@@ -32,4 +48,14 @@ class Colliders implements IDisposable {
   public function dispose() {
     members = null;
   }
+
+  static function get_collider_defaults():ColliderOptions return {
+    separate: true
+  }
+}
+
+typedef ColliderOptions = {
+  var ?separate:Bool;
+  var ?callback:Dynamic->Dynamic->Collision->Void;
+  var ?condition:Dynamic->Dynamic->Collision->Bool;
 }

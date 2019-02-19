@@ -42,6 +42,7 @@ class QuadTree extends Rect implements IPooled {
       pooled = true;
       for (child in children) child.put();
       children = [];
+      for (data in contents) data.bounds.put();
       contents = [];
       _pool.put_unsafe(this);
     }
@@ -193,10 +194,9 @@ typedef QuadTreeData = TypedQuadTreeData<Dynamic>;
 
 typedef TypedQuadTreeData<T> = {
   /**
-   * Data to store.
+   * Id of the Data.
    */
-  var ?data:T;
-  var ?body:Body;
+  var id:Int;
   /**
    * Bounds of the Data.
    */

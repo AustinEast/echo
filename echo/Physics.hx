@@ -1,56 +1,73 @@
 package echo;
 
+import echo.util.SAT;
+
 using hxmath.math.MathUtil;
+using hxmath.math.Vector2;
+using hxd.Math;
 
 class Physics {
-  public static function step(state:State, dt:Float) {
-    // Integrate
+  public static function step(world:World, dt:Float) {
+    for (member in world.members) {
+      // Apply Gravity
+      if (member.mass > 0) member.acceleration += world.gravity;
+      // Compute Velocity
+      member.velocity.x = compute_velocity(member.velocity.x, member.acceleration.x, member.drag.x, member.max_velocity.x, member.inverse_mass, dt);
+      member.velocity.y = compute_velocity(member.velocity.y, member.acceleration.y, member.drag.y, member.max_velocity.y, member.inverse_mass, dt);
+      // Apply Velocity
+      member.position.addWith(member.velocity * dt);
+      // TODO: Flesh out rotation stuff
+      // Apply Rotations
+      member.rotation += member.rotational_velocity * dt;
+      // Reset Acceleration Forces
+      member.acceleration.set(0, 0);
+      // member.rotational_acceleration = 0;
+    }
   }
 
-  // public static function resolve(e1:CollisionItem, e2:CollisionItem, cd:CollisionData) {
-  //   // Calculate relative velocity
-  //   var rv = e1.motion.velocity - e2.motion.velocity;
-  //   // Calculate relative velocity in terms of the normal direction
-  //   var vel_to_normal = rv * cd.normal;
-  //   var inv_mass_sum = e1.motion.inv_mass + e2.motion.inv_mass;
-  //   // Do not resolve if velocities are separating
-  //   if (vel_to_normal > 0) {
-  //     // Calculate elasticity
-  //     var e = (e1.motion.elasticity + e2.motion.elasticity) * 0.5;
-  //     // Calculate impulse scalar
-  //     var j = (-(1 + e) * vel_to_normal) / inv_mass_sum;
-  //     var impulse = -j * cd.normal;
-  //     // Apply impulse
-  //     var mass_sum = e1.motion.mass + e2.motion.mass;
-  //     var ratio = e1.motion.mass / mass_sum;
-  //     e1.motion.velocity -= impulse * e1.motion.inv_mass;
-  //     ratio = e2.motion.mass / mass_sum;
-  //     e2.motion.velocity += impulse * e2.motion.inv_mass;
-  //   }
-  //   var correction = (Math.max(cd.overlap - lerp, 0) / inv_mass_sum) * correction_percent * cd.normal;
-  //   e1.transform.subtract(e1.motion.inv_mass * correction);
-  //   e2.transform.add(e2.motion.inv_mass * correction);
-  // }
-  // public static function resolve_static(e:CollisionItem, cd:CollisionData) {
-  //   var vel_to_normal = e.motion.velocity * cd.normal;
-  //   if (vel_to_normal > 0) {
-  //     var j = (-(1 + e.motion.elasticity) * vel_to_normal) / e.motion.inv_mass;
-  //     var impulse = -j * cd.normal;
-  //     // Apply impulse
-  //     e.motion.velocity -= impulse * e.motion.inv_mass;
-  //   }
-  //   var correction = (Math.max(cd.overlap - lerp, 0) / e.motion.inv_mass) * correction_percent * cd.normal;
-  //   e.transform.subtract(e.motion.inv_mass * correction);
-  // }
-  public static inline function compute_velocity(v:Float, a:Float, d:Float, m:Float) {
+  public static function separate(world:World, dt:Float) {
+    for (collider in world.colliders.members) {
+      if (collider.separate) for (collision in collider.collisions) resolve(collision.a, collision.b, collision.data);
+    }
+  }
+
+  public static function resolve(a:Body, b:Body, cd:CollisionData) {
+    // Do not resolve if either objects arent solid
+    if (!a.solid || !b.solid || a.mass == 0 && b.mass == 0) return;
+    // Calculate relative velocity
+    var rv = a.velocity - b.velocity;
+    // Calculate relative velocity in terms of the normal direction
+    var vel_to_normal = rv * cd.normal;
+    var inv_mass_sum = a.inverse_mass + b.inverse_mass;
+    // Do not resolve if velocities are separating
+    if (vel_to_normal > 0) {
+      // Calculate elasticity
+      var e = (a.elasticity + b.elasticity) * 0.5;
+      // Calculate impulse scalar
+      var j = (-(1 + e) * vel_to_normal) / inv_mass_sum;
+      var impulse = -j * cd.normal;
+      // Apply impulse
+      var mass_sum = a.mass + b.mass;
+      var ratio = a.mass / mass_sum;
+      a.velocity.subtractWith(impulse * a.inverse_mass);
+      ratio = b.mass / mass_sum;
+      b.velocity.addWith(impulse * b.inverse_mass);
+    }
+    // Provide some positional correction to the objects to help prevent jitter
+    var correction = (Math.max(cd.overlap - 0.013, 0) / inv_mass_sum) * 0.8 * cd.normal;
+    a.position.subtractWith(a.inverse_mass * correction);
+    b.position.addWith(b.inverse_mass * correction);
+  }
+
+  public static inline function compute_velocity(v:Float, a:Float, d:Float, m:Float, im:Float, dt:Float) {
     // Apply Acceleration to Velocity
     if (a != 0) {
-      v += a;
+      v += a * im * dt;
     }
     // Otherwise Apply Drag to Velocity
     else if (d != 0) {
-      if (v - d > 0) v -= d;
-      else if (v + d < 0) v += d;
+      if (v - d > 0) v -= d * im * dt;
+      else if (v + d < 0) v += d * im * dt;
       else v = 0;
     }
     // Clamp Velocity if it has a Max

@@ -1,9 +1,8 @@
 # class paths
--cp sample
+-cp lib
 # entry point
 -main Main
 # libraries
 -lib echo
--lib heaps
-# flags
--debug
+# output
+-js bin/lib.js

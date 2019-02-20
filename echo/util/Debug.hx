@@ -1,6 +1,7 @@
 package echo.util;
 
 import echo.shape.*;
+import glib.Log;
 
 class Debug {
   public var draw_bodies:Bool = true;
@@ -11,13 +12,12 @@ class Debug {
   public var quadtree_color:Int;
   public var quadtree_fill_color:Int;
 
-  public function draw_line(from_x:Float, from_y:Float, to_x:Float, to_y:Int, color:Int, alpha:Float = 1.) {}
-
-  public function draw_rect(x:Float, y:Float, width:Float, height:Float, color:Int, ?stroke:Int, alpha:Float = 1.) {}
-
-  public function draw_circle(x:Float, y:Float, radius:Float, color:Int, ?stroke:Int, alpha:Float = 1.) {}
-
-  public function clear() {}
+  public static function log(world:World) {
+    trace('World State:');
+    for (member in world.members) {
+      trace(' - Body #${member.id} { x: ${member.x} , y: ${member.y}, colliding: ${member.collided} }');
+    }
+  }
 
   public function draw(world:World) {
     clear();
@@ -35,6 +35,13 @@ class Debug {
         }
       }
     }
+    public function draw_line(from_x:Float, from_y:Float, to_x:Float, to_y:Int, color:Int, alpha:Float = 1.) {}
+
+    public function draw_rect(x:Float, y:Float, width:Float, height:Float, color:Int, ?stroke:Int, alpha:Float = 1.) {}
+
+    public function draw_circle(x:Float, y:Float, radius:Float, color:Int, ?stroke:Int, alpha:Float = 1.) {}
+
+    public function clear() {}
   }
 
   function draw_qd(tree:QuadTree) for (child in tree.children) {

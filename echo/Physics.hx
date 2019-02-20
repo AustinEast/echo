@@ -4,7 +4,6 @@ import echo.util.SAT;
 
 using hxmath.math.MathUtil;
 using hxmath.math.Vector2;
-using hxd.Math;
 /**
  * Class containing methods for performing Physics simulations on a World
  */

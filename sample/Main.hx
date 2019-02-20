@@ -43,7 +43,7 @@ class Main extends BaseApp {
     // Update the current Sample State
     fsm.update(dt);
     // Step the World Forward
-    Echo.step(world, dt);
+    world.step(dt);
     // Draw the new World
     debug.draw(world);
     // Update GUI text

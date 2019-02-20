@@ -16,7 +16,7 @@ Try the Samples [here](austineast.github.io/echo)!
 * Collision listeners to provide collision callbacks
 * Extendable debug drawing
 
-# Getting Started
+## Getting Started
 
 Echo requires [Haxe 4](https://haxe.org/download/version/4.0.0-rc.1/) to run.
 
@@ -39,9 +39,9 @@ For OpenFL users, add this into your `Project.xml` instead:
 <haxelib name="echo" />
 ```
 
-# Usage
+## Usage
 
-## Concepts
+### Concepts
 
 #### Echo
 
@@ -74,13 +74,14 @@ Groups are collections of Bodys. These can be used for grouping collisions.
 
 Listeners keep track of collisions between Bodies and Groups, enacting callbacks and physics responses, depending on their configurations.
 
-## Example
-```
+### Example
+```haxe
 // `using` echo.Echo is prefered over importing it, as it adds in some useful extension methods
 using echo.Echo;
 
 class Main {
   static function main() {
+
     // Create a World to hold all the Physics Bodies
     // Worlds, Bodies, and Listeners are all created with optional configuration objects.
     // This makes it easy to construct obje t configurations, reuse them, and even easily load them from JSON!
@@ -125,6 +126,5 @@ class Main {
     }
   }
 }
-
 
 ```

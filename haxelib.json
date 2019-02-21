@@ -2,11 +2,11 @@
     "name": "echo",
     "license": "MIT",
     "tags": ["physics", "collisions"],
-    "description": "Simple Physics Engine written in Pure Haxe",
+    "description": "Simple Physics Library written in Haxe",
     "contributors": ["austineast"],
-    "url": "https://austineast.github.io",
-    "releasenote": "initial release",
-    "version": "0.0.1",
+    "url": "https://austineast.github.io/echo",
+    "releasenote": "haxelib.json fixes",
+    "version": "0.0.2",
     "dependencies": {
       "ghostlib": "",
       "hxmath": ""

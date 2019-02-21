@@ -1,8 +1,8 @@
 # class paths
--cp lib
+-cp test
 # entry point
 -main Main
 # libraries
 -lib echo
 # output
--js bin/lib.js
+-js bin/test.js

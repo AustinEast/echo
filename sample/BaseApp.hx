@@ -8,7 +8,7 @@ import state.*;
 using echo.Echo;
 
 class BaseApp extends hxd.App {
-  var sample_states:Array<Class<State<World>>> = [StackingState, CirclesState, GroupsState];
+  var sample_states:Array<Class<State<World>>>;
   var fsm:FSM<World>;
   var fui:h2d.Flow;
   var debug:HeapsDebug;

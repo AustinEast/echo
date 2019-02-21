@@ -25,6 +25,8 @@ class Main extends BaseApp {
       gravity_y: 20,
       iterations: 5
     });
+    // Set up our Sample States
+    sample_states = [StackingState, CirclesState, GroupsState];
     // Create a State Manager and pass it the World and the first Sample
     fsm = new FSM<World>(world, Type.createInstance(sample_states[index], null));
     // Create a Debug drawer to display debug graphics

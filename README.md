@@ -84,11 +84,11 @@ class Main {
 
     // Create a World to hold all the Physics Bodies
     // Worlds, Bodies, and Listeners are all created with optional configuration objects.
-    // This makes it easy to construct obje t configurations, reuse them, and even easily load them from JSON!
+    // This makes it easy to construct object configurations, reuse them, and even easily load them from JSON!
     var world = Echo.start({
-      width: 64, // Affects the bounds that collision checks.
+      width: 64, // Affects the bounds for collision checks.
       height: 64, // Affects the bounds for collision checks.
-      gravity_y: 5, // Force of Gravity on the Y axis. Also available on for the X axis.
+      gravity_y: 5, // Force of Gravity on the Y axis. Also available for the X axis.
       iterations: 2 // Sets the number of iterations each time the World steps.
     });
 

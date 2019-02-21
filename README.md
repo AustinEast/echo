@@ -88,7 +88,7 @@ class Main {
     var world = Echo.start({
       width: 64, // Affects the bounds for collision checks.
       height: 64, // Affects the bounds for collision checks.
-      gravity_y: 5, // Force of Gravity on the Y axis. Also available on for the X axis.
+      gravity_y: 5, // Force of Gravity on the Y axis. Also available for the X axis.
       iterations: 2 // Sets the number of iterations each time the World steps.
     });
 

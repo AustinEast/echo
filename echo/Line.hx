@@ -1,5 +1,6 @@
-package echo.shape;
+package echo;
 
+import glib.Proxy;
 import hxmath.math.Vector2;
 
 typedef LineType = {
@@ -9,7 +10,7 @@ typedef LineType = {
   var dy:Float;
 }
 
-class Line {
+class Line implements IProxy {
   public var x(get, set):Float;
   public var y(get, set):Float;
   public var start:Vector2;

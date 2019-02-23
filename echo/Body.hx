@@ -2,26 +2,46 @@ package echo;
 
 import hxmath.math.Vector2;
 import glib.Disposable;
+import glib.Proxy;
 import echo.Shape;
 import echo.Echo;
 import echo.shape.Rect;
 
-class Body implements IEcho implements IDisposable {
+class Body implements IEcho implements IDisposable implements IProxy {
   /**
    * Default Body Options
    */
   public static var defaults(get, null):BodyOptions;
   static var ids:Int = 0;
-
+  /**
+   * Unique id of the Body
+   */
   public var id(default, null):Int;
+  /**
+   * Body's position on the X axis.
+   * Alias for `position.x`
+   */
+  @:alias(position.x)
+  public var x:Float;
+  /**
+   * Body's position on the Y axis.
+   * Alias for `position.y`
+   */
+  @:alias(position.y)
+  public var y:Float;
+  /**
+   * Body's `Shape`. this `Shape` acts as the Body's Collider, allowing it to be checked for Collisions.
+   */
   @:isVar
   public var shape(get, set):Null<Shape>;
+  /**
+   * Flag to set whether the Body collides with other Bodies.
+   * If false, this Body will not have its position or velocity affected by other Bodies, but it iwiw tsits eeiiitt oonoisill skskbsksk
+   */
   @:isVar
   public var solid(get, set):Bool;
   @:isVar
   public var mass(get, set):Float;
-  public var x(get, set):Float;
-  public var y(get, set):Float;
   @:isVar
   public var position(get, set):Vector2;
   @:isVar
@@ -40,6 +60,8 @@ class Body implements IEcho implements IDisposable {
   public var max_rotational_velocity(get, set):Float;
   @:isVar
   public var drag(get, set):Vector2;
+  @:isVar
+  public var gravity_scale(get, set):Float;
   public var inverse_mass(default, null):Float;
   public var active:Bool;
   public var type(default, null):EchoType;
@@ -94,38 +116,6 @@ class Body implements IEcho implements IDisposable {
     drag = null;
   }
 
-  // getters
-  function get_shape():Null<Shape> return shape;
-
-  function get_mass():Float return mass;
-
-  function get_solid():Bool return solid;
-
-  function get_x():Float return position.x;
-
-  function get_y():Float return position.y;
-
-  function get_position():Vector2 return position;
-
-  function get_rotation():Float return rotation;
-
-  function get_elasticity():Float return elasticity;
-
-  function get_velocity():Vector2 return velocity;
-
-  function get_acceleration():Vector2 return acceleration;
-
-  function get_rotational_velocity():Float return rotational_velocity;
-
-  function get_max_velocity():Vector2 return max_velocity;
-
-  function get_max_rotational_velocity():Float return max_rotational_velocity;
-
-  function get_drag():Vector2 return drag;
-
-  // setters
-  function set_shape(value:Null<Shape>):Null<Shape> return shape = value;
-
   function set_mass(value:Float):Float {
     if (value < 0.0001) {
       value = 0;
@@ -134,30 +124,6 @@ class Body implements IEcho implements IDisposable {
     else inverse_mass = 1 / value;
     return mass = value;
   }
-
-  function set_solid(value:Bool):Bool return solid = value;
-
-  function set_x(value:Float) return position.x = value;
-
-  function set_y(value:Float) return position.y = value;
-
-  function set_position(value:Vector2) return position = value;
-
-  function set_rotation(value:Float) return rotation = value;
-
-  function set_elasticity(value:Float) return elasticity = value;
-
-  function set_velocity(value:Vector2) return velocity = value;
-
-  function set_acceleration(value:Vector2) return acceleration = value;
-
-  function set_rotational_velocity(value:Float) return rotational_velocity = value;
-
-  function set_max_velocity(value:Vector2) return max_velocity = value;
-
-  function set_max_rotational_velocity(value:Float) return max_rotational_velocity = value;
-
-  function set_drag(value:Vector2) return drag = value;
 
   static function get_defaults():BodyOptions return {
     solid: true,

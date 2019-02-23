@@ -6,12 +6,6 @@ import hxmath.math.Vector2;
 
 using echo.util.SAT;
 
-typedef CircleType = {
-  var x:Float;
-  var y:Float;
-  var radius:Float;
-}
-
 class Circle extends Shape implements IPooled {
   public static var pool(get, never):IPool<Circle>;
   static var _pool = new Pool<Circle>(Circle);
@@ -82,4 +76,10 @@ class Circle extends Shape implements IPooled {
     radius = value * 0.5;
     return value;
   }
+}
+
+typedef CircleOptions = {
+  var x:Float;
+  var y:Float;
+  var radius:Float;
 }

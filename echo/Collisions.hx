@@ -76,7 +76,8 @@ class Collisions {
   public static function notify(world:World) {
     for (listener in world.listeners.members) {
       if (listener.callback == null) continue;
-      for (collision in listener.collisions) listener.callback(collision.a, collision.b, cast collision.data);
+      if (listener.condition == null) for (c in listener.collisions) listener.callback(c.a, c.b, cast c.data);
+      else for (c in listener.collisions) if (listener.condition(cast c.a, cast c.b, cast c.data)) listener.callback(c.a, c.b, cast c.data);
     }
   }
 

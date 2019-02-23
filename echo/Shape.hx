@@ -1,24 +1,31 @@
 package echo;
 
+import glib.Proxy;
 import echo.shape.*;
 import echo.util.SAT;
 import hxmath.math.Vector2;
 /**
  * Base Shape Class. Check out `echo.shapes` for all available shapes
  */
-class Shape {
+class Shape implements IProxy {
   /**
    * Default Shape Options
    */
   public static var defaults(get, null):ShapeOptions;
 
-  public var x(get, set):Float;
-  public var y(get, set):Float;
+  @:alias(position.x)
+  public var x:Float;
+  @:alias(position.y)
+  public var y:Float;
   public var type:ShapeType;
   public var position:Vector2;
+  @:alias(position.y)
   public var top(get, null):Float;
+  @:alias(position.y)
   public var bottom(get, null):Float;
+  @:alias(position.x)
   public var left(get, null):Float;
+  @:alias(position.x)
   public var right(get, null):Float;
 
   public static function get(options:ShapeOptions):Shape {
@@ -60,24 +67,6 @@ class Shape {
   function collide_rect(r:Rect):Null<CollisionData> return null;
 
   function collide_circle(c:Circle):Null<CollisionData> return null;
-
-  // getters
-  function get_x():Float return position.x;
-
-  function get_y():Float return position.y;
-
-  function get_top():Float return position.y;
-
-  function get_bottom():Float return position.y;
-
-  function get_left():Float return position.x;
-
-  function get_right():Float return position.x;
-
-  // setters
-  function set_x(value:Float):Float return position.x = value;
-
-  function set_y(value:Float):Float return position.y = value;
 
   static function get_defaults():ShapeOptions return {
     type: RECT,

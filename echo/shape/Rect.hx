@@ -6,13 +6,6 @@ import hxmath.math.Vector2;
 
 using echo.util.SAT;
 
-typedef RectType = {
-  var x:Float;
-  var y:Float;
-  var width:Float;
-  var height:Float;
-}
-
 class Rect extends Shape implements IPooled {
   public static var pool(get, never):IPool<Rect>;
   static var _pool = new Pool<Rect>(Rect);
@@ -112,4 +105,11 @@ class Rect extends Shape implements IPooled {
     ey = value * 0.5;
     return value;
   }
+}
+
+typedef RectOptions = {
+  var x:Float;
+  var y:Float;
+  var width:Float;
+  var height:Float;
 }

@@ -5,6 +5,7 @@ import echo.Listener;
 import echo.Collisions;
 import echo.World;
 
+@:expose
 class Echo {
   /**
    * Shortcut for creating a new `World`

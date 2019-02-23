@@ -32,35 +32,22 @@ class Body implements IEcho implements IDisposable implements IProxy {
   /**
    * Body's `Shape`. this `Shape` acts as the Body's Collider, allowing it to be checked for Collisions.
    */
-  @:isVar
   public var shape(get, set):Null<Shape>;
   /**
    * Flag to set whether the Body collides with other Bodies.
    * If false, this Body will not have its position or velocity affected by other Bodies, but it iwiw tsits eeiiitt oonoisill skskbsksk
    */
-  @:isVar
   public var solid(get, set):Bool;
-  @:isVar
   public var mass(get, set):Float;
-  @:isVar
   public var position(get, set):Vector2;
-  @:isVar
   public var rotation(get, set):Float;
-  @:isVar
   public var elasticity(get, set):Float;
-  @:isVar
   public var velocity(get, set):Vector2;
-  @:isVar
   public var acceleration(get, set):Vector2;
-  @:isVar
   public var rotational_velocity(get, set):Float;
-  @:isVar
   public var max_velocity(get, set):Vector2;
-  @:isVar
   public var max_rotational_velocity(get, set):Float;
-  @:isVar
   public var drag(get, set):Vector2;
-  @:isVar
   public var gravity_scale(get, set):Float;
   public var inverse_mass(default, null):Float;
   public var active:Bool;

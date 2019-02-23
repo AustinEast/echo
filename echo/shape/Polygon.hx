@@ -9,7 +9,6 @@ using hxmath.math.MathUtil;
  */
 class Polygon extends Shape {
   public var vertices:Array<Vector2>;
-  @:isVar
   public var rotation(get, set):Float;
 
   public function new(x:Float = 0, y:Float = 0, ?vertices:Array<Vector2>, rotation:Float = 0) {

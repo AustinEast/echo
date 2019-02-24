@@ -57,7 +57,7 @@ class Body implements IEcho implements IDisposable implements IProxy {
   /**
    * Body's position on the X and Y axis.
    */
-  public var position(get, set):Vector2;
+  public var position(get, null):Vector2;
   /**
    * Body's current rotational angle. Currently is not implemented.
    */

@@ -11,10 +11,25 @@ import haxe.ds.Vector;
  * A `World` is an Object representing the state of a Physics simulation and it configurations. 
  */
 class World extends Group {
+  /**
+   * Width of the World, extending right from the World's X position.
+   */
   public var width:Float;
+  /**
+   * Width of the World, extending down from the World's Y position.
+   */
   public var height:Float;
+  /**
+   * The World's position on the X axis.
+   */
   public var x:Float;
+  /**
+   * The World's position on the Y axis.
+   */
   public var y:Float;
+  /**
+   * The amount of acceleration applied to each `Body` member every Step.
+   */
   public var gravity(default, null):Vector2;
   public var quadtree:QuadTree;
   public var listeners:Listeners;

@@ -61,7 +61,7 @@ class Rect extends Shape implements IPooled {
     return this;
   }
 
-  override inline function to_aabb(?rect:Rect):Rect return rect == null ? Rect.get(x, y, width, height) : rect.set(x, y, width, height);
+  override inline function bounds(?rect:Rect):Rect return rect == null ? Rect.get(x, y, width, height) : rect.set(x, y, width, height);
 
   override inline function clone():Rect return Rect.get(x, y, width, height);
 

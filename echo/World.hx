@@ -7,7 +7,9 @@ import echo.Echo;
 import echo.data.Data;
 import echo.data.Options;
 import haxe.ds.Vector;
-
+/**
+ * A `World` is an Object representing the state of a Physics simulation and it configurations. 
+ */
 class World extends Group {
   public var width:Float;
   public var height:Float;
@@ -31,11 +33,16 @@ class World extends Group {
     iterations = options.iterations == null ? 5 : options.iterations;
   }
 
+  /**
+   * Clears the World's members and listeners.
+   */
   override function clear() {
     super.clear();
     listeners.clear();
   }
-
+  /**
+   * Disposes the World. DO NOT use the World after disposing it, as it could lead to null reference errors.
+   */
   override function dispose() {
     super.dispose();
     gravity = null;

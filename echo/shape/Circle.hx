@@ -43,7 +43,7 @@ class Circle extends Shape implements IPooled {
 
   public inline function load(circle:Circle):Circle return set(circle.x, circle.y, circle.radius);
 
-  override inline function to_aabb(?rect:Rect):Rect return rect == null ? Rect.get(x, y, diameter, diameter) : rect.set(x, y, diameter, diameter);
+  override inline function bounds(?rect:Rect):Rect return rect == null ? Rect.get(x, y, diameter, diameter) : rect.set(x, y, diameter, diameter);
 
   override function clone():Circle return Circle.get(x, y, radius);
 

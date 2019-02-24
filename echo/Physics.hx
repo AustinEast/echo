@@ -1,6 +1,6 @@
 package echo;
 
-import echo.util.SAT;
+import echo.data.Data;
 
 using hxmath.math.MathUtil;
 using hxmath.math.Vector2;

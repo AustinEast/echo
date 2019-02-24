@@ -6,6 +6,8 @@ import glib.Proxy;
 import echo.Shape;
 import echo.Echo;
 import echo.shape.Rect;
+import echo.data.Options;
+import echo.data.Types;
 
 class Body implements IEcho implements IDisposable implements IProxy {
   /**
@@ -35,9 +37,13 @@ class Body implements IEcho implements IDisposable implements IProxy {
   public var shape(get, set):Null<Shape>;
   /**
    * Flag to set whether the Body collides with other Bodies.
-   * If false, this Body will not have its position or velocity affected by other Bodies, but it iwiw tsits eeiiitt oonoisill skskbsksk
+   * If false, this Body will not have its position or velocity affected by other Bodies, but it will still call collision callbacks
    */
   public var solid(get, set):Bool;
+  /**
+   * Body's mass. Affects how the Body reacts to Collisions and Velocity. The higher a Body's mass, the more resistant it is to those forces.
+   * If a Body's mass is set to `0`, it becomes static - unmovable by forces and collisions.
+   */
   public var mass(get, set):Float;
   public var position(get, set):Vector2;
   public var rotation(get, set):Float;
@@ -127,21 +133,4 @@ class Body implements IEcho implements IDisposable implements IProxy {
     drag_x: 0,
     drag_y: 0
   }
-}
-
-typedef BodyOptions = {
-  var ?shape:ShapeOptions;
-  var ?solid:Bool;
-  var ?mass:Float;
-  var ?x:Float;
-  var ?y:Float;
-  var ?elasticity:Float;
-  var ?velocity_x:Float;
-  var ?velocity_y:Float;
-  var ?rotational_velocity:Float;
-  var ?max_velocity_x:Float;
-  var ?max_velocity_y:Float;
-  var ?max_rotational_velocity:Float;
-  var ?drag_x:Float;
-  var ?drag_y:Float;
 }

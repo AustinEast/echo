@@ -2,6 +2,7 @@ package echo;
 
 import glib.Disposable;
 import echo.Echo;
+import echo.data.Types;
 /**
  * Container for storing a collection of Bodies. Use these to group Bodies for a `Listener`
  *

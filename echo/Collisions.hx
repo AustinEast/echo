@@ -3,6 +3,8 @@ package echo;
 import echo.Body;
 import echo.util.SAT;
 import echo.util.QuadTree;
+import echo.data.Options;
+import echo.data.Data;
 /**
  * Class containing methods for performing Collisions on a World
  */
@@ -108,10 +110,4 @@ class Collisions {
     bb.put();
     return col == null ? null : {a: a, b: b};
   }
-}
-
-typedef Collision = {
-  var a:Body;
-  var b:Body;
-  var ?data:CollisionData;
 }

@@ -2,7 +2,8 @@ package echo;
 
 import glib.Disposable;
 import echo.Echo;
-import echo.Collisions;
+import echo.data.Data;
+import echo.data.Options;
 /**
  * Data Structure used to listen for Collisions between Bodies and Groups of Bodies
  */
@@ -70,10 +71,4 @@ class Listeners implements IDisposable {
   static function get_listener_defaults():ListenerOptions return {
     separate: true
   }
-}
-
-typedef ListenerOptions = {
-  var ?separate:Bool;
-  var ?callback:Dynamic->Dynamic->Collision->Void;
-  var ?condition:Dynamic->Dynamic->Collision->Bool;
 }

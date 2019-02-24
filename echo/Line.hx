@@ -29,10 +29,3 @@ class Line implements IProxy {
     return v.y == m * v.x + b;
   }
 }
-
-typedef LineOptions = {
-  var x:Float;
-  var y:Float;
-  var dx:Float;
-  var dy:Float;
-}

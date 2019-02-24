@@ -4,6 +4,7 @@ import glib.Pool;
 import echo.Body;
 import echo.Shape;
 import echo.shape.Rect;
+import echo.data.Data;
 /**
  * Simple QuadTree implementation to assist with broad-phase 2D collisions.
  *
@@ -188,21 +189,4 @@ class QuadTree extends Rect implements IPooled {
   function get_leaf() return children.length == 0;
 
   static function get_pool():IPool<QuadTree> return _pool;
-}
-
-typedef QuadTreeData = TypedQuadTreeData<Dynamic>;
-
-typedef TypedQuadTreeData<T> = {
-  /**
-   * Id of the Data.
-   */
-  var id:Int;
-  /**
-   * Bounds of the Data.
-   */
-  var bounds:Rect;
-  /**
-   * Helper flag to check if this Data has been counted during queries.
-   */
-  var flag:Bool;
 }

@@ -23,10 +23,3 @@ class Polygon extends Shape {
 
   public function from_circle(sub_divisions:Int = 3) {}
 }
-
-typedef PolygonOptions = {
-  var x:Float;
-  var y:Float;
-  var vertices:Array<Vector2>;
-  var rotation:Float;
-}

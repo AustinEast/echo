@@ -4,6 +4,8 @@ import hxmath.math.Vector2;
 import echo.util.QuadTree;
 import echo.Listener;
 import echo.Echo;
+import echo.data.Data;
+import echo.data.Options;
 import haxe.ds.Vector;
 
 class World extends Group {
@@ -15,7 +17,7 @@ class World extends Group {
   public var quadtree:QuadTree;
   public var listeners:Listeners;
   public var iterations:Int;
-  public var history:Vector<WorldState>;
+  public var history:Vector<{bodies:Array<Body>, collisions:Array<Collision>}>;
 
   public function new(options:WorldOptions) {
     super(options.members);
@@ -42,17 +44,4 @@ class World extends Group {
     listeners = null;
     history = null;
   }
-}
-
-typedef WorldOptions = {
-  var width:Float;
-  var height:Float;
-  var ?x:Float;
-  var ?y:Float;
-  var ?gravity_x:Float;
-  var ?gravity_y:Float;
-  var ?members:Array<Body>;
-  var ?listeners:Array<Listener>;
-  var ?iterations:Int;
-  var ?history:Int;
 }

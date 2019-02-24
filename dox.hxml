@@ -1,0 +1,10 @@
+-lib echo
+-cp echo
+-D doc-gen
+--macro include('echo')
+--no-output
+-js bin/docs.js
+-xml bin/echo.xml
+
+--next
+-cmd haxelib run dox -i bin -o bin/pages --title "Echo Physics Library" -D website "http://austineast.github.io/echo" -in echo -in glib -in hxmath

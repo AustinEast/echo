@@ -2,6 +2,7 @@ package echo.shape;
 
 import echo.shape.*;
 import glib.Pool;
+import echo.data.Data;
 import hxmath.math.Vector2;
 
 using echo.util.SAT;
@@ -105,11 +106,4 @@ class Rect extends Shape implements IPooled {
     ey = value * 0.5;
     return value;
   }
-}
-
-typedef RectOptions = {
-  var x:Float;
-  var y:Float;
-  var width:Float;
-  var height:Float;
 }

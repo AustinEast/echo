@@ -4,6 +4,8 @@ import echo.Body;
 import echo.Listener;
 import echo.Collisions;
 import echo.World;
+import echo.data.Types;
+import echo.data.Options;
 
 @:expose
 class Echo {
@@ -39,7 +41,7 @@ class Echo {
    * @param dt
    */
   public static function step(world:World, dt:Float) {
-    // TODO: Save WorldState to History
+    // TODO: Save World State to History
     var fdt = dt / world.iterations;
     for (i in 0...world.iterations) {
       Physics.step(world, fdt);
@@ -73,17 +75,6 @@ class Echo {
   public static function collide(a:IEcho, b:IEcho, ?options:ListenerOptions) {}
 }
 
-typedef WorldState = {
-  var bodies:Array<Body>;
-  var collisions:Array<Collision>;
-}
-
 interface IEcho {
   public var type(default, null):EchoType;
-}
-
-@:enum
-abstract EchoType(Int) from Int to Int {
-  var BODY = 0;
-  var GROUP = 1;
 }

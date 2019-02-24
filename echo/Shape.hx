@@ -3,6 +3,9 @@ package echo;
 import glib.Proxy;
 import echo.shape.*;
 import echo.util.SAT;
+import echo.data.Data;
+import echo.data.Options;
+import echo.data.Types;
 import hxmath.math.Vector2;
 /**
  * Base Shape Class. Check out `echo.shapes` for all available shapes
@@ -78,22 +81,4 @@ class Shape implements IProxy {
     offset_x: 0,
     offset_y: 0
   }
-}
-
-typedef ShapeOptions = {
-  var ?type:ShapeType;
-  var ?radius:Float;
-  var ?width:Float;
-  var ?height:Float;
-  var ?points:Array<Vector2>;
-  var ?rotation:Float;
-  var ?offset_x:Float;
-  var ?offset_y:Float;
-}
-
-@:enum
-abstract ShapeType(Int) from Int to Int {
-  var RECT = 0;
-  var CIRCLE = 1;
-  var POLYGON = 2;
 }

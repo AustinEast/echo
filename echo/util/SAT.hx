@@ -1,6 +1,7 @@
 package echo.util;
 
 import echo.shape.*;
+import echo.data.Data;
 import hxmath.math.Vector2;
 
 using hxmath.math.MathUtil;
@@ -155,20 +156,3 @@ class SAT {
     };
   }
 }
-
-typedef CollisionData = {
-  /**
-   * The length of shape 1's penetration into shape 2.
-   */
-  var overlap:Float;
-  /**
-   * The normal vector (direction) of shape 1's penetration into shape 2.
-   */
-  var normal:Vector2;
-  /**
-   * TODO: Provide a direction const, similar to Flixel's
-   */
-  var ?direction:Int;
-}
-
-typedef IntersectionData = {}

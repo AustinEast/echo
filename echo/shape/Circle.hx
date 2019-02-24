@@ -2,6 +2,7 @@ package echo.shape;
 
 import glib.Pool;
 import echo.shape.*;
+import echo.data.Data;
 import hxmath.math.Vector2;
 
 using echo.util.SAT;
@@ -76,10 +77,4 @@ class Circle extends Shape implements IPooled {
     radius = value * 0.5;
     return value;
   }
-}
-
-typedef CircleOptions = {
-  var x:Float;
-  var y:Float;
-  var radius:Float;
 }

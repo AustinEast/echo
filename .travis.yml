@@ -29,4 +29,5 @@ deploy:
    haxe: "4.0.0-rc.1"
    script: bash ./release_haxelib.sh $HAXELIB_PWD
    on:
-	  tags: true
+    tags: true
+    

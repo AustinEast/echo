@@ -7,7 +7,7 @@ haxe:
  - "4.0.0-rc.1"
 
 install:
- - haxelib git https://github.com/HaxeFoundation/dox.git
+ - haxelib git dox https://github.com/HaxeFoundation/dox.git
  - haxelib install ghostlib
  - haxelib install hxmath
  - haxelib dev echo .

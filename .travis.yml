@@ -10,6 +10,7 @@ install:
  - haxelib git dox https://github.com/HaxeFoundation/dox.git
  - haxelib install ghostlib
  - haxelib install hxmath
+ - haxelib install heaps
  - haxelib dev echo .
 
 script:

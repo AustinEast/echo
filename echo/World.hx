@@ -16,7 +16,7 @@ class World extends Group {
    */
   public var width:Float;
   /**
-   * Width of the World, extending down from the World's Y position.
+   * Height of the World, extending down from the World's Y position.
    */
   public var height:Float;
   /**
@@ -32,6 +32,9 @@ class World extends Group {
    */
   public var gravity(default, null):Vector2;
   public var quadtree:QuadTree;
+  /**
+   * The amount of iterations that occur each time the World is stepped. The higher the number, the more stable the Physics Simulation will be, at the cost of performance.
+   */
   public var listeners:Listeners;
   public var iterations:Int;
   public var history:Vector<{bodies:Array<Body>, collisions:Array<Collision>}>;

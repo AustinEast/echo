@@ -7,4 +7,4 @@
 -xml bin/echo.xml
 
 --next
--cmd haxelib run dox -i bin -o bin/api --title "Echo API" -D website "http://austineast.github.io/echo" -D themeColor 0x45283c -in echo -in glib -in hxmath
+-cmd haxelib run dox -i bin -o bin/api --title "Echo API" -D website "http://austineast.github.io/echo" -in echo -in glib -in hxmath

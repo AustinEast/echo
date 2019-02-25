@@ -107,6 +107,10 @@ class Body implements IEcho implements IDisposable implements IProxy {
    */
   public var active:Bool;
   /**
+   * Dynamic Object to store any user data on the `Body`. Useful for Callbacks.
+   */
+  public var data:Dynamic;
+  /**
    * Enum to determine the whether this Object is a `Body` or a `Group`. This is used in place of Type Casting internally.
    */
   public var type(default, null):EchoType;
@@ -115,6 +119,14 @@ class Body implements IEcho implements IDisposable implements IProxy {
    * Used for debug drawing.
    */
   public var collided:Bool;
+  #if ghost
+  /**
+   * Reference to this Body's parent GameObject.
+   *
+   * Only available when using the Ghost Framework (https://github.com/AustinEast/ghost)
+   */
+  public var gameobject:gxd.GameObject;
+  #end
   /**
    * Creates a new Body.
    * @param options Optional values to configure the new Body
@@ -174,6 +186,10 @@ class Body implements IEcho implements IDisposable implements IProxy {
     velocity = null;
     max_velocity = null;
     drag = null;
+    data = null;
+    #if ghost
+    gameobject = null;
+    #end
   }
 
   function set_mass(value:Float):Float {

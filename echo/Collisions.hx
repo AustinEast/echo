@@ -1,10 +1,10 @@
 package echo;
 
 import echo.Body;
-import echo.util.SAT;
 import echo.util.QuadTree;
-import echo.data.Options;
 import echo.data.Data;
+
+using Lambda;
 /**
  * Class containing methods for performing Collisions on a World
  */
@@ -64,7 +64,10 @@ class Collisions {
         sa.position.addWith(result.a.position);
         sb.position.addWith(result.b.position);
         result.data = sa.collides(sb);
+        // If there was no collision, continue
         if (result.data == null) continue;
+        // Check if the collision passes the listener's condition if it has one
+        if (listener.condition != null && listener.condition(result.a, result.b, result.data)) continue;
         result.a.collided = result.b.collided = true;
         listener.collisions.push(result);
         sa.put();
@@ -77,9 +80,23 @@ class Collisions {
    */
   public static function notify(world:World) {
     for (listener in world.listeners.members) {
-      if (listener.callback == null) continue;
-      if (listener.condition == null) for (c in listener.collisions) listener.callback(c.a, c.b, cast c.data);
-      else for (c in listener.collisions) if (listener.condition(cast c.a, cast c.b, cast c.data)) listener.callback(c.a, c.b, cast c.data);
+      if (listener.enter != null || listener.stay != null) {
+        for (c in listener.collisions) {
+          if (listener.enter != null && listener.last_collisions.find((f) -> return f.a == c.a && f.b == c.b || f.a == c.b && f.b == c.a) == null) {
+            listener.enter(c.a, c.b, c.data);
+          }
+          else if (listener.stay != null) {
+            listener.stay(c.a, c.b, c.data);
+          }
+        }
+      }
+      if (listener.exit != null) {
+        for (lc in listener.last_collisions) {
+          if (listener.collisions.find((f) -> return f.a == lc.a && f.b == lc.b || f.a == lc.b && f.b == lc.a) == null) {
+            listener.exit(lc.a, lc.b);
+          }
+        }
+      }
     }
   }
 

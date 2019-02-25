@@ -1,20 +1,52 @@
 package echo;
 
+import echo.Body;
 import glib.Disposable;
 import echo.Echo;
 import echo.data.Data;
 import echo.data.Options;
 /**
- * Data Structure used to listen for Collisions between Bodies and Groups of Bodies
+ * Data Structure used to listen for Collisions between Bodies and Groups of Bodies.
  */
 typedef Listener = {
+  /**
+   * The first Body or Group the listener checks each step.
+   */
   var a:IEcho;
+  /**
+   * The second Body or Group the listener checks each step.
+   */
   var b:IEcho;
+  /**
+   * Flag that determines if Collisions found by this listener should separate the Bodies. Defaults to `true`.
+   */
   var separate:Bool;
+  /**
+   * Store of the latest Collisions.
+   */
   var collisions:Array<Collision>;
+  /**
+   * Store of the Collisions from the Prior Frame.
+   */
   var last_collisions:Array<Collision>;
-  var ?callback:Dynamic->Dynamic->Collision->Void;
-  var ?condition:Dynamic->Dynamic->Collision->Bool;
+  /**
+   * A callback function that is called on the first frame that a collision starts.
+   */
+  var ?enter:Body->Body->CollisionData->Void;
+  /**
+   * A callback function that is called on frames when two Bodies are continuing to collide.
+   */
+  var ?stay:Body->Body->CollisionData->Void;
+  /**
+   * A callback function that is called when a collision between two Bodies ends.
+   */
+  var ?exit:Body->Body->Void;
+  /**
+   * A callback function that allows extra logic to be run on a potential collision.
+   *
+   * If it returns true, the collision is valid. Otherwise the collision is discarded and no physics resolution/collision callbacks occur
+   */
+  var ?condition:Body->Body->CollisionData->Bool;
 }
 /**
  * Container used to store Listeners
@@ -45,7 +77,9 @@ class Listeners implements IDisposable {
       collisions: [],
       last_collisions: []
     };
-    if (options.callback != null) listener.callback = options.callback;
+    if (options.enter != null) listener.enter = options.enter;
+    if (options.stay != null) listener.stay = options.stay;
+    if (options.exit != null) listener.exit = options.exit;
     if (options.condition != null) listener.condition = options.condition;
     members.push(listener);
     return listener;

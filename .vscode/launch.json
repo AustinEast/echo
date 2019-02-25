@@ -5,7 +5,7 @@
             "type": "chrome",
             "request": "launch",
             "name": "Chrome Debugger",
-            "url": "file://${workspaceFolder}/index.html",
+            "url": "file://${workspaceFolder}/bin/index.html",
             "webRoot": "${workspaceFolder}",
             "preLaunchTask": {
 				"type" : "haxe",

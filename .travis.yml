@@ -23,9 +23,8 @@ deploy:
    local-dir: bin
    skip-cleanup: true
    github-token: $GITHUB_TOKEN
-   keep-history: true
    on:
-    branch: master
+    tags: true
  - provider: script
    haxe: "4.0.0-rc.1"
    script: bash ./release_haxelib.sh $HAXELIB_PWD

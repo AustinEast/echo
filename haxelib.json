@@ -5,8 +5,8 @@
     "description": "Simple Physics Library written in Haxe",
     "contributors": ["austineast"],
     "url": "https://austineast.github.io/echo",
-    "releasenote": "haxelib.json fixes",
-    "version": "0.0.2",
+    "releasenote": "reorganizing, docs, and travis",
+    "version": "0.1.0",
     "dependencies": {
       "ghostlib": "",
       "hxmath": ""

@@ -6,3 +6,4 @@
 -lib echo
 # output
 -js bin/test.js
+--no-output

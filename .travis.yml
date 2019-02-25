@@ -4,15 +4,28 @@ dist: trusty
 language: haxe
 
 haxe:
- - "3.4.7"
- - "development"
+ - "4.0.0-rc.1"
 
 install:
+ - haxelib git https://github.com/HaxeFoundation/dox.git
+ - haxelib install ghostlib
+ - haxelib install hxmath
  - haxelib dev echo .
 
+script:
+ - haxe test.hxml
+ - haxe sample.hxml
+ - haxe dox.hxml
+
 deploy:
+ - provider: pages
+   local-dir: bin
+   skip-cleanup: true
+   github-token: $GITHUB_TOKEN
+   on:
+    branch: master
  - provider: script
-   haxe: 3.4.7
+   haxe: "4.0.0-rc.1"
    script: bash ./release_haxelib.sh $HAXELIB_PWD
    on:
-	 tags: true
+	  tags: true

@@ -36,17 +36,31 @@
             height:auto; 
             max-width: 720px;
         }
-        a {
-            margin: 40px;
-            padding: 15px;
-            text-decoration: none;
-            font-size: 1.5em;
-            color: #45283c;
-            background-color: white;
+        footer a {
+            color: white;
         }
         .dark {
             color: white;
             background: #45283c;
+        }
+        .buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-evenly;
+            width: 100%;
+            max-width: 720px;
+            margin: 40px;
+        }
+        .buttons a {
+            margin: 10px;
+            padding: 15px;
+            font-size: 1.5em;
+            color: #45283c;
+            background-color: white;
+            width: 50%;
+            max-width: 150px;
+            text-align: center;
+            text-decoration: none;
         }
     </style>
 </head>
@@ -56,10 +70,14 @@
         <h1>Echo</h1>
         <p>Simple Arcade Physics Library for Haxe</p>
         <canvas width="640" height="360" id="webgl"></canvas>
-        <a href="https://github.com/AustinEast/echo/">Get Started</a>
+        <div class="buttons">
+            <a href="https://github.com/AustinEast/echo/">Get Started</a>
+            <a href="./api/">API</a>
+        </div>
+        <footer style="font-style: italic;">Created by Austin East @ <a href="https://austineast.me">austineast.me</a></footer>
     </main>
 </body>
-<script src="bin/sample.js"></script>
+<script src="./sample.js"></script>
 <script>
     function resize() {
         var canvas = document.getElementById('webgl')

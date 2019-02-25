@@ -1,5 +1,0 @@
-# import base.xml
-sample.hxml
-# output
--js bin/sample.js
--cmd open ./index.html

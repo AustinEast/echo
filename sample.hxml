@@ -5,5 +5,7 @@
 # libraries
 -lib echo
 -lib heaps
-# flags
--debug
+# copy assets
+--macro sample.Assets.copyProjectAssets()
+# output
+-js bin/sample.js

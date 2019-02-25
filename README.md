@@ -3,7 +3,9 @@
 </p>
 
 # echo
-Echo is a 2D Physics library written in Haxe.
+A 2D Physics library written in Haxe.
+
+[![Build Status](https://travis-ci.org/austineast/echo.svg?branch=master)](https://travis-ci.org/austineast/echo)
 
 It focuses on maintaining a simple API that is easy to integrate into any engine/framework (Heaps, OpenFL, Kha, etc). All Echo needs is an update loop and its ready to go!
 
@@ -24,7 +26,7 @@ Install the library from haxelib:
 ```
 haxelib install echo
 ```
-Alternatively the library can be installed from github:
+Alternatively the dev version of the library can be installed from github:
 ```
 haxelib git echo https://github.com/AustinEast/echo.git
 ```

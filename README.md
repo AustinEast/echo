@@ -9,7 +9,9 @@ A 2D Physics library written in Haxe.
 
 It focuses on maintaining a simple API that is easy to integrate into any engine/framework (Heaps, OpenFL, Kha, etc). All Echo needs is an update loop and its ready to go!
 
-Try the Samples [here](austineast.github.io/echo)!
+Try the [Samples 🎮](https://austineast.github.io/echo)!
+
+Check out the [API 📖](https://austineast.github.io/echo/api/)!
 
 ## Features
 * Semi-implicit euler integration physics
@@ -85,7 +87,7 @@ class Main {
   static function main() {
     // Create a World to hold all the Physics Bodies
     // Worlds, Bodies, and Listeners are all created with optional configuration objects.
-    // This makes it easy to construct obje t configurations, reuse them, and even easily load them from JSON!
+    // This makes it easy to construct object configurations, reuse them, and even easily load them from JSON!
     var world = Echo.start({
       width: 64, // Affects the bounds that collision checks.
       height: 64, // Affects the bounds for collision checks.

@@ -1,4 +1,4 @@
 #!/bin/sh
-rm -f library.zip
-zip -r library.zip src *.html *.md *.json *.hxml run.n
-haxelib submit library.zip $HAXELIB_PWD --always
+rm -f echo.zip
+zip -r echo.zip echo *.html *.md *.json *.hxml run.n
+haxelib submit echo.zip $HAXELIB_PWD --always

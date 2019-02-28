@@ -3,9 +3,6 @@ package;
 import echo.World;
 import echo.util.Debug;
 import glib.FSM;
-import state.*;
-
-using echo.Echo;
 
 class BaseApp extends hxd.App {
   var sample_states:Array<Class<State<World>>>;

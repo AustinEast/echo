@@ -1,11 +1,10 @@
-// `using` echo.Echo is prefered over importing it, as it adds in some useful extension methods
-using echo.Echo;
+import echo.Echo;
 
 class Main {
   static function main() {
     // Create a World to hold all the Physics Bodies
     // Worlds, Bodies, and Listeners are all created with optional configuration objects.
-    // This makes it easy to construct obje t configurations, reuse them, and even easily load them from JSON!
+    // This makes it easy to construct object configurations, reuse them, and even easily load them from JSON!
     var world = Echo.start({
       width: 64, // Affects the bounds that collision checks.
       height: 64, // Affects the bounds for collision checks.

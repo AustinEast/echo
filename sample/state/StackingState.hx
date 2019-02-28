@@ -5,8 +5,6 @@ import echo.World;
 import glib.FSM;
 import glib.Random;
 
-using echo.Echo;
-
 class StackingState extends State<World> {
   var body_count:Int = 100;
 

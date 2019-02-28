@@ -49,10 +49,7 @@ For OpenFL users, add this into your `Project.xml` instead:
 
 #### Echo
 
-The `Echo` Class holds helpful utility methods to help streamline the creation and management of Physics Simulations. It is recommended import this class like so: 
-```
-using echo.Echo;
-```
+The `Echo` Class holds helpful utility methods to help streamline the creation and management of Physics Simulations.
 
 #### World
 
@@ -80,8 +77,7 @@ Listeners keep track of collisions between Bodies and Groups, enacting callbacks
 
 ### Example
 ```haxe
-// `using` echo.Echo is prefered over importing it, as it adds in some useful extension methods
-using echo.Echo;
+import echo.Echo;
 
 class Main {
   static function main() {

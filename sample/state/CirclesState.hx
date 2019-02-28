@@ -1,12 +1,9 @@
 package state;
 
-import echo.Listener;
 import echo.Body;
 import echo.World;
 import glib.FSM;
 import glib.Random;
-
-using echo.Echo;
 
 class CirclesState extends State<World> {
   var body_count:Int = 100;

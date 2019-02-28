@@ -125,7 +125,7 @@ class Body implements IEcho implements IDisposable implements IProxy {
    *
    * Only available when using the Ghost Framework (https://github.com/AustinEast/ghost)
    */
-  public var gameobject:gxd.GameObject;
+  public var gameobject:g2d.GameObject;
   #end
   /**
    * Creates a new Body.

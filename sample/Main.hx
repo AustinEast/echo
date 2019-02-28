@@ -1,11 +1,10 @@
 package;
 
+import echo.Echo;
 import echo.World;
 import echo.util.Debug;
 import glib.FSM;
 import state.*;
-
-using echo.Echo;
 
 class Main extends BaseApp {
   public static var scene:h2d.Scene;

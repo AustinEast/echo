@@ -3,13 +3,13 @@ package echo;
 import hxmath.math.Vector2;
 import echo.util.QuadTree;
 import echo.Listener;
-import echo.Echo;
 import echo.data.Data;
 import echo.data.Options;
 import haxe.ds.Vector;
 /**
  * A `World` is an Object representing the state of a Physics simulation and it configurations. 
  */
+ @:using(echo.Echo)
 class World extends Group {
   /**
    * Width of the World, extending right from the World's X position.

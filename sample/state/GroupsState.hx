@@ -1,13 +1,10 @@
 package state;
 
-import hxmath.math.Vector2;
 import echo.Body;
 import echo.Group;
 import echo.World;
 import glib.FSM;
 import glib.Random;
-
-using echo.Echo;
 
 class GroupsState extends State<World> {
   var body_count:Int = 50;

@@ -76,5 +76,5 @@ class Echo {
 }
 
 interface IEcho {
-  public var type(default, null):EchoType;
+  public var echo_type(default, null):EchoType;
 }

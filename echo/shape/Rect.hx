@@ -55,7 +55,7 @@ class Rect extends Shape implements IPooled {
   }
 
   public inline function load(rect:Rect):Rect {
-    position = rect.position;
+    position = rect.position.clone();
     ex = rect.ex;
     ey = rect.ey;
     return this;

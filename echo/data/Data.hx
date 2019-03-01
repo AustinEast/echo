@@ -34,7 +34,7 @@ typedef QuadTreeData = {
   /**
    * Bounds of the Data.
    */
-  var bounds:Rect;
+  var ?bounds:Rect;
   /**
    * Helper flag to check if this Data has been counted during queries.
    */

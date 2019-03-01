@@ -15,8 +15,9 @@ class Physics {
    */
   public static function step(world:World, dt:Float) {
     for (member in world.members) {
+      if (member.mass == 0) continue;
       // Apply Gravity
-      if (member.mass > 0) member.acceleration += world.gravity;
+      member.acceleration += world.gravity;
       // Compute Velocity
       member.velocity.x = compute_velocity(member.velocity.x, member.acceleration.x, member.drag.x, member.max_velocity.x, member.inverse_mass, dt);
       member.velocity.y = compute_velocity(member.velocity.y, member.acceleration.y, member.drag.y, member.max_velocity.y, member.inverse_mass, dt);

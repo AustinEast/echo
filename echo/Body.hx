@@ -1,5 +1,6 @@
 package echo;
 
+import echo.data.Data.QuadTreeData;
 import hxmath.math.Vector2;
 import glib.Disposable;
 import glib.Proxy;
@@ -107,18 +108,32 @@ class Body implements IEcho implements IDisposable implements IProxy {
    */
   public var active:Bool;
   /**
+   * The `World` that this body is attached to. It can only be a part of one `World` at a time.
+   */
+  @:allow(echo.World)
+  public var world(default, null):World;
+  /**
    * Dynamic Object to store any user data on the `Body`. Useful for Callbacks.
    */
   public var data:Dynamic;
   /**
    * Enum to determine the whether this Object is a `Body` or a `Group`. This is used in place of Type Casting internally.
    */
-  public var type(default, null):EchoType;
+  public var echo_type(default, null):EchoType;
   /**
    * Flag to check if the Body collided with something during the step.
    * Used for debug drawing.
    */
   public var collided:Bool;
+
+  @:dox(hide)
+  @:allow(echo.World, echo.Collisions)
+  var cache:{
+    x:Float,
+    y:Float,
+    ?shape:Shape,
+    ?quadtree_data:QuadTreeData
+  };
   #if ghost
   /**
    * Reference to this Body's parent GameObject.
@@ -134,12 +149,13 @@ class Body implements IEcho implements IDisposable implements IProxy {
   public function new(?options:BodyOptions) {
     this.id = ++ids;
     active = true;
-    type = BODY;
+    echo_type = BODY;
     position = new Vector2(0, 0);
     velocity = new Vector2(0, 0);
     acceleration = new Vector2(0, 0);
     max_velocity = new Vector2(0, 0);
     drag = new Vector2(0, 0);
+    cache = {x: 0, y: 0};
     load(options);
   }
   /**
@@ -150,8 +166,8 @@ class Body implements IEcho implements IDisposable implements IProxy {
     options = glib.Data.copy_fields(options, defaults);
     if (options.shape != null) shape = Shape.get(options.shape);
     solid = options.solid;
-    mass = options.mass;
     position.set(options.x, options.y);
+    mass = options.mass;
     elasticity = options.elasticity;
     velocity.set(options.velocity_x, options.velocity_y);
     rotational_velocity = options.rotational_velocity;
@@ -169,24 +185,43 @@ class Body implements IEcho implements IDisposable implements IProxy {
     acceleration.y += y;
   }
   /**
-   * If a Body has a shape, it will return an AABB `Rect` representing the bounds of that shape relative to the Body's Position. If the Body does not have a shape, this will return `nu``l.
+   * If a Body has a shape, it will return an AABB `Rect` representing the bounds of that shape relative to the Body's Position. If the Body does not have a shape, this will return `null'.
+   * @param rect Optional `Rect` to set the values to. If the Body does not have a Shape, this will not be set.
    * @return Null<Rect>
    */
-  public function bounds():Null<Rect> {
+  public function bounds(?rect:Rect):Null<Rect> {
     if (shape == null) return null;
-    var b = shape.bounds();
+    var b = shape.bounds(rect);
     b.position.addWith(position);
     return b;
+  }
+
+  public inline function remove():Body {
+    if (world != null) world.remove(this);
+    if (cache.quadtree_data.bounds != null) cache.quadtree_data.bounds.put();
+    return this;
+  }
+
+  public function refresh_cache() {
+    cache.x = x;
+    cache.y = y;
+    cache.shape = shape;
+    if (cache.quadtree_data != null) {
+      bounds(cache.quadtree_data.bounds);
+      if (world != null) world.quadtree.update(cache.quadtree_data);
+    }
   }
   /**
    * Disposes the Body. DO NOT use the Body after disposing it, as it could lead to null reference errors.
    */
   public function dispose() {
+    remove();
     shape.put();
     velocity = null;
     max_velocity = null;
     drag = null;
     data = null;
+    cache = null;
     #if ghost
     gameobject = null;
     #end
@@ -196,6 +231,7 @@ class Body implements IEcho implements IDisposable implements IProxy {
     if (value < 0.0001) {
       value = 0;
       inverse_mass = 0;
+      refresh_cache();
     }
     else inverse_mass = 1 / value;
     return mass = value;

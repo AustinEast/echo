@@ -11,11 +11,11 @@ import echo.data.Data;
  * TODO: Doc this boi up!
  */
 class QuadTree extends Rect implements IPooled {
-  public static var max_depth:Int = 5;
-  public static var max_objects:Int = 5;
   public static var pool(get, never):IPool<QuadTree>;
   static var _pool = new Pool<QuadTree>(QuadTree);
 
+  public var max_depth:Int = 5;
+  public var max_objects:Int = 5;
   public var children:Array<QuadTree>;
   public var contents:Array<QuadTreeData>;
   public var count(get, null):Int;
@@ -43,13 +43,13 @@ class QuadTree extends Rect implements IPooled {
       pooled = true;
       for (child in children) child.put();
       children = [];
-      for (data in contents) data.bounds.put();
       contents = [];
       _pool.put_unsafe(this);
     }
   }
 
   public function insert(data:QuadTreeData) {
+    if (data.bounds == null) return;
     // If the new data does not intersect this node, stop.
     if (!data.bounds.overlaps(this)) return;
     // If the node is a leaf and contains more than the maximum allowed, split it.
@@ -61,7 +61,7 @@ class QuadTree extends Rect implements IPooled {
   }
 
   public function remove(data:QuadTreeData) {
-    leaf ? contents.remove(data) : for (child in children) child.remove(data);
+    leaf ? for(d in contents) if (d.id == data.id) contents.remove(d) : for (child in children) child.remove(data);
     shake();
   }
 

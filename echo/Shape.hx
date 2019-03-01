@@ -114,7 +114,7 @@ class Shape implements IProxy {
   public function put() {}
   /**
    * Returns an AABB `Rect` representing the bounds of the `Shape`.
-   * @param rect Optional `Rect` to set to the value bounds of the Shape's bounds.
+   * @param rect Optional `Rect` to set the values to.
    * @return Rect
    */
   public function bounds(?rect:Rect) return rect == null ? Rect.get(x, y, 0, 0) : rect.set(x, y, 0, 0);

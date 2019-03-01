@@ -25,7 +25,7 @@ class Main extends BaseApp {
       iterations: 5
     });
     // Set up our Sample States
-    sample_states = [StackingState, CirclesState, GroupsState];
+    sample_states = [StackingState, CirclesState, GroupsState, StaticState];
     // Create a State Manager and pass it the World and the first Sample
     fsm = new FSM<World>(world, Type.createInstance(sample_states[index], null));
     // Create a Debug drawer to display debug graphics
@@ -57,11 +57,11 @@ class Main extends BaseApp {
     fui.y = 5;
     fui.padding = 5;
     fui.verticalSpacing = 5;
-    fui.isVertical = true;
+    fui.layout = Vertical;
     var bui = new h2d.Flow(s2d);
     bui.padding = 5;
     bui.verticalSpacing = 5;
-    bui.isVertical = true;
+    bui.layout = Vertical;
     bui.y = s2d.height - 90;
     state_text = addText("Sample: ", bui);
     members_text = addText("Bodies: ", bui);

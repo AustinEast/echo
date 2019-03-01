@@ -5,16 +5,18 @@ import echo.Echo;
 import echo.data.Types;
 /**
  * Container for storing a collection of Bodies. Use these to group Bodies for a `Listener`
- *
- * TODO: Make a `Typed` version of this
  */
-class Group implements IEcho implements IDisposable {
+typedef Group = TypedGroup<Body>;
+/**
+ * Typed container for storing a collection of Bodies. Use these to group Bodies for a `Listener`
+ */
+class TypedGroup<T:Body> implements IEcho implements IDisposable {
   public var members:Array<Body>;
-  public var type(default, null):EchoType;
+  public var echo_type(default, null):EchoType;
 
   public function new(?members:Array<Body>) {
     this.members = members == null ? [] : members;
-    type = GROUP;
+    echo_type = GROUP;
   }
 
   public function add(body:Body):Body {
@@ -28,9 +30,17 @@ class Group implements IEcho implements IDisposable {
     return body;
   }
 
-  public function clear() {
-    members = [];
-  }
+  public inline function dynamics():Array<Body> return members.filter(b -> return b.mass > 0);
+
+  public inline function statics():Array<Body> return members.filter(b -> return b.mass == 0);
+
+  public inline function for_each(f:Body->Void) for (b in members) f(b);
+
+  public inline function for_each_dynamic(f:Body->Void) for (b in members) if (b.mass > 0) f(b);
+
+  public inline function for_each_static(f:Body->Void) for (b in members) if (b.mass == 0) f(b);
+
+  public function clear() members = [];
 
   public function dispose() members = null;
 }

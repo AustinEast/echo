@@ -3,6 +3,7 @@ package echo;
 import hxmath.math.Vector2;
 import echo.util.QuadTree;
 import echo.Listener;
+import echo.shape.Rect;
 import echo.data.Data;
 import echo.data.Options;
 import haxe.ds.Vector;
@@ -14,19 +15,19 @@ class World extends Group {
   /**
    * Width of the World, extending right from the World's X position.
    */
-  public var width:Float;
+  public var width(default, set):Float;
   /**
    * Height of the World, extending down from the World's Y position.
    */
-  public var height:Float;
+  public var height(default, set):Float;
   /**
    * The World's position on the X axis.
    */
-  public var x:Float;
+  public var x(default, set):Float;
   /**
    * The World's position on the Y axis.
    */
-  public var y:Float;
+  public var y(default, set):Float;
   /**
    * The amount of acceleration applied to each `Body` member every Step.
    */
@@ -38,17 +39,39 @@ class World extends Group {
   public var listeners:Listeners;
   public var iterations:Int;
   public var history:Vector<{bodies:Array<Body>, collisions:Array<Collision>}>;
+  var init:Bool;
 
   public function new(options:WorldOptions) {
     super(options.members);
+    init = false;
     width = options.width < 1 ? throw("World must have a width of at least 1") : options.width;
     height = options.height < 1 ? throw("World must have a width of at least 1") : options.height;
     x = options.x == null ? 0 : options.x;
     y = options.y == null ? 0 : options.y;
     gravity = new Vector2(options.gravity_x == null ? 0 : options.gravity_x, options.gravity_y == null ? 0 : options.gravity_y);
-    quadtree = QuadTree.get();
+    refresh();
+
     listeners = new Listeners(this, options.listeners);
     iterations = options.iterations == null ? 5 : options.iterations;
+  }
+
+  public inline function center(?rect:Rect):Rect {
+    return rect != null ? rect.set(x + (width * 0.5), y + (height * 0.5), width, height) : Rect.get(x + (width * 0.5), y + (height * 0.5), width, height);
+  }
+
+  override function add(body:Body):Body {
+    if (body.world != null) body.remove();
+    body.world = this;
+    members.push(body);
+    body.cache.quadtree_data = {id: body.id, bounds: body.bounds(), flag: false};
+    quadtree.insert(body.cache.quadtree_data);
+    return body;
+  }
+
+  override function remove(body:Body):Body {
+    body.world = null;
+    quadtree.remove(body.cache.quadtree_data);
+    return super.remove(body);
   }
 
   /**
@@ -56,17 +79,56 @@ class World extends Group {
    */
   override function clear() {
     super.clear();
+    refresh();
     listeners.clear();
   }
   /**
    * Disposes the World. DO NOT use the World after disposing it, as it could lead to null reference errors.
    */
   override function dispose() {
+    for_each(b -> b.remove());
     super.dispose();
     gravity = null;
     quadtree.put();
     listeners.dispose();
     listeners = null;
     history = null;
+  }
+
+  public function refresh() {
+    init = true;
+    if (quadtree != null) quadtree.put();
+    quadtree = QuadTree.get();
+    var r = center();
+    quadtree.load(r);
+    r.put();
+    for_each((member)-> {
+      member.bounds(member.cache.quadtree_data.bounds);
+      quadtree.update(member.cache.quadtree_data);
+    });
+  }
+
+  function set_x(value:Float) {
+    x = value;
+    if (init) refresh();
+    return x;
+  }
+
+  function set_y(value:Float) {
+    y = value;
+    if (init) refresh();
+    return y;
+  }
+
+  function set_width(value:Float) {
+    width = value;
+    if (init) refresh();
+    return height;
+  }
+
+  function set_height(value:Float) {
+    height = value;
+    if (init) refresh();
+    return height;
   }
 }

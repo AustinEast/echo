@@ -14,24 +14,22 @@ class Collisions {
    * TODO: Keep a Quadtree of Cached Static Objects
    */
   public static function query(world:World) {
-    // Populate the Quadtree
-    if (world.quadtree != null) world.quadtree.put();
-    world.quadtree = QuadTree.get(world.x + (world.width * 0.5), world.y + (world.height * 0.5), world.width, world.height);
-    for (member in world.members) {
-      member.collided = false;
-      if (member.active) {
-        var b = member.bounds();
-        if (b != null) world.quadtree.insert({id: member.id, bounds: b, flag: false});
+    // Update the Quadtree
+    world.for_each((b) -> {
+      b.collided = false;
+      if (b.active && b.mass > 0) {
+        b.bounds(b.cache.quadtree_data.bounds);
+        world.quadtree.update(b.cache.quadtree_data);
       }
-    }
+    });
 
     // Process the Listeners
     for (listener in world.listeners.members) {
       // BroadPhase
       var results:Array<Collision> = [];
-      switch (listener.a.type) {
+      switch (listener.a.echo_type) {
         case BODY:
-          switch (listener.b.type) {
+          switch (listener.b.echo_type) {
             case BODY:
               var col = body_and_body(cast listener.a, cast listener.b);
               if (col != null) results.push(col);
@@ -39,7 +37,7 @@ class Collisions {
               results = body_and_group(cast listener.a, cast listener.b, world.quadtree);
           }
         case GROUP:
-          switch (listener.b.type) {
+          switch (listener.b.echo_type) {
             case BODY:
               results = body_and_group(cast listener.a, cast listener.b, world.quadtree);
             case GROUP:
@@ -59,10 +57,26 @@ class Collisions {
             return false;
           }).length > 0) continue;
         // Preform the full collision check
-        var sa = result.a.shape.clone();
-        var sb = result.b.shape.clone();
-        sa.position.addWith(result.a.position);
-        sb.position.addWith(result.b.position);
+        var sa;
+        var sb;
+        if (result.a.mass == 0) {
+          sa = result.a.cache.shape.clone();
+          sa.position.x += result.a.cache.x;
+          sa.position.y += result.a.cache.y;
+        }
+        else {
+          sa = result.a.shape.clone();
+          sa.position.addWith(result.a.position);
+        }
+        if (result.b.mass == 0) {
+          sb = result.b.cache.shape.clone();
+          sb.position.x += result.b.cache.x;
+          sb.position.y += result.b.cache.y;
+        }
+        else {
+          sb = result.b.shape.clone();
+          sb.position.addWith(result.b.position);
+        }
         result.data = sa.collides(sb);
         // If there was no collision, continue
         if (result.data == null) continue;
@@ -103,12 +117,12 @@ class Collisions {
   static function group_and_group(a:Group, b:Group, ?quadtree:QuadTree):Array<Collision> {
     if (a.members.length == 0 || b.members.length == 0) return [];
     var results:Array<Collision> = [];
-    for (member in a.members) if (member.active) results = results.concat(body_and_group(member, b, quadtree));
+    for (member in a.members) if (member.active && member.mass > 0) results = results.concat(body_and_group(member, b, quadtree));
     return results;
   }
 
   static function body_and_group(body:Body, group:Group, ?quadtree:QuadTree):Array<Collision> {
-    if (body.shape == null || !body.active) return [];
+    if (body.shape == null || !body.active || body.mass == 0) return [];
     var bounds = body.bounds();
     var results:Array<Collision> = [];
     for (result in quadtree.query(bounds)) {
@@ -119,7 +133,7 @@ class Collisions {
   }
 
   static function body_and_body(a:Body, b:Body):Null<Collision> {
-    if (a.shape == null || b.shape == null || !a.active || !b.active || a == b) return null;
+    if (a.shape == null || b.shape == null || !a.active || !b.active || a == b || a.mass == 0 && b.mass == 0) return null;
     var ab = a.bounds();
     var bb = b.bounds();
     var col = ab.collides(bb);

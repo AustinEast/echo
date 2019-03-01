@@ -9,9 +9,9 @@ A 2D Physics library written in Haxe.
 
 It focuses on maintaining a simple API that is easy to integrate into any engine/framework (Heaps, OpenFL, Kha, etc). All Echo needs is an update loop and its ready to go!
 
-Try the [Samples 🎮](https://austineast.github.io/echo)!
+Try the [Samples 🎮](https://austineast.dev/echo)!
 
-Check out the [API 📖](https://austineast.github.io/echo/api/)!
+Check out the [API 📖](https://austineast.dev/echo/api/)!
 
 ## Features
 * Semi-implicit euler integration physics

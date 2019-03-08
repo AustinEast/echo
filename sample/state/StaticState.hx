@@ -82,6 +82,7 @@ class StaticState extends State<World> {
 
   override public function exit(world:World) {
     Main.instance.iterations_slider.value = 5;
+    Main.instance.iterations_slider.onChange();
     world.iterations = 5;
     world.clear();
   }

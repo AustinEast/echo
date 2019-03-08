@@ -9,6 +9,6 @@
     "version": "0.3.0",
     "dependencies": {
       "ghostlib": "",
-      "hxmath": ""
+      "hxmath": "git:https://github.com/tbrosman/hxmath.git"
     }
   }

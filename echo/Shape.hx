@@ -1,6 +1,6 @@
 package echo;
 
-import glib.Proxy;
+import ghost.Proxy;
 import echo.shape.*;
 import echo.data.Data;
 import echo.data.Options;
@@ -20,7 +20,7 @@ class Shape implements IProxy {
    * @return Shape
    */
   public static function get(options:ShapeOptions):Shape {
-    options = glib.Data.copy_fields(options, defaults);
+    options = ghost.Data.copy_fields(options, defaults);
     switch (options.type) {
       case RECT:
         return Rect.get(options.offset_x, options.offset_y, options.width, options.height);

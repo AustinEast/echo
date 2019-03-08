@@ -1,6 +1,6 @@
 package echo.util;
 
-import glib.Pool;
+import ghost.Pool;
 import echo.Body;
 import echo.Shape;
 import echo.shape.Rect;

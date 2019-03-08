@@ -2,8 +2,8 @@ package state;
 
 import echo.Body;
 import echo.World;
-import glib.FSM;
-import glib.Random;
+import ghost.FSM;
+import ghost.Random;
 
 class CirclesState extends State<World> {
   var body_count:Int = 100;
@@ -12,7 +12,7 @@ class CirclesState extends State<World> {
   var timer:Float;
 
   override public function enter(world:World) {
-    Main.state_text.text = "Sample: Circle/Box Collisions";
+    Main.instance.state_text.text = "Sample: Circle/Box Collisions";
     timer = 0;
     // Add some platforms for the bodies to bounce off of
     // Setting the Mass to 0 makes them unmovable
@@ -31,8 +31,8 @@ class CirclesState extends State<World> {
     }
 
     cursor = new Body({
-      x: Main.scene.mouseX,
-      y: Main.scene.mouseY,
+      x: Main.instance.scene.mouseX,
+      y: Main.instance.scene.mouseY,
       shape: {
         type: CIRCLE,
         radius: 16
@@ -44,9 +44,9 @@ class CirclesState extends State<World> {
     world.listen();
   }
 
-  override function update(world:World, dt:Float) {
+  override function step(world:World, dt:Float) {
     // Move the Cursor Body
-    cursor.velocity.set(Main.scene.mouseX - cursor.x, Main.scene.mouseY - cursor.y);
+    cursor.velocity.set(Main.instance.scene.mouseX - cursor.x, Main.instance.scene.mouseY - cursor.y);
     cursor.velocity *= cursor_speed;
 
     timer += dt;

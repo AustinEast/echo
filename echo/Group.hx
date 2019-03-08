@@ -1,6 +1,6 @@
 package echo;
 
-import glib.Disposable;
+import ghost.Disposable;
 import echo.Echo;
 import echo.data.Types;
 /**

@@ -33,6 +33,7 @@ class World extends Group {
    */
   public var gravity(default, null):Vector2;
   public var quadtree:QuadTree;
+  public var static_quadtree:QuadTree;
   /**
    * The amount of iterations that occur each time the World is stepped. The higher the number, the more stable the Physics Simulation will be, at the cost of performance.
    */
@@ -64,13 +65,14 @@ class World extends Group {
     body.world = this;
     members.push(body);
     body.cache.quadtree_data = {id: body.id, bounds: body.bounds(), flag: false};
-    quadtree.insert(body.cache.quadtree_data);
+    body.mass == 0 ? static_quadtree.insert(body.cache.quadtree_data) : quadtree.insert(body.cache.quadtree_data);
     return body;
   }
 
   override function remove(body:Body):Body {
-    body.world = null;
     quadtree.remove(body.cache.quadtree_data);
+    static_quadtree.remove(body.cache.quadtree_data);
+    body.remove();
     return super.remove(body);
   }
 
@@ -99,12 +101,14 @@ class World extends Group {
     init = true;
     if (quadtree != null) quadtree.put();
     quadtree = QuadTree.get();
+    if (static_quadtree != null) static_quadtree.put();
+    static_quadtree = QuadTree.get();
     var r = center();
-    quadtree.load(r);
+    static_quadtree.load(r);
     r.put();
-    for_each((member)-> {
+    for_each_static((member)-> {
       member.bounds(member.cache.quadtree_data.bounds);
-      quadtree.update(member.cache.quadtree_data);
+      static_quadtree.update(member.cache.quadtree_data);
     });
   }
 

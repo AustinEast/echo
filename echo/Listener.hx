@@ -1,7 +1,7 @@
 package echo;
 
 import echo.Body;
-import glib.Disposable;
+import ghost.Disposable;
 import echo.Echo;
 import echo.data.Data;
 import echo.data.Options;
@@ -69,7 +69,7 @@ class Listeners implements IDisposable {
    * @return Listener
    */
   public function add(a:IEcho, b:IEcho, ?options:ListenerOptions):Listener {
-    options = glib.Data.copy_fields(options, listener_defaults);
+    options = ghost.Data.copy_fields(options, listener_defaults);
     var listener:Listener = {
       a: a,
       b: b,

@@ -3,12 +3,16 @@ package;
 import echo.Echo;
 import echo.World;
 import echo.util.Debug;
-import glib.FSM;
+import ghost.FSM;
 import state.*;
 
 class Main extends BaseApp {
-  public static var scene:h2d.Scene;
-  public static var state_text:h2d.Text;
+  public static var instance:Main;
+
+  public var scene:h2d.Scene;
+  public var state_text:h2d.Text;
+  public var gravity_slider:h2d.Slider;
+  public var iterations_slider:h2d.Slider;
 
   var width:Int = 640;
   var height:Int = 360;
@@ -17,6 +21,7 @@ class Main extends BaseApp {
   var fps_text:h2d.Text;
 
   override function init() {
+    instance = this;
     // Create a World to hold all the Physics Bodies
     world = Echo.start({
       width: width,
@@ -42,7 +47,7 @@ class Main extends BaseApp {
 
   override function update(dt:Float) {
     // Update the current Sample State
-    fsm.update(dt);
+    fsm.step(dt);
     // Step the World Forward
     world.step(dt);
     // Draw the new World
@@ -72,8 +77,8 @@ class Main extends BaseApp {
     addButton("Previous", previous_state, buttons);
     addButton("Restart", reset_state, buttons);
     addButton("Next", next_state, buttons);
-    addSlider("Gravity", () -> return world.gravity.y, (v) -> world.gravity.y = v, -100, 100);
-    addSlider("Iterations", () -> return world.iterations, (v) -> world.iterations = Std.int(v), 1, 10);
+    gravity_slider = addSlider("Gravity", () -> return world.gravity.y, (v) -> world.gravity.y = v, -100, 100);
+    iterations_slider = addSlider("Iterations", () -> return world.iterations, (v) -> world.iterations = Std.int(v), 1, 10);
   }
 
   static function main() {

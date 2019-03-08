@@ -1,7 +1,7 @@
 package echo.util;
 
 import echo.shape.*;
-import glib.Log;
+import ghost.Log;
 
 class Debug {
   public var draw_bodies:Bool = true;
@@ -21,7 +21,10 @@ class Debug {
 
   public function draw(world:World) {
     clear();
-    if (draw_quadtree) draw_qd(world.quadtree);
+    if (draw_quadtree) {
+      draw_qd(world.static_quadtree);
+      draw_qd(world.quadtree);
+    }
     if (draw_bodies) for (body in world.members) {
       if (body.shape != null) {
         switch (body.shape.type) {

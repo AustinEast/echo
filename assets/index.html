@@ -6,14 +6,14 @@
     <meta name="description" content="Simple Arcade Physics for Haxe" />
     <meta property="og:title" content="Echo Physics Library" />
     <meta property="og:description" content="Simple Arcade Physics for Haxe" />
-    <meta property="og:url" content="https://austineast.github.io/echo" />
-    <meta property="og:image" content=”https://raw.githubusercontent.com/austineast/echo/gh-pages/echo.png" />
+    <meta property="og:url" content="https://austineast.dev/echo" />
+    <meta property="og:image" content=”https://raw.githubusercontent.com/austineast/echo/gh-pages/logo.png" />
     <link rel="shortcut icon" href="https://raw.githubusercontent.com/austineast/echo/gh-pages/icon.ico" type="image/x-icon" />
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:site" content="@austinweast" />
     <meta name="twitter:title" content="Echo Physics Library" />
     <meta name="twitter:description" content="Simple Arcade Physics for Haxe" />
-    <meta name="twitter:image:src" content="https://raw.githubusercontent.com/austineast/echo/gh-pages/echo.png" />
+    <meta name="twitter:image:src" content="https://raw.githubusercontent.com/austineast/echo/gh-pages/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui" />
     <meta name="format-detection" content="telephone=no" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -34,12 +34,13 @@
         }
         canvas#webgl { 
             height:auto; 
+            width: 100%;
             max-width: 720px;
         }
         footer a {
             color: white;
         }
-        .dark {
+        .theme {
             color: white;
             background: #45283c;
         }
@@ -64,9 +65,9 @@
         }
     </style>
 </head>
-<body class="dark">
+<body class="theme">
     <main>
-        <img src="./echo.png"></img>
+        <img src="./logo.png"></img>
         <h1>Echo</h1>
         <p>Simple Arcade Physics Library for Haxe</p>
         <canvas width="640" height="360" id="webgl"></canvas>
@@ -79,14 +80,9 @@
 </body>
 <script src="./sample.js"></script>
 <script>
-    function resize() {
-        var canvas = document.getElementById('webgl')
-        
-        canvas.style.width = '100%';
-        // canvas.style.minWidth = '640px';
-    }
     // Resize the canvas on window resize
-    window.addEventListener('resize', resize(), false);
-    resize();
+    var canvas = document.getElementById('webgl');
+    canvas.style.width = '100%';
+    window.addEventListener('resize', () => canvas.style.width = '100%', false);
 </script>
 </html>

@@ -3,8 +3,8 @@ package state;
 import echo.Body;
 import echo.Group;
 import echo.World;
-import glib.FSM;
-import glib.Random;
+import ghost.FSM;
+import ghost.Random;
 
 class GroupsState extends State<World> {
   var body_count:Int = 50;
@@ -14,7 +14,7 @@ class GroupsState extends State<World> {
   var timer:Float;
 
   override public function enter(world:World) {
-    Main.state_text.text = "Sample: Group Collisions";
+    Main.instance.state_text.text = "Sample: Group Collisions";
     timer = 0;
     // And split them between the two groups
     circles = new Group();
@@ -44,7 +44,7 @@ class GroupsState extends State<World> {
     world.listen(rects, floors);
   }
 
-  override function update(world:World, dt:Float) {
+  override function step(world:World, dt:Float) {
     timer += dt;
     if (timer > 0.3 + Random.range(-0.2, 0.2)) {
       if (circles.members.length < body_count) launch(world.add(circles.add(make_circle())), world, true);
@@ -96,7 +96,7 @@ class GroupsState extends State<World> {
 
   inline function launch(b:Body, w:World, left:Bool) {
     b.position.set(left ? 20 : w.width - 20, w.height / 2);
-    b.velocity.set(left ? 130 : -130, hxd.Math.lerp(-60, 20, Main.scene.mouseY / w.height));
+    b.velocity.set(left ? 130 : -130, hxd.Math.lerp(-60, 20, Main.instance.scene.mouseY / w.height));
   }
 
   inline function offscreen(b:Body, world:World) return b.y + b.shape.top > world.height || b.x + b.shape.right < 0 || b.x + b.shape.left > world.width;

@@ -1,12 +1,12 @@
 package echo;
 
-import echo.data.Data.QuadTreeData;
 import hxmath.math.Vector2;
-import glib.Disposable;
-import glib.Proxy;
+import ghost.Disposable;
+import ghost.Proxy;
 import echo.Shape;
 import echo.Echo;
 import echo.shape.Rect;
+import echo.data.Data;
 import echo.data.Options;
 import echo.data.Types;
 /**
@@ -140,7 +140,7 @@ class Body implements IEcho implements IDisposable implements IProxy {
    *
    * Only available when using the Ghost Framework (https://github.com/AustinEast/ghost)
    */
-  public var gameobject:g2d.GameObject;
+  public var entity:h2d.Entity;
   #end
   /**
    * Creates a new Body.
@@ -163,7 +163,7 @@ class Body implements IEcho implements IDisposable implements IProxy {
    * @param options
    */
   public function load(?options:BodyOptions) {
-    options = glib.Data.copy_fields(options, defaults);
+    options = ghost.Data.copy_fields(options, defaults);
     if (options.shape != null) shape = Shape.get(options.shape);
     solid = options.solid;
     position.set(options.x, options.y);
@@ -208,7 +208,7 @@ class Body implements IEcho implements IDisposable implements IProxy {
     cache.shape = shape;
     if (cache.quadtree_data != null) {
       bounds(cache.quadtree_data.bounds);
-      if (world != null) world.quadtree.update(cache.quadtree_data);
+      if (world != null && mass == 0) world.static_quadtree.update(cache.quadtree_data);
     }
   }
   /**
@@ -223,7 +223,7 @@ class Body implements IEcho implements IDisposable implements IProxy {
     data = null;
     cache = null;
     #if ghost
-    gameobject = null;
+    entity = null;
     #end
   }
 

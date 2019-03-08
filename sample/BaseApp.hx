@@ -2,7 +2,7 @@ package;
 
 import echo.World;
 import echo.util.Debug;
-import glib.FSM;
+import ghost.FSM;
 
 class BaseApp extends hxd.App {
   var sample_states:Array<Class<State<World>>>;

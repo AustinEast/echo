@@ -1,7 +1,7 @@
 package echo.shape;
 
 import echo.shape.*;
-import glib.Pool;
+import ghost.Pool;
 import echo.data.Data;
 import hxmath.math.Vector2;
 

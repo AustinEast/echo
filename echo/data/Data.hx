@@ -40,3 +40,8 @@ typedef QuadTreeData = {
    */
   var flag:Bool;
 }
+
+@:enum
+abstract Direction(Int) from Int to Int {
+  var TOP = 0;
+}

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/austineast/echo/gh-pages/echo.png">
+  <img src="https://raw.githubusercontent.com/austineast/echo/gh-pages/logo.png">
 </p>
 
 # echo

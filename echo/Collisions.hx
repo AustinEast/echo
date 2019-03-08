@@ -14,12 +14,14 @@ class Collisions {
    * TODO: Keep a Quadtree of Cached Static Objects
    */
   public static function query(world:World) {
-    // Update the Quadtree
+    // Populate the Quadtree
+    if (world.quadtree != null) world.quadtree.put();
+    world.quadtree = QuadTree.get(world.x + (world.width * 0.5), world.y + (world.height * 0.5), world.width, world.height);
     world.for_each((b) -> {
       b.collided = false;
       if (b.active && b.mass > 0) {
         b.bounds(b.cache.quadtree_data.bounds);
-        world.quadtree.update(b.cache.quadtree_data);
+        world.quadtree.insert(b.cache.quadtree_data);
       }
     });
 
@@ -34,14 +36,14 @@ class Collisions {
               var col = body_and_body(cast listener.a, cast listener.b);
               if (col != null) results.push(col);
             case GROUP:
-              results = body_and_group(cast listener.a, cast listener.b, world.quadtree);
+              results = body_and_group(cast listener.a, cast listener.b, world);
           }
         case GROUP:
           switch (listener.b.echo_type) {
             case BODY:
-              results = body_and_group(cast listener.a, cast listener.b, world.quadtree);
+              results = body_and_group(cast listener.a, cast listener.b, world);
             case GROUP:
-              results = group_and_group(cast listener.a, cast listener.b, world.quadtree);
+              results = group_and_group(cast listener.a, cast listener.b, world);
           }
       }
       // NarrowPhase
@@ -114,18 +116,21 @@ class Collisions {
     }
   }
 
-  static function group_and_group(a:Group, b:Group, ?quadtree:QuadTree):Array<Collision> {
+  static function group_and_group(a:Group, b:Group, ?world:World):Array<Collision> {
     if (a.members.length == 0 || b.members.length == 0) return [];
     var results:Array<Collision> = [];
-    for (member in a.members) if (member.active && member.mass > 0) results = results.concat(body_and_group(member, b, quadtree));
+    for (member in a.members) if (member.active && member.mass > 0) results = results.concat(body_and_group(member, b, world));
     return results;
   }
 
-  static function body_and_group(body:Body, group:Group, ?quadtree:QuadTree):Array<Collision> {
+  static function body_and_group(body:Body, group:Group, ?world:World):Array<Collision> {
     if (body.shape == null || !body.active || body.mass == 0) return [];
     var bounds = body.bounds();
     var results:Array<Collision> = [];
-    for (result in quadtree.query(bounds)) {
+    for (result in world.quadtree.query(bounds)) {
+      group.members.map((member) -> if (result.id == member.id) results.push({a: body, b: member}));
+    }
+    for (result in world.static_quadtree.query(bounds)) {
       group.members.map((member) -> if (result.id == member.id) results.push({a: body, b: member}));
     }
     bounds.put();

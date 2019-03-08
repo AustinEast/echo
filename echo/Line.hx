@@ -1,6 +1,6 @@
 package echo;
 
-import glib.Proxy;
+import ghost.Proxy;
 import hxmath.math.Vector2;
 
 class Line implements IProxy {

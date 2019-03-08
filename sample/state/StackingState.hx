@@ -2,14 +2,14 @@ package state;
 
 import echo.Body;
 import echo.World;
-import glib.FSM;
-import glib.Random;
+import ghost.FSM;
+import ghost.Random;
 
 class StackingState extends State<World> {
   var body_count:Int = 100;
 
   override public function enter(world:World) {
-    Main.state_text.text = "Sample: Stacking Boxes";
+    Main.instance.state_text.text = "Sample: Stacking Boxes";
     // Add a bunch of random Physics Bodies to the World
     for (i in 0...body_count) {
       var b = new Body({

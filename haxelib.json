@@ -6,9 +6,9 @@
     "contributors": ["austineast"],
     "url": "https://austineast.github.io/echo",
     "releasenote": "statics optimizing",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "dependencies": {
       "ghostlib": "",
-      "hxmath": "git:https://github.com/tbrosman/hxmath.git"
+      "hxmath": ""
     }
   }

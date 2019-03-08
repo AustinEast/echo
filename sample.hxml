@@ -6,6 +6,6 @@
 -lib echo
 -lib heaps
 # copy assets
---macro sample.Assets.copyProjectAssets()
+--macro ghost.Assets.copyProjectAssets()
 # output
 -js bin/sample.js

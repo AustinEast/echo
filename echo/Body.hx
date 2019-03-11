@@ -167,6 +167,7 @@ class Body implements IEcho implements IDisposable implements IProxy {
     if (options.shape != null) shape = Shape.get(options.shape);
     solid = options.solid;
     position.set(options.x, options.y);
+    rotation = options.rotation;
     mass = options.mass;
     elasticity = options.elasticity;
     velocity.set(options.velocity_x, options.velocity_y);
@@ -242,6 +243,7 @@ class Body implements IEcho implements IDisposable implements IProxy {
     mass: 1,
     x: 0,
     y: 0,
+    rotation: 0,
     elasticity: 0,
     velocity_x: 0,
     velocity_y: 0,

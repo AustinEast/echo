@@ -32,6 +32,10 @@ typedef BodyOptions = {
    */
   var ?y:Float;
   /**
+   * The Body's rotation.
+   */
+  var ?rotation:Float;
+  /**
    * Value to determine how much of a Body's `velocity` should be retained during collisions (or how much should the `Body` "bounce" in other words).
    */
   var ?elasticity:Float;

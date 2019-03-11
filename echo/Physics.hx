@@ -75,7 +75,7 @@ class Physics {
     b.position.addWith(b.inverse_mass * correction);
   }
 
-  static inline function compute_velocity(v:Float, a:Float, d:Float, m:Float, im:Float, dt:Float) {
+  public static inline function compute_velocity(v:Float, a:Float, d:Float, m:Float, im:Float, dt:Float) {
     // Apply Acceleration to Velocity
     if (a != 0) {
       v += a * im * dt;

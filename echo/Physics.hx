@@ -16,19 +16,13 @@ class Physics {
   public static function step(world:World, dt:Float) {
     for (member in world.members) {
       if (member.mass == 0) continue;
-      // Apply Gravity
-      member.acceleration += world.gravity;
       // Compute Velocity
-      member.velocity.x = compute_velocity(member.velocity.x, member.acceleration.x, member.drag.x, member.max_velocity.x, member.inverse_mass, dt);
-      member.velocity.y = compute_velocity(member.velocity.y, member.acceleration.y, member.drag.y, member.max_velocity.y, member.inverse_mass, dt);
+      member.velocity.x = compute_velocity(member.velocity.x, member.acceleration.x, member.drag.x, member.max_velocity.x, dt);
+      member.velocity.y = compute_velocity(member.velocity.y, member.acceleration.y, member.drag.y, member.max_velocity.y, dt);
       // Apply Velocity
-      member.position.addWith(member.velocity * dt);
-      // TODO: Flesh out rotation stuff
+      member.position.addWith(member.velocity * member.inverse_mass * dt);
       // Apply Rotations
       member.rotation += member.rotational_velocity * dt;
-      // Reset Acceleration Forces
-      member.acceleration.set(0, 0);
-      // member.rotational_acceleration = 0;
     }
   }
   /**
@@ -75,15 +69,15 @@ class Physics {
     b.position.addWith(b.inverse_mass * correction);
   }
 
-  public static inline function compute_velocity(v:Float, a:Float, d:Float, m:Float, im:Float, dt:Float) {
+  public static inline function compute_velocity(v:Float, a:Float, d:Float, m:Float, dt:Float) {
     // Apply Acceleration to Velocity
     if (a != 0) {
-      v += a * im * dt;
+      v += a * dt;
     }
-    // Otherwise Apply Drag to Velocity
     else if (d != 0) {
-      if (v - d > 0) v -= d * im * dt;
-      else if (v + d < 0) v += d * im * dt;
+      d = d * dt;
+      if (v - d > 0) v -= d;
+      else if (v + d < 0) v += d;
       else v = 0;
     }
     // Clamp Velocity if it has a Max

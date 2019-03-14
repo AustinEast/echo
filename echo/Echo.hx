@@ -43,11 +43,19 @@ class Echo {
   public static function step(world:World, dt:Float) {
     // TODO: Save World State to History
     var fdt = dt / world.iterations;
+    // Apply Gravity
+    for (member in world.members) {
+      member.acceleration += world.gravity;
+    }
     for (i in 0...world.iterations) {
       Physics.step(world, fdt);
       Collisions.query(world);
       Physics.separate(world, fdt);
       Collisions.notify(world);
+    }
+    // Reset acceleration
+    for (member in world.members) {
+      member.acceleration.set(0, 0);
     }
   }
   /**

@@ -136,11 +136,11 @@ class Body implements IEcho implements IDisposable implements IProxy {
   };
   #if ghost
   /**
-   * Reference to this Body's parent GameObject.
+   * Reference to this Body's parent Entity. Useful for Callbacks.
    *
    * Only available when using the Ghost Framework (https://github.com/AustinEast/ghost)
    */
-  public var entity:h2d.Entity;
+  public var entity:ghost.EntityBase<h2d.Object>;
   #end
   /**
    * Creates a new Body.

@@ -11,12 +11,6 @@ typedef BodyOptions = {
    */
   var ?shape:ShapeOptions;
   /**
-   * Flag to set whether the Body collides with other Bodies.
-   *
-   * If false, this Body will not have its position or velocity affected by other Bodies, but it will still call collision callbacks
-   */
-  var ?solid:Bool;
-  /**
    * Body's mass. Affects how the Body reacts to Collisions and Velocity.
    *
    * The higher a Body's mass, the more resistant it is to those forces.

@@ -43,7 +43,7 @@ class Physics {
    */
   public static function resolve(a:Body, b:Body, cd:CollisionData) {
     // Do not resolve if either objects arent solid
-    if (!a.solid || !b.solid || a.mass == 0 && b.mass == 0) return;
+    if (!a.shape.solid || !b.shape.solid || a.mass == 0 && b.mass == 0) return;
     // Calculate relative velocity
     var rv = a.velocity - b.velocity;
     // Calculate relative velocity in terms of the normal direction

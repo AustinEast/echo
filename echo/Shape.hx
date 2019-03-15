@@ -61,7 +61,10 @@ class Shape implements IProxy {
    * @param y
    * @return position = new Vector2(x, y)
    */
-  function new(x:Float = 0, y:Float = 0) position = new Vector2(x, y);
+  function new(x:Float = 0, y:Float = 0) {
+    solid = true;
+    position = new Vector2(x, y);
+  }
   /**
    * The Shape's position on the X axis.
    *
@@ -90,6 +93,12 @@ class Shape implements IProxy {
    * If added to a `Body`, this value is treated as an offset to the Body's position.
    */
   public var position:Vector2;
+  /**
+   * Flag to set whether the Shape collides with other Shapes.
+   *
+   * If false, this Shape's Body will not have its position or velocity affected by other Bodies, but it will still call collision callbacks
+   */
+  public var solid(get, set):Bool;
   /**
    * The Upper Bounds of the Shape.
    */

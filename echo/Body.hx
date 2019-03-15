@@ -43,12 +43,6 @@ class Body implements IEcho implements IDisposable implements IProxy {
    */
   public var shape(get, set):Null<Shape>;
   /**
-   * Flag to set whether the Body collides with other Bodies.
-   *
-   * If false, this Body will not have its position or velocity affected by other Bodies, but it will still call collision callbacks
-   */
-  public var solid(get, set):Bool;
-  /**
    * Body's mass. Affects how the Body reacts to Collisions and Velocity.
    *
    * The higher a Body's mass, the more resistant it is to those forces.
@@ -134,14 +128,6 @@ class Body implements IEcho implements IDisposable implements IProxy {
     ?shape:Shape,
     ?quadtree_data:QuadTreeData
   };
-  #if ghost
-  /**
-   * Reference to this Body's parent Entity. Useful for Callbacks.
-   *
-   * Only available when using the Ghost Framework (https://github.com/AustinEast/ghost)
-   */
-  public var entity:ghost.EntityBase<h2d.Object>;
-  #end
   /**
    * Creates a new Body.
    * @param options Optional values to configure the new Body
@@ -165,7 +151,6 @@ class Body implements IEcho implements IDisposable implements IProxy {
   public function load(?options:BodyOptions) {
     options = ghost.Data.copy_fields(options, defaults);
     if (options.shape != null) shape = Shape.get(options.shape);
-    solid = options.solid;
     position.set(options.x, options.y);
     rotation = options.rotation;
     mass = options.mass;
@@ -223,9 +208,6 @@ class Body implements IEcho implements IDisposable implements IProxy {
     drag = null;
     data = null;
     cache = null;
-    #if ghost
-    entity = null;
-    #end
   }
 
   function set_mass(value:Float):Float {
@@ -239,7 +221,6 @@ class Body implements IEcho implements IDisposable implements IProxy {
   }
 
   static function get_defaults():BodyOptions return {
-    solid: true,
     mass: 1,
     x: 0,
     y: 0,

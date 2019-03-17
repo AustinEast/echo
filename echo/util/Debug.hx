@@ -31,10 +31,11 @@ class Debug {
           switch (shape.type) {
             case RECT:
               var r:Rect = cast shape;
-              draw_rect(r.x - r.ex + body.x, r.y - r.ey + body.y, r.width, r.height, shape_fill_color, body.collided ? shape_collided_color : shape_color, 0.2);
+              draw_rect(r.x - r.ex + body.x, r.y - r.ey + body.y, r.width, r.height, shape_fill_color, shape
+                .collided ? shape_collided_color : shape_color, 0.2);
             case CIRCLE:
               var c:Circle = cast shape;
-              draw_circle(c.x + body.x, c.y + body.y, c.radius, shape_fill_color, body.collided ? shape_collided_color : shape_color, 0.2);
+              draw_circle(c.x + body.x, c.y + body.y, c.radius, shape_fill_color, shape.collided ? shape_collided_color : shape_color, 0.2);
             case POLYGON:
           }
         }

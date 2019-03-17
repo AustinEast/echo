@@ -171,6 +171,11 @@ class Body implements IEcho implements IDisposable implements IProxy {
     return s;
   }
 
+  public function remove_shape(shape:Shape):Shape {
+    shapes.remove(shape);
+    return shape;
+  }
+
   public inline function clear_shapes() {
     for (shape in shapes) shape.put();
     shapes = [];

@@ -57,7 +57,7 @@ A `World` is an Object representing the state of a Physics simulation and it con
 
 #### Bodies
 
-A `Body` is an Object representing a Physical Body in a `World`. A `Body` has a position, velocity, mass, an optional collider shape, and many other properties that are used in a `World` simulation.
+A `Body` is an Object representing a Physical Body in a `World`. A `Body` has a position, velocity, mass, optional collider shapes, and many other properties that are used in a `World` simulation.
 
 #### Shapes
 

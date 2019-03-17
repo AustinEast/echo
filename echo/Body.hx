@@ -41,7 +41,7 @@ class Body implements IEcho implements IDisposable implements IProxy {
   /**
    * The Body's optional `Shape`. If it **isn't** null, this `Shape` acts as the Body's Collider, allowing it to be checked for Collisions.
    */
-  public var shape(get, set):Null<Shape>;
+  public var shapes(get, set):Array<Shape>;
   /**
    * Body's mass. Affects how the Body reacts to Collisions and Velocity.
    *
@@ -125,7 +125,7 @@ class Body implements IEcho implements IDisposable implements IProxy {
   var cache:{
     x:Float,
     y:Float,
-    ?shape:Shape,
+    ?shapes:Array<Shape>,
     ?quadtree_data:QuadTreeData
   };
   /**
@@ -142,6 +142,7 @@ class Body implements IEcho implements IDisposable implements IProxy {
     max_velocity = new Vector2(0, 0);
     drag = new Vector2(0, 0);
     cache = {x: 0, y: 0};
+    shapes = [];
     load(options);
   }
   /**
@@ -150,7 +151,9 @@ class Body implements IEcho implements IDisposable implements IProxy {
    */
   public function load(?options:BodyOptions) {
     options = ghost.Data.copy_fields(options, defaults);
-    if (options.shape != null) shape = Shape.get(options.shape);
+    clear_shapes();
+    if (options.shape != null) add_shape(options.shape);
+    if (options.shapes != null) for (shape in options.shapes) add_shape(shape);
     position.set(options.x, options.y);
     rotation = options.rotation;
     mass = options.mass;
@@ -160,6 +163,17 @@ class Body implements IEcho implements IDisposable implements IProxy {
     max_velocity.set(options.max_velocity_x, options.max_velocity_y);
     max_rotational_velocity = options.max_rotational_velocity;
     drag.set(options.drag_x, options.drag_y);
+  }
+
+  public function add_shape(options:ShapeOptions):Shape {
+    var s = Shape.get(options);
+    shapes.push(s);
+    return s;
+  }
+
+  public inline function clear_shapes() {
+    for (shape in shapes) shape.put();
+    shapes = [];
   }
   /**
    * Adds forces to a Body's acceleration.
@@ -171,15 +185,27 @@ class Body implements IEcho implements IDisposable implements IProxy {
     acceleration.y += y;
   }
   /**
-   * If a Body has a shape, it will return an AABB `Rect` representing the bounds of that shape relative to the Body's Position. If the Body does not have a shape, this will return `null'.
-   * @param rect Optional `Rect` to set the values to. If the Body does not have a Shape, this will not be set.
+   * If a Body has shapes, it will return an AABB `Rect` representing the bounds of its shapes relative to the Body's Position. If the Body does not have any shapes, this will return `null'.
+   * @param rect Optional `Rect` to set the values to. If the Body does not have any shapes, this will not be set.
    * @return Null<Rect>
    */
   public function bounds(?rect:Rect):Null<Rect> {
-    if (shape == null) return null;
-    var b = shape.bounds(rect);
-    b.position.addWith(position);
-    return b;
+    if (shapes.length == 0) return null;
+    var min_x = 0.;
+    var min_y = 0.;
+    var max_x = 0.;
+    var max_y = 0.;
+    for (shape in shapes) {
+      if (shape.left < min_x) min_x = shape.left;
+      if (shape.top < min_y) min_y = shape.top;
+      if (shape.right > max_x) max_x = shape.right;
+      if (shape.bottom > max_y) max_y = shape.bottom;
+    }
+    min_x += position.x;
+    min_y += position.y;
+    max_x += position.x;
+    max_y += position.y;
+    return rect == null ? Rect.get_from_min_max(min_x, min_y, max_x, max_y) : rect.set_from_min_max(min_x, min_y, max_x, max_y);
   }
 
   public inline function remove():Body {
@@ -191,7 +217,7 @@ class Body implements IEcho implements IDisposable implements IProxy {
   public function refresh_cache() {
     cache.x = x;
     cache.y = y;
-    cache.shape = shape;
+    cache.shapes = shapes.copy();
     if (cache.quadtree_data != null) {
       bounds(cache.quadtree_data.bounds);
       if (world != null && mass == 0) world.static_quadtree.update(cache.quadtree_data);
@@ -202,7 +228,8 @@ class Body implements IEcho implements IDisposable implements IProxy {
    */
   public function dispose() {
     remove();
-    shape.put();
+    for (shape in shapes) shape.put();
+    shapes = null;
     velocity = null;
     max_velocity = null;
     drag = null;

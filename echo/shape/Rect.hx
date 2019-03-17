@@ -26,9 +26,9 @@ class Rect extends Shape implements IPooled {
     return rect;
   }
 
-  public static function get_from_vectors(a:Vector2, b:Vector2):Rect {
+  public static inline function get_from_min_max(min_x:Float, min_y:Float, max_x:Float, max_y:Float):Rect {
     var rect = _pool.get();
-    rect.set(Math.min(a.x, b.x), Math.min(a.y, b.y), Math.abs(b.x - a.x), Math.abs(b.y - a.y));
+    rect.set((min_x + max_x) * 0.5, (min_y + max_y) * 0.5, max_x - min_x, max_y - min_y);
     rect.pooled = false;
     return rect;
   }
@@ -52,6 +52,10 @@ class Rect extends Shape implements IPooled {
     this.width = width;
     this.height = height;
     return this;
+  }
+
+  public inline function set_from_min_max(min_x:Float, min_y:Float, max_x:Float, max_y:Float):Rect {
+    return set((min_x + max_x) * 0.5, (min_y + max_y) * 0.5, max_x - min_x, max_y - min_y);
   }
 
   public inline function load(rect:Rect):Rect {

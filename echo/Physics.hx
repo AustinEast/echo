@@ -32,7 +32,9 @@ class Physics {
    */
   public static function separate(world:World, dt:Float) {
     for (listener in world.listeners.members) {
-      if (listener.separate) for (collision in listener.collisions) resolve(collision.a, collision.b, collision.data);
+      if (listener.separate) for (collision in listener.collisions) {
+        for (i in 0...collision.data.length) resolve(collision.a, collision.b, collision.data[i]);
+      }
     }
   }
   /**
@@ -43,7 +45,7 @@ class Physics {
    */
   public static function resolve(a:Body, b:Body, cd:CollisionData) {
     // Do not resolve if either objects arent solid
-    if (!a.shape.solid || !b.shape.solid || a.mass == 0 && b.mass == 0) return;
+    if (!cd.sa.solid || !cd.sb.solid || a.mass == 0 && b.mass == 0) return;
     // Calculate relative velocity
     var rv = a.velocity - b.velocity;
     // Calculate relative velocity in terms of the normal direction

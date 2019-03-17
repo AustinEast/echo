@@ -99,5 +99,10 @@ class GroupsState extends State<World> {
     b.velocity.set(left ? 130 : -130, hxd.Math.lerp(-60, 20, Main.instance.scene.mouseY / w.height));
   }
 
-  inline function offscreen(b:Body, world:World) return b.y + b.shape.top > world.height || b.x + b.shape.right < 0 || b.x + b.shape.left > world.width;
+  inline function offscreen(b:Body, world:World) {
+    var bounds = b.bounds();
+    var check = bounds.top > world.height || bounds.right < 0 || bounds.left > world.width;
+    bounds.put();
+    return check;
+  }
 }

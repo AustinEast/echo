@@ -119,6 +119,7 @@ class Shape implements IProxy {
    */
   @:alias(position.x)
   public var right(get, null):Float;
+  public var collided:Bool;
 
   public function put() {}
   /**

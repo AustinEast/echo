@@ -4,24 +4,37 @@ import echo.shape.Rect;
 import hxmath.math.Vector2;
 
 typedef Collision = {
+  /**
+   * Body A.
+   */
   var a:Body;
+  /**
+   * Body B.
+   */
   var b:Body;
-  var ?data:CollisionData;
+  /**
+   * Array containing Data from Each Collision found between the two Bodies' Shapes.
+   */
+  var data:Array<CollisionData>;
 }
 
 typedef CollisionData = {
   /**
-   * The length of shape 1's penetration into shape 2.
+   * Shape A.
+   */
+  var ?sa:Shape;
+  /**
+   * Shape B.
+   */
+  var ?sb:Shape;
+  /**
+   * The length of Shape A's penetration into Shape B.
    */
   var overlap:Float;
   /**
-   * The normal vector (direction) of shape 1's penetration into shape 2.
+   * The normal vector (direction) of Shape A's penetration into Shape B.
    */
   var normal:Vector2;
-  /**
-   * TODO: Provide a direction const, similar to Flixel's
-   */
-  var ?direction:Int;
 }
 
 typedef IntersectionData = {}

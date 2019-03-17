@@ -11,6 +11,10 @@ typedef BodyOptions = {
    */
   var ?shape:ShapeOptions;
   /**
+   * Defines an array of Shapes that the Body will use as colliders
+   */
+  var ?shapes:Array<ShapeOptions>;
+  /**
    * Body's mass. Affects how the Body reacts to Collisions and Velocity.
    *
    * The higher a Body's mass, the more resistant it is to those forces.
@@ -115,11 +119,11 @@ typedef ListenerOptions = {
   /**
    * A callback function that is called on the first frame that a collision starts.
    */
-  var ?enter:Body->Body->CollisionData->Void;
+  var ?enter:Body->Body->Array<CollisionData>->Void;
   /**
    * A callback function that is called on frames when two Bodies are continuing to collide.
    */
-  var ?stay:Body->Body->CollisionData->Void;
+  var ?stay:Body->Body->Array<CollisionData>->Void;
   /**
    * A callback function that is called when a collision between two Bodies ends.
    */
@@ -129,7 +133,7 @@ typedef ListenerOptions = {
    *
    * If it returns true, the collision is valid. Otherwise the collision is discarded and no physics resolution/collision callbacks occur
    */
-  var ?condition:Body->Body->CollisionData->Bool;
+  var ?condition:Body->Body->Array<CollisionData>->Bool;
 }
 
 typedef ShapeOptions = {

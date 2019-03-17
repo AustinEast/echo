@@ -42,17 +42,17 @@ class SAT {
   }
 
   public static function rect_and_rect(rect1:Rect, rect2:Rect, flip:Bool = false):Null<CollisionData> {
-    var s1 = flip ? rect2 : rect1;
-    var s2 = flip ? rect1 : rect2;
+    var sa = flip ? rect2 : rect1;
+    var sb = flip ? rect1 : rect2;
 
     // Vector from A to B
-    var n = s2.position - s1.position;
+    var n = sb.position - sa.position;
     // Calculate overlap on x axis
-    var x_overlap = s1.ex + s2.ex - Math.abs(n.x);
+    var x_overlap = sa.ex + sb.ex - Math.abs(n.x);
     // SAT test on x axis
     if (x_overlap > 0) {
       // Calculate overlap on y axis
-      var y_overlap = s1.ey + s2.ey - Math.abs(n.y);
+      var y_overlap = sa.ey + sb.ey - Math.abs(n.y);
       // SAT test on y axis.
       // If both axis overlap, the boxes are colliding
       if (y_overlap > 0) {
@@ -60,6 +60,8 @@ class SAT {
         if (x_overlap < y_overlap) {
           // Point towards B knowing that n points from A to B
           return {
+            sa: sa,
+            sb: sb,
             normal: n.x < 0 ? new Vector2(-1, 0) : new Vector2(1, 0),
             overlap: x_overlap
           };
@@ -78,13 +80,13 @@ class SAT {
   }
 
   public static function circle_and_circle(circle1:Circle, circle2:Circle, flip:Bool = false):Null<CollisionData> {
-    var s1 = flip ? circle2 : circle1;
-    var s2 = flip ? circle1 : circle2;
+    var sa = flip ? circle2 : circle1;
+    var sb = flip ? circle1 : circle2;
 
-    // Vector2 from s2 to s1
-    var n = s2.position - s1.position;
+    // Vector2 from sb to sa
+    var n = sb.position - sa.position;
     // radii of circles
-    var r = s1.radius + s2.radius;
+    var r = sa.radius + sb.radius;
     var d = n.lengthSq;
 
     // Do quick check if circles are colliding
@@ -92,7 +94,7 @@ class SAT {
     // If distance between circles is zero, make up a number
     else if (d == 0) {
       return {
-        overlap: s1.radius,
+        overlap: sa.radius,
         normal: new Vector2(1, 0)
       };
     }
@@ -113,12 +115,9 @@ class SAT {
     // Closest point on A to center of B
     var closest = n.clone();
 
-    var ex = (r.right - r.left) / 2;
-    var ey = (r.bottom - r.top) / 2;
-
     // Clamp point to edges of the AABB
-    closest.x = closest.x.clamp(-ex, ex);
-    closest.y = closest.y.clamp(-ey, ey);
+    closest.x = closest.x.clamp(-r.ex, r.ex);
+    closest.y = closest.y.clamp(-r.ey, r.ey);
     var inside = false;
 
     // Circle is inside the AABB, so we need to clamp the circle's center
@@ -128,11 +127,11 @@ class SAT {
       // Find closest axis
       if (Math.abs(n.x) > Math.abs(n.y)) {
         // Clamp to closest extent
-        closest.x = closest.x > 0 ? ex : -ex;
+        closest.x = closest.x > 0 ? r.ex + c.radius + 0.1 : -r.ex - c.radius - 0.1;
       }
       else {
         // Clamp to closest extent
-        closest.y = closest.y > 0 ? ey : -ey;
+        closest.y = closest.y > 0 ? r.ey + c.radius + 0.1 : -r.ey - c.radius - 0.1;
       }
     }
 
@@ -148,11 +147,10 @@ class SAT {
     d = Math.sqrt(d);
     normal.normalize();
 
-    // Collision normal needs to be flipped to point outside if circle was
-    // inside the AABB
+    // Collision normal needs to be flipped to point outside if circle was inside the AABB
     return {
-      normal: inside ? normal * -1 : normal,
-      overlap: rad - d
+      normal: inside ? -normal : normal,
+      overlap: Math.abs(rad - d)
     };
   }
 }

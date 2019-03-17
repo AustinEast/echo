@@ -26,15 +26,17 @@ class Debug {
       draw_qd(world.quadtree);
     }
     if (draw_bodies) for (body in world.members) {
-      if (body.shape != null) {
-        switch (body.shape.type) {
-          case RECT:
-            var r:Rect = cast body.shape;
-            draw_rect(r.x - r.ex + body.x, r.y - r.ey + body.y, r.width, r.height, shape_fill_color, body.collided ? shape_collided_color : shape_color, 0.2);
-          case CIRCLE:
-            var c:Circle = cast body.shape;
-            draw_circle(c.x + body.x, c.y + body.y, c.radius, shape_fill_color, body.collided ? shape_collided_color : shape_color, 0.2);
-          case POLYGON:
+      if (body.shapes.length != 0) {
+        for (shape in body.shapes) {
+          switch (shape.type) {
+            case RECT:
+              var r:Rect = cast shape;
+              draw_rect(r.x - r.ex + body.x, r.y - r.ey + body.y, r.width, r.height, shape_fill_color, body.collided ? shape_collided_color : shape_color, 0.2);
+            case CIRCLE:
+              var c:Circle = cast shape;
+              draw_circle(c.x + body.x, c.y + body.y, c.radius, shape_fill_color, body.collided ? shape_collided_color : shape_color, 0.2);
+            case POLYGON:
+          }
         }
       }
     }

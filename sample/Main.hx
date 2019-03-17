@@ -1,5 +1,6 @@
 package;
 
+import hxd.Key;
 import echo.Echo;
 import echo.World;
 import echo.util.Debug;
@@ -30,7 +31,7 @@ class Main extends BaseApp {
       iterations: 5
     });
     // Set up our Sample States
-    sample_states = [StackingState, CirclesState, GroupsState, StaticState];
+    sample_states = [MultiShapeState, StackingState, CirclesState, GroupsState, StaticState];
     // Create a State Manager and pass it the World and the first Sample
     fsm = new FSM<World>(world, Type.createInstance(sample_states[index], null));
     // Create a Debug drawer to display debug graphics
@@ -46,10 +47,12 @@ class Main extends BaseApp {
   }
 
   override function update(dt:Float) {
+    // Hold Shift for slowmo debugging
+    var fdt = Key.isDown(Key.SHIFT) ? dt * 0.1 : dt;
     // Update the current Sample State
-    fsm.step(dt);
+    fsm.step(fdt);
     // Step the World Forward
-    world.step(dt);
+    world.step(fdt);
     // Draw the new World
     debug.draw(world);
     // Update GUI text

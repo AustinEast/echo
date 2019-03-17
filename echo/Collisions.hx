@@ -50,44 +50,57 @@ class Collisions {
       listener.last_collisions = listener.collisions.copy();
       listener.collisions = [];
       for (result in results) {
-        // Filter out self collisions
+        // Filterout self collisions/
         if (result.a.id == result.b.id) continue;
         // Filter out duplicate pairs
         if (listener.collisions.filter((pair) -> {
-            if (pair.a.id == result.a.id && pair.b.id == result.b.id) return true;
-            if (pair.b.id == result.a.id && pair.a.id == result.b.id) return true;
-            return false;
-          }).length > 0) continue;
+          if (pair.a.id == result.a.id && pair.b.id == result.b.id) return true;
+          if (pair.b.id == result.a.id && pair.a.id == result.b.id) return true;
+          return false;
+        }).length > 0) continue;
         // Preform the full collision check
-        var sa;
-        var sb;
-        if (result.a.mass == 0) {
-          sa = result.a.cache.shape.clone();
-          sa.position.x += result.a.cache.x;
-          sa.position.y += result.a.cache.y;
+        var use_a_cache = result.a.mass == 0;
+        var ssa = use_a_cache ? result.a.cache.shapes : result.a.shapes;
+
+        for (sa in ssa) {
+          var sac = sa.clone();
+          if (use_a_cache) {
+            sac.x += result.a.cache.x;
+            sac.y += result.a.cache.y;
+          }
+          else {
+            sac.x += result.a.x;
+            sac.y += result.a.y;
+          }
+          var use_b_cache = result.b.mass == 0;
+          var ssb = use_b_cache ? result.b.cache.shapes : result.b.shapes;
+          for (sb in ssb) {
+            var sbc = sb.clone();
+            if (use_b_cache) {
+              sbc.x += result.b.cache.x;
+              sbc.y += result.b.cache.y;
+            }
+            else {
+              sbc.x += result.b.x;
+              sbc.y += result.b.y;
+            }
+            var col = sac.collides(sbc);
+            if (col != null) {
+              col.sa = sa;
+              col.sb = sb;
+              result.data.push(col);
+            }
+            sbc.put();
+          }
+          sac.put();
         }
-        else {
-          sa = result.a.shape.clone();
-          sa.position.addWith(result.a.position);
-        }
-        if (result.b.mass == 0) {
-          sb = result.b.cache.shape.clone();
-          sb.position.x += result.b.cache.x;
-          sb.position.y += result.b.cache.y;
-        }
-        else {
-          sb = result.b.shape.clone();
-          sb.position.addWith(result.b.position);
-        }
-        result.data = sa.collides(sb);
         // If there was no collision, continue
-        if (result.data == null) continue;
+        if (result.data.length == 0) continue;
         // Check if the collision passes the listener's condition if it has one
         if (listener.condition != null && listener.condition(result.a, result.b, result.data)) continue;
+        for (data in result.data) data.sa.collided = data.sb.collided = true;
         result.a.collided = result.b.collided = true;
         listener.collisions.push(result);
-        sa.put();
-        sb.put();
       }
     }
   }
@@ -98,7 +111,8 @@ class Collisions {
     for (listener in world.listeners.members) {
       if (listener.enter != null || listener.stay != null) {
         for (c in listener.collisions) {
-          if (listener.enter != null && listener.last_collisions.find((f) -> return f.a == c.a && f.b == c.b || f.a == c.b && f.b == c.a) == null) {
+          if (listener.enter != null
+            && listener.last_collisions.find((f) -> return f.a == c.a && f.b == c.b || f.a == c.b && f.b == c.a) == null) {
             listener.enter(c.a, c.b, c.data);
           }
           else if (listener.stay != null) {
@@ -124,26 +138,26 @@ class Collisions {
   }
 
   static function body_and_group(body:Body, group:Group, ?world:World):Array<Collision> {
-    if (body.shape == null || !body.active || body.mass == 0) return [];
+    if (body.shapes.length == 0 || !body.active || body.mass == 0) return [];
     var bounds = body.bounds();
     var results:Array<Collision> = [];
     for (result in world.quadtree.query(bounds)) {
-      group.members.map((member) -> if (result.id == member.id) results.push({a: body, b: member}));
+      group.members.map((member) -> if (result.id == member.id) results.push({a: body, b: member, data: []}));
     }
     for (result in world.static_quadtree.query(bounds)) {
-      group.members.map((member) -> if (result.id == member.id) results.push({a: body, b: member}));
+      group.members.map((member) -> if (result.id == member.id) results.push({a: body, b: member, data: []}));
     }
     bounds.put();
     return results;
   }
 
   static function body_and_body(a:Body, b:Body):Null<Collision> {
-    if (a.shape == null || b.shape == null || !a.active || !b.active || a == b || a.mass == 0 && b.mass == 0) return null;
+    if (a.shapes.length == 0 || b.shapes.length == 0 || !a.active || !b.active || a == b || a.mass == 0 && b.mass == 0) return null;
     var ab = a.bounds();
     var bb = b.bounds();
     var col = ab.collides(bb);
     ab.put();
     bb.put();
-    return col == null ? null : {a: a, b: b};
+    return col == null ? null : {a: a, b: b, data: []};
   }
 }

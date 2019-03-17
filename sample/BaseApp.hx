@@ -33,14 +33,14 @@ class BaseApp extends hxd.App {
     var f = new h2d.Flow(parent == null ? fui : parent);
     f.padding = 5;
     f.paddingBottom = 7;
-    f.backgroundTile = h2d.Tile.fromColor(0x404040);
+    f.backgroundTile = h2d.Tile.fromColor(0x404040, 1, 1, 0.5);
     var tf = new h2d.Text(getFont(), f);
     tf.text = label;
     f.enableInteractive = true;
     f.interactive.cursor = Button;
     f.interactive.onClick = function(_) onClick();
-    f.interactive.onOver = function(_) f.backgroundTile = h2d.Tile.fromColor(0x606060);
-    f.interactive.onOut = function(_) f.backgroundTile = h2d.Tile.fromColor(0x404040);
+    f.interactive.onOver = function(_) f.backgroundTile = h2d.Tile.fromColor(0x606060, 1, 1, 0.5);
+    f.interactive.onOut = function(_) f.backgroundTile = h2d.Tile.fromColor(0x404040, 1, 1, 0.5);
     return f;
   }
 

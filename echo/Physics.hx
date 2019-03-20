@@ -61,14 +61,14 @@ class Physics {
       // Apply impulse
       var mass_sum = a.mass + b.mass;
       var ratio = a.mass / mass_sum;
-      a.velocity.subtractWith(impulse * a.inverse_mass);
+      if (!a.kinematic) a.velocity.subtractWith(impulse * a.inverse_mass);
       ratio = b.mass / mass_sum;
-      b.velocity.addWith(impulse * b.inverse_mass);
+      if (!b.kinematic) b.velocity.addWith(impulse * b.inverse_mass);
     }
     // Provide some positional correction to the objects to help prevent jitter
     var correction = (Math.max(cd.overlap - 0.013, 0) / inv_mass_sum) * 0.8 * cd.normal;
-    a.position.subtractWith(a.inverse_mass * correction);
-    b.position.addWith(b.inverse_mass * correction);
+    if (!a.kinematic) a.position.subtractWith(a.inverse_mass * correction);
+    if (!b.kinematic) b.position.addWith(b.inverse_mass * correction);
   }
 
   public static inline function compute_velocity(v:Float, a:Float, d:Float, m:Float, dt:Float) {

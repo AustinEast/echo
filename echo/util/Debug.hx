@@ -19,8 +19,8 @@ class Debug {
     }
   }
 
-  public function draw(world:World) {
-    clear();
+  public function draw(world:World, clear_canvas:Bool = true) {
+    if (clear_canvas) clear();
     if (draw_quadtree) {
       draw_qd(world.static_quadtree);
       draw_qd(world.quadtree);

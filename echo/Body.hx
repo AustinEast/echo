@@ -43,6 +43,13 @@ class Body implements IEcho implements IDisposable implements IProxy {
    */
   public var shapes(get, set):Array<Shape>;
   /**
+   * Flag to set how a Body is affected by Collisions.
+   *
+   * If set to true, the Body will still Collide and move through the world, but it will not be moved by external collision forces.
+   * This is useful for things like moving platforms.
+   */
+  public var kinematic:Bool;
+  /**
    * Body's mass. Affects how the Body reacts to Collisions and Velocity.
    *
    * The higher a Body's mass, the more resistant it is to those forces.
@@ -143,19 +150,20 @@ class Body implements IEcho implements IDisposable implements IProxy {
     drag = new Vector2(0, 0);
     cache = {x: 0, y: 0};
     shapes = [];
-    load(options);
+    load_options(options);
   }
   /**
    * Sets a Body's values from a `BodyOptions` object.
    * @param options
    */
-  public function load(?options:BodyOptions) {
+  public function load_options(?options:BodyOptions) {
     options = ghost.Data.copy_fields(options, defaults);
     clear_shapes();
     if (options.shape != null) add_shape(options.shape);
     if (options.shapes != null) for (shape in options.shapes) add_shape(shape);
     position.set(options.x, options.y);
     rotation = options.rotation;
+    kinematic = options.kinematic;
     mass = options.mass;
     elasticity = options.elasticity;
     velocity.set(options.velocity_x, options.velocity_y);
@@ -163,6 +171,7 @@ class Body implements IEcho implements IDisposable implements IProxy {
     max_velocity.set(options.max_velocity_x, options.max_velocity_y);
     max_rotational_velocity = options.max_rotational_velocity;
     drag.set(options.drag_x, options.drag_y);
+    gravity_scale = options.gravity_scale;
   }
 
   public function add_shape(options:ShapeOptions):Shape {
@@ -253,6 +262,7 @@ class Body implements IEcho implements IDisposable implements IProxy {
   }
 
   static function get_defaults():BodyOptions return {
+    kinematic: false,
     mass: 1,
     x: 0,
     y: 0,
@@ -265,6 +275,7 @@ class Body implements IEcho implements IDisposable implements IProxy {
     max_velocity_y: 0,
     max_rotational_velocity: 10000,
     drag_x: 0,
-    drag_y: 0
+    drag_y: 0,
+    gravity_scale: 1
   }
 }

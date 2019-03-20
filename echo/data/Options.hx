@@ -15,6 +15,13 @@ typedef BodyOptions = {
    */
   var ?shapes:Array<ShapeOptions>;
   /**
+   * Flag to set how a Body is affected by Collisions.
+   *
+   * If set to true, the Body will still Collide and move through the world, but it will not be moved by external collision forces.
+   * This is useful for things like moving platforms.
+   */
+  var ?kinematic:Bool;
+  /**
    * Body's mass. Affects how the Body reacts to Collisions and Velocity.
    *
    * The higher a Body's mass, the more resistant it is to those forces.
@@ -75,6 +82,7 @@ typedef BodyOptions = {
    * A measure of how fast a Body will move its velocity towards 0 on the Y axis when there is no acceleration.
    */
   var ?drag_y:Float;
+  var ?gravity_scale:Float;
 }
 
 typedef WorldOptions = {

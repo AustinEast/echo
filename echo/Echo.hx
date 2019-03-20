@@ -45,7 +45,7 @@ class Echo {
     var fdt = dt / world.iterations;
     // Apply Gravity
     for (member in world.members) {
-      member.acceleration += world.gravity;
+      member.acceleration += world.gravity * member.gravity_scale;
     }
     for (i in 0...world.iterations) {
       Physics.step(world, fdt);

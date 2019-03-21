@@ -39,7 +39,7 @@ class Body implements IEcho implements IDisposable implements IProxy {
   @:alias(position.y)
   public var y:Float;
   /**
-   * The Body's array of `Shape` objects. If it **isn't** null, these `Shape` objects acts as the Body's Collider, allowing it to be checked for Collisions.
+   * The Body's array of `Shape` objects. If it **isn't** null, these `Shape` objects act as the Body's Collider, allowing it to be checked for Collisions.
    */
   public var shapes(get, set):Array<Shape>;
   /**

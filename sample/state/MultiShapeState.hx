@@ -20,35 +20,30 @@ class MultiShapeState extends State<World> {
           {
             type: RECT,
             width: 32,
-            height: 32,
             radius: 16
           },
           {
             type: i % 2 == 0 ? CIRCLE : RECT,
             offset_x: 16,
             width: 24,
-            height: 24,
             radius: 12
           },
           {
             type: i % 2 == 0 ? CIRCLE : RECT,
             offset_x: -16,
             width: 24,
-            height: 24,
             radius: 12
           },
           {
             type: i % 2 == 0 ? CIRCLE : RECT,
             offset_y: -16,
             width: 24,
-            height: 24,
             radius: 12
           },
           {
             type: i % 2 == 0 ? CIRCLE : RECT,
             offset_y: 16,
             width: 24,
-            height: 24,
             radius: 12
           }
         ]

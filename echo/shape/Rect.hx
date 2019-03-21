@@ -19,7 +19,7 @@ class Rect extends Shape implements IPooled {
   public var max(get, null):Vector2;
   public var pooled:Bool;
 
-  public static inline function get(x:Float = 0, y:Float = 0, width:Float = 1, height:Float = 1):Rect {
+  public static inline function get(x:Float = 0, y:Float = 0, width:Float = 1, height:Float = 0):Rect {
     var rect = _pool.get();
     rect.set(x, y, width, height);
     rect.pooled = false;
@@ -47,10 +47,10 @@ class Rect extends Shape implements IPooled {
     }
   }
 
-  public inline function set(x:Float = 0, y:Float = 0, width:Float = 1, height:Float = 1):Rect {
+  public inline function set(x:Float = 0, y:Float = 0, width:Float = 1, height:Float = 0):Rect {
     position.set(x, y);
     this.width = width;
-    this.height = height;
+    this.height = height <= 0 ? width : height;
     return this;
   }
 

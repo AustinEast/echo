@@ -151,9 +151,9 @@ class Shape implements IProxy {
 
   static function get_defaults():ShapeOptions return {
     type: RECT,
-    radius: 8,
-    width: 16,
-    height: 16,
+    radius: 1,
+    width: 1,
+    height: 0,
     points: [],
     rotation: 0,
     offset_x: 0,

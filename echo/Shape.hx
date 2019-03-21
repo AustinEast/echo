@@ -93,6 +93,7 @@ class Shape implements IProxy {
    * If added to a `Body`, this value is treated as an offset to the Body's position.
    */
   public var position:Vector2;
+  public var rotation(get, set):Float;
   /**
    * Flag to set whether the Shape collides with other Shapes.
    *

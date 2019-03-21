@@ -9,12 +9,10 @@ using hxmath.math.MathUtil;
  */
 class Polygon extends Shape {
   public var vertices:Array<Vector2>;
-  public var rotation(get, set):Float;
 
-  public function new(x:Float = 0, y:Float = 0, ?vertices:Array<Vector2>, rotation:Float = 0) {
+  public function new(x:Float = 0, y:Float = 0, ?vertices:Array<Vector2>) {
     super(x, y);
     this.vertices = vertices == null ? [] : vertices;
-    this.rotation = rotation;
   }
 
   public inline function to_rect():Rect return Rect.get(x, y);

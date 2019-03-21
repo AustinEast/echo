@@ -1,7 +1,10 @@
 package echo.util;
 
+import hxmath.math.Vector2;
 import echo.shape.*;
 import ghost.Log;
+
+using hxmath.math.MathUtil;
 
 class Debug {
   public var draw_bodies:Bool = true;
@@ -27,15 +30,22 @@ class Debug {
     }
     if (draw_bodies) for (body in world.members) {
       if (body.shapes.length != 0) {
+        // var cos = Math.cos(body.rotation);
+        // var sin = Math.sin(body.rotation);
+        var v = new Vector2(0, 0);
         for (shape in body.shapes) {
+          //body.rotation != 0 ? v.set(shape.x * cos - shape.y * sin, shape.y * cos + shape.x * sin) : 
+          v.set(shape.x, shape.y);
+          v.addWith(body.position);
           switch (shape.type) {
             case RECT:
               var r:Rect = cast shape;
-              draw_rect(r.x - r.ex + body.x, r.y - r.ey + body.y, r.width, r.height, shape_fill_color, shape
+              draw_rect(v.x - r.ex, v.y - r.ey, r.width, r.height, shape_fill_color, shape
                 .collided ? shape_collided_color : shape_color, 0.2);
             case CIRCLE:
               var c:Circle = cast shape;
-              draw_circle(c.x + body.x, c.y + body.y, c.radius, shape_fill_color, shape.collided ? shape_collided_color : shape_color, 0.2);
+
+              draw_circle(v.x, v.y, c.radius, shape_fill_color, shape.collided ? shape_collided_color : shape_color, 0.2);
             case POLYGON:
           }
         }

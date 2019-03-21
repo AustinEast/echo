@@ -145,13 +145,35 @@ typedef ListenerOptions = {
 }
 
 typedef ShapeOptions = {
+  /**
+   * Enum describing the Shape to create. Currently supports RECT and CIRCLE.
+   */
   var ?type:ShapeType;
+  /**
+   * If the Shape is a Circle, it's radius will be taken from this value. Otherwise this is ignored.
+   */
   var ?radius:Float;
+  /**
+   * If the Shape is a Rect, it's width will be taken from this value. Otherwise this is ignored.
+   *
+   * If this value is set and height isnt, the Rect will use this value for it's height.
+   */
   var ?width:Float;
+  /**
+   * If the Shape is a Rect, it's height will be taken from this value. Otherwise this is ignored.
+   *
+   * If this value isnt set and width isnt, the Rect will use its width value for it's height.
+   */
   var ?height:Float;
   var ?points:Array<Vector2>;
   var ?rotation:Float;
+  /**
+   * The Shape's offset from it's parent Body on the X-Axis.
+   */
   var ?offset_x:Float;
+  /**
+   * The Shape's offset from it's parent Body on the Y-Axis.
+   */
   var ?offset_y:Float;
 }
 

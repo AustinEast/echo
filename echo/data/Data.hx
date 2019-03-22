@@ -1,21 +1,44 @@
 package echo.data;
 
+import ghost.Pool;
 import echo.shape.Rect;
 import hxmath.math.Vector2;
 
-typedef Collision = {
+class Collision implements IPooled {
+  public static var pool(get, never):IPool<Collision>;
+  static var _pool = new Pool<Collision>(Collision);
   /**
    * Body A.
    */
-  var a:Body;
+  public var a:Body;
   /**
    * Body B.
    */
-  var b:Body;
+  public var b:Body;
   /**
    * Array containing Data from Each Collision found between the two Bodies' Shapes.
    */
-  var data:Array<CollisionData>;
+  public var data:Array<CollisionData>;
+  public var pooled:Bool;
+
+  public static inline function get(a:Body, b:Body):Collision {
+    var c = _pool.get();
+    c.a = a;
+    c.b = b;
+    c.data = [];
+    c.pooled = false;
+    return c;
+  }
+
+  public function put() {
+    if (!pooled) {
+      data = [];
+      pooled = true;
+      _pool.put_unsafe(this);
+    }
+  }
+
+  static function get_pool():IPool<Collision> return _pool;
 }
 
 typedef CollisionData = {

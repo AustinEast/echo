@@ -1,5 +1,6 @@
 package echo;
 
+import ghost.Pool;
 import echo.Body;
 import echo.util.QuadTree;
 import echo.data.Data;
@@ -48,6 +49,7 @@ class Collisions {
           }
       }
       // NarrowPhase
+      for (collision in listener.last_collisions) collision.put();
       listener.last_collisions = listener.collisions.copy();
       listener.collisions = [];
       for (result in results) {
@@ -143,10 +145,10 @@ class Collisions {
     var bounds = body.bounds();
     var results:Array<Collision> = [];
     for (result in world.quadtree.query(bounds)) {
-      group.members.map((member) -> if (result.id == member.id) results.push({a: body, b: member, data: []}));
+      group.members.map((member) -> if (result.id == member.id) results.push(Collision.get(body, member)));
     }
     for (result in world.static_quadtree.query(bounds)) {
-      group.members.map((member) -> if (result.id == member.id) results.push({a: body, b: member, data: []}));
+      group.members.map((member) -> if (result.id == member.id) results.push(Collision.get(body, member)));
     }
     bounds.put();
     return results;
@@ -159,6 +161,6 @@ class Collisions {
     var col = ab.collides(bb);
     ab.put();
     bb.put();
-    return col == null ? null : {a: a, b: b, data: []};
+    return col == null ? null : Collision.get(a, b);
   }
 }

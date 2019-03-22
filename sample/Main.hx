@@ -32,8 +32,9 @@ class Main extends BaseApp {
     });
     // Set up our Sample States
     sample_states = [MultiShapeState, StackingState, CirclesState, GroupsState, StaticState];
+    index = 0;
     // Create a State Manager and pass it the World and the first Sample
-    fsm = new FSM<World>(world, Type.createInstance(sample_states[index], null));
+    fsm = new FSM<World>(world, Type.createInstance(MultiShapeState, null));
     // Create a Debug drawer to display debug graphics
     debug = new HeapsDebug(s2d);
     // Set the Background color of the Scene

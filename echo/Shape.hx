@@ -21,14 +21,17 @@ class Shape implements IProxy {
    */
   public static function get(options:ShapeOptions):Shape {
     options = ghost.Data.copy_fields(options, defaults);
+    var s:Shape;
     switch (options.type) {
       case RECT:
-        return Rect.get(options.offset_x, options.offset_y, options.width, options.height);
+        s = Rect.get(options.offset_x, options.offset_y, options.width, options.height);
       case CIRCLE:
-        return Circle.get(options.offset_x, options.offset_y, options.radius);
+        s = Circle.get(options.offset_x, options.offset_y, options.radius);
       case POLYGON:
         throw 'Polygon Shape has not been implemented';
     }
+    s.solid = options.solid;
+    return s;
   }
   /**
    * Gets a `Rect` from the Rect Classes' Object Pool. Shortcut for `Rect.get()`.
@@ -157,6 +160,7 @@ class Shape implements IProxy {
     points: [],
     rotation: 0,
     offset_x: 0,
-    offset_y: 0
+    offset_y: 0,
+    solid: true
   }
 }

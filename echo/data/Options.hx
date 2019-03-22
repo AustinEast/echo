@@ -149,6 +149,7 @@ typedef ShapeOptions = {
    * Enum describing the Shape to create. Currently supports RECT and CIRCLE.
    */
   var ?type:ShapeType;
+  var ?solid:Bool;
   /**
    * If the Shape is a Circle, it's radius will be taken from this value. Otherwise this is ignored.
    */

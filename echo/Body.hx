@@ -126,6 +126,10 @@ class Body implements IEcho implements IDisposable implements IProxy {
    * Used for debug drawing.
    */
   public var collided:Bool;
+  @:allow(echo.Physics.step)
+  public var last_x(default, null):Float;
+  @:allow(echo.Physics.step)
+  public var last_y(default, null):Float;
 
   @:dox(hide)
   @:allow(echo.World, echo.Collisions)
@@ -172,6 +176,8 @@ class Body implements IEcho implements IDisposable implements IProxy {
     max_rotational_velocity = options.max_rotational_velocity;
     drag.set(options.drag_x, options.drag_y);
     gravity_scale = options.gravity_scale;
+    last_x = x;
+    last_y = y;
   }
 
   public function add_shape(options:ShapeOptions):Shape {

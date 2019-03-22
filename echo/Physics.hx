@@ -16,6 +16,8 @@ class Physics {
   public static function step(world:World, dt:Float) {
     for (member in world.members) {
       if (member.mass == 0) continue;
+      member.last_x = member.x;
+      member.last_y = member.y;
       // Compute Velocity
       member.velocity.x = compute_velocity(member.velocity.x, member.acceleration.x, member.drag.x, member.max_velocity.x, dt);
       member.velocity.y = compute_velocity(member.velocity.y, member.acceleration.y, member.drag.y, member.max_velocity.y, dt);

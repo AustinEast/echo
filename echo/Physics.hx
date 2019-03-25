@@ -48,9 +48,10 @@ class Physics {
     // Do not resolve if either objects arent solid
     if (!cd.sa.solid || !cd.sb.solid || a.mass == 0 && b.mass == 0) return;
     // Calculate relative velocity
-    var rv = a.velocity - b.velocity;
+    var rvx = a.velocity.x - b.velocity.x;
+    var rvy = a.velocity.y - b.velocity.y;
     // Calculate relative velocity in terms of the normal direction
-    var vel_to_normal = rv * cd.normal;
+    var vel_to_normal = rvx * cd.normal.x + rvy * cd.normal.y;
     var inv_mass_sum = a.inverse_mass + b.inverse_mass;
     // Do not resolve if velocities are separating
     if (vel_to_normal > 0) {
@@ -58,13 +59,20 @@ class Physics {
       var e = (a.elasticity + b.elasticity) * 0.5;
       // Calculate impulse scalar
       var j = (-(1 + e) * vel_to_normal) / inv_mass_sum;
-      var impulse = -j * cd.normal;
+      var impulse_x = -j * cd.normal.x;
+      var impulse_y = -j * cd.normal.y;
       // Apply impulse
       var mass_sum = a.mass + b.mass;
       var ratio = a.mass / mass_sum;
-      if (!a.kinematic) a.velocity.subtractWith(impulse * a.inverse_mass);
+      if (!a.kinematic) {
+        a.velocity.x -= impulse_x * a.inverse_mass;
+        a.velocity.y -= impulse_y * a.inverse_mass;
+      }
       ratio = b.mass / mass_sum;
-      if (!b.kinematic) b.velocity.addWith(impulse * b.inverse_mass);
+      if (!b.kinematic) {
+        b.velocity.x += impulse_x * b.inverse_mass;
+        b.velocity.y += impulse_y * b.inverse_mass;
+      }
     }
     // Provide some positional correction to the objects to help prevent jitter
     var correction = (Math.max(cd.overlap, 0) / inv_mass_sum) * 0.9 * cd.normal;

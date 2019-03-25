@@ -27,9 +27,10 @@ class Collisions {
     });
 
     // Process the Listeners
+    var results = [];
     for (listener in world.listeners.members) {
       // BroadPhase
-      var results:Array<Collision> = [];
+      results.resize(0);
       switch (listener.a.echo_type) {
         case BODY:
           switch (listener.b.echo_type) {
@@ -37,20 +38,20 @@ class Collisions {
               var col = body_and_body(cast listener.a, cast listener.b);
               if (col != null) results.push(col);
             case GROUP:
-              results = body_and_group(cast listener.a, cast listener.b, world);
+              body_and_group(cast listener.a, cast listener.b, world, results);
           }
         case GROUP:
           switch (listener.b.echo_type) {
             case BODY:
-              results = body_and_group(cast listener.a, cast listener.b, world);
+              body_and_group(cast listener.a, cast listener.b, world, results);
             case GROUP:
-              results = group_and_group(cast listener.a, cast listener.b, world);
+              group_and_group(cast listener.a, cast listener.b, world, results);
           }
       }
       // NarrowPhase
       for (collision in listener.last_collisions) collision.put();
       listener.last_collisions = listener.collisions;
-      listener.collisions = [];
+      listener.collisions.resize(0);
       for (result in results) {
         // Filterout self collisions/
         if (result.a.id == result.b.id) {
@@ -144,25 +145,34 @@ class Collisions {
     }
   }
 
-  static function group_and_group(a:Group, b:Group, ?world:World):Array<Collision> {
+  static function group_and_group(a:Group, b:Group, world:World, results:Array<Collision>) {
     if (a.count == 0 || b.count == 0) return [];
-    var results:Array<Collision> = [];
-    a.for_each_dynamic(member -> if (member.active && member.mass > 0) results = results.concat(body_and_group(member, b, world)));
+    a.for_each_dynamic(member -> if (member.active && member.mass > 0) body_and_group(member, b, world, results));
     return results;
   }
 
-  static function body_and_group(body:Body, group:Group, ?world:World):Array<Collision> {
-    if (body.shapes.length == 0 || !body.active || body.mass == 0) return [];
+  static var qr:Array<QuadTreeData> = [];
+  static var sqr:Array<QuadTreeData> = [];
+
+  static function body_and_group(body:Body, group:Group, world:World, results:Array<Collision>) {
+    if (body.shapes.length == 0 || !body.active || body.mass == 0) return;
     var bounds = body.bounds();
-    var results:Array<Collision> = [];
-    for (result in world.quadtree.query(bounds)) {
-      group.for_each_dynamic((member) -> if (result.id == member.id) results.push(Collision.get(body, member)));
-    }
-    for (result in world.static_quadtree.query(bounds)) {
-      group.for_each_static((member) -> if (result.id == member.id) results.push(Collision.get(body, member)));
-    }
+    qr.resize(0);
+    sqr.resize(0);
+    world.quadtree.query(bounds, qr);
+    world.static_quadtree.query(bounds, sqr);
+    group.for_each((member) -> {
+      for (result in (member.mass > 0 ? qr : sqr)) {
+        if (result.id == member.id) results.push(Collision.get(body, member));
+      }
+    });
+    // for (result in world.quadtree.query(bounds)) {
+    //   group.for_each_dynamic((member) -> if (result.id == member.id) results.push(Collision.get(body, member)));
+    // }
+    // for (result in world.static_quadtree.query(bounds)) {
+    //   group.for_each_static((member) -> if (result.id == member.id) results.push(Collision.get(body, member)));
+    // }
     bounds.put();
-    return results;
   }
 
   static function body_and_body(a:Body, b:Body):Null<Collision> {

@@ -46,24 +46,25 @@ class SAT {
     var sb = flip ? rect1 : rect2;
 
     // Vector from A to B
-    var n = sb.position - sa.position;
+    var nx = sb.position.x - sa.position.x;
+    var ny = sb.position.y - sa.position.y;
     // Calculate overlap on x axis
-    var x_overlap = sa.ex + sb.ex - Math.abs(n.x);
+    var x_overlap = sa.ex + sb.ex - Math.abs(nx);
     // SAT test on x axis
     if (x_overlap > 0) {
       // Calculate overlap on y axis
-      var y_overlap = sa.ey + sb.ey - Math.abs(n.y);
+      var y_overlap = sa.ey + sb.ey - Math.abs(ny);
       // SAT test on y axis.
       // If both axis overlap, the boxes are colliding
       if (y_overlap > 0) {
         // Find out which axis is axis of least penetration
         if (x_overlap < y_overlap) {
           // Point towards B knowing that n points from A to B
-          return CollisionData.get(x_overlap, n.x < 0 ? new Vector2(-1, 0) : new Vector2(1, 0));
+          return CollisionData.get(x_overlap, nx < 0 ? -1 : 1, 0);
         }
         else {
           // Point toward B knowing that n points from A to B
-          return CollisionData.get(y_overlap, n.y < 0 ? new Vector2(0, -1) : new Vector2(0, 1));
+          return CollisionData.get(y_overlap, 0, ny < 0 ? -1 : 1);
         }
       }
     }
@@ -75,23 +76,27 @@ class SAT {
     var sa = flip ? circle2 : circle1;
     var sb = flip ? circle1 : circle2;
 
-    // Vector2 from sb to sa
-    var n = sb.position - sa.position;
+    // Vector from sb to sa
+    var nx = sb.position.x - sa.position.x;
+    var ny = sb.position.y - sa.position.y;
     // radii of circles
     var r = sa.radius + sb.radius;
-    var d = n.lengthSq;
+    // length squared
+    var d = nx * nx + ny * ny;
 
     // Do quick check if circles are colliding
     if (d >= r * r) return null;
     // If distance between circles is zero, make up a number
     else if (d == 0) {
-      return CollisionData.get(sa.radius, new Vector2(1, 0));
+      return CollisionData.get(sa.radius, 1, 0);
     }
     else {
       // Get actual square root
       d = Math.sqrt(d);
       // Distance is difference between radius and distance
-      return CollisionData.get(r - d, n / d);
+      nx /= d;
+      ny /= d;
+      return CollisionData.get(r - d, nx, ny);
     }
   }
 
@@ -134,6 +139,7 @@ class SAT {
     normal.normalize();
 
     // Collision normal needs to be flipped to point outside if circle was inside the AABB
-    return CollisionData.get(Math.abs(rad - d), inside ? -normal : normal);
+    if (inside) normal *= -1;
+    return CollisionData.get(Math.abs(rad - d), normal.x, normal.y);
   }
 }

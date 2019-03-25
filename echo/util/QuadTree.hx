@@ -42,8 +42,8 @@ class QuadTree extends Rect implements IPooled {
     if (!pooled) {
       pooled = true;
       for (child in children) child.put();
-      children = [];
-      contents = [];
+      children.resize(0);
+      contents.resize(0);
       _pool.put_unsafe(this);
     }
   }
@@ -128,7 +128,7 @@ class QuadTree extends Rect implements IPooled {
         children[i].insert(contents[j]);
       }
     }
-    contents = [];
+    contents.resize(0);
   }
 
   function reset() {

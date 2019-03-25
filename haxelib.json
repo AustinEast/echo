@@ -6,7 +6,7 @@
     "contributors": ["austineast"],
     "url": "https://austineast.dev/echo",
     "releasenote": "Allocation Optimization",
-    "version": "0.4.1",
+    "version": "0.4.2",
     "dependencies": {
       "ghostlib": "",
       "hxmath": ""

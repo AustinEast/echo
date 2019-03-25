@@ -104,6 +104,7 @@ class World extends Group {
     if (static_quadtree != null) static_quadtree.put();
     static_quadtree = QuadTree.get();
     var r = center();
+    quadtree.load(r);
     static_quadtree.load(r);
     r.put();
     for_each_static((member)-> {

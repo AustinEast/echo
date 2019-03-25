@@ -14,8 +14,7 @@ class Physics {
    * @param dt elapsed time since the last step
    */
   public static function step(world:World, dt:Float) {
-    for (member in world.members) {
-      if (member.mass == 0) continue;
+    world.for_each_dynamic((member) -> {
       member.last_x = member.x;
       member.last_y = member.y;
       // Compute Velocity
@@ -25,7 +24,7 @@ class Physics {
       member.position.addWith(member.velocity * member.inverse_mass * dt);
       // Apply Rotations
       member.rotation += member.rotational_velocity * dt;
-    }
+    });
   }
   /**
    * Separates a World's Bodies that have collided. Use `Collisions.query()` to query for collisions
@@ -68,7 +67,7 @@ class Physics {
       if (!b.kinematic) b.velocity.addWith(impulse * b.inverse_mass);
     }
     // Provide some positional correction to the objects to help prevent jitter
-    var correction = (Math.max(cd.overlap - 0.013, 0) / inv_mass_sum) * 0.8 * cd.normal;
+    var correction = (Math.max(cd.overlap, 0) / inv_mass_sum) * 0.9 * cd.normal;
     if (!a.kinematic) a.position.subtractWith(a.inverse_mass * correction);
     if (!b.kinematic) b.position.addWith(b.inverse_mass * correction);
   }

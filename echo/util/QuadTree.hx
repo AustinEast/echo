@@ -15,7 +15,7 @@ class QuadTree extends Rect implements IPooled {
   static var _pool = new Pool<QuadTree>(QuadTree);
 
   public var max_depth:Int = 5;
-  public var max_objects:Int = 5;
+  public var max_objects:Int = 10;
   public var children:Array<QuadTree>;
   public var contents:Array<QuadTreeData>;
   public var count(get, null):Int;
@@ -70,19 +70,13 @@ class QuadTree extends Rect implements IPooled {
     insert(data);
   }
 
-  public function query(shape:Shape):Array<QuadTreeData> {
-    var result:Array<QuadTreeData> = [];
+  public function query(shape:Shape, ?result:Array<QuadTreeData>):Array<QuadTreeData> {
+    if(result == null) result = [];
     if (!overlaps(shape)) return result;
     if (leaf) {
       for (data in contents) if (data.bounds.overlaps(shape)) result.push(data);
-    }
-    else {
-      for (child in children) {
-        var recurse = child.query(shape);
-        if (recurse.length > 0) {
-          result = result.concat(recurse);
-        }
-      }
+    } else {
+      for (child in children) child.query(shape, result);
     }
 
     return result;

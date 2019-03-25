@@ -59,19 +59,11 @@ class SAT {
         // Find out which axis is axis of least penetration
         if (x_overlap < y_overlap) {
           // Point towards B knowing that n points from A to B
-          return {
-            sa: sa,
-            sb: sb,
-            normal: n.x < 0 ? new Vector2(-1, 0) : new Vector2(1, 0),
-            overlap: x_overlap
-          };
+          return CollisionData.get(x_overlap, n.x < 0 ? new Vector2(-1, 0) : new Vector2(1, 0));
         }
         else {
           // Point toward B knowing that n points from A to B
-          return {
-            normal: n.y < 0 ? new Vector2(0, -1) : new Vector2(0, 1),
-            overlap: y_overlap
-          }
+          return CollisionData.get(y_overlap, n.y < 0 ? new Vector2(0, -1) : new Vector2(0, 1));
         }
       }
     }
@@ -93,19 +85,13 @@ class SAT {
     if (d >= r * r) return null;
     // If distance between circles is zero, make up a number
     else if (d == 0) {
-      return {
-        overlap: sa.radius,
-        normal: new Vector2(1, 0)
-      };
+      return CollisionData.get(sa.radius, new Vector2(1, 0));
     }
     else {
       // Get actual square root
       d = Math.sqrt(d);
       // Distance is difference between radius and distance
-      return {
-        overlap: r - d,
-        normal: n / d
-      };
+      return CollisionData.get(r - d, n / d);
     }
   }
 
@@ -148,9 +134,6 @@ class SAT {
     normal.normalize();
 
     // Collision normal needs to be flipped to point outside if circle was inside the AABB
-    return {
-      normal: inside ? -normal : normal,
-      overlap: Math.abs(rad - d)
-    };
+    return CollisionData.get(Math.abs(rad - d), inside ? -normal : normal);
   }
 }

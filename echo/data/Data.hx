@@ -32,7 +32,7 @@ class Collision implements IPooled {
 
   public function put() {
     if (!pooled) {
-      data = [];
+      for (d in data) d.put();
       pooled = true;
       _pool.put_unsafe(this);
     }
@@ -41,23 +41,43 @@ class Collision implements IPooled {
   static function get_pool():IPool<Collision> return _pool;
 }
 
-typedef CollisionData = {
+class CollisionData implements IPooled {
+  public static var pool(get, never):IPool<CollisionData>;
+  static var _pool = new Pool<CollisionData>(CollisionData);
   /**
    * Shape A.
    */
-  var ?sa:Shape;
+  public var sa:Shape;
   /**
    * Shape B.
    */
-  var ?sb:Shape;
+  public var sb:Shape;
   /**
    * The length of Shape A's penetration into Shape B.
    */
-  var overlap:Float;
+  public var overlap:Float;
   /**
    * The normal vector (direction) of Shape A's penetration into Shape B.
    */
-  var normal:Vector2;
+  public var normal:Vector2;
+  public var pooled:Bool;
+
+  public static inline function get(overlap:Float, normal:Vector2):CollisionData {
+    var c = _pool.get();
+    c.overlap = overlap;
+    c.normal = normal;
+    c.pooled = false;
+    return c;
+  }
+
+  public function put() {
+    if (!pooled) {
+      pooled = true;
+      _pool.put_unsafe(this);
+    }
+  }
+
+  static function get_pool():IPool<CollisionData> return _pool;
 }
 
 typedef IntersectionData = {}

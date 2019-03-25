@@ -17,9 +17,7 @@ class Debug {
 
   public static function log(world:World) {
     trace('World State:');
-    for (member in world.members) {
-      trace(' - Body #${member.id} { x: ${member.x} , y: ${member.y}, colliding: ${member.collided} }');
-    }
+    world.for_each(member -> trace(' - Body #${member.id} { x: ${member.x} , y: ${member.y}, colliding: ${member.collided} }'));
   }
 
   public function draw(world:World, clear_canvas:Bool = true) {
@@ -28,29 +26,26 @@ class Debug {
       draw_qd(world.static_quadtree);
       draw_qd(world.quadtree);
     }
-    if (draw_bodies) for (body in world.members) {
-      if (body.shapes.length != 0) {
-        // var cos = Math.cos(body.rotation);
-        // var sin = Math.sin(body.rotation);
-        var v = new Vector2(0, 0);
-        for (shape in body.shapes) {
-          //body.rotation != 0 ? v.set(shape.x * cos - shape.y * sin, shape.y * cos + shape.x * sin) : 
-          v.set(shape.x, shape.y);
-          v.addWith(body.position);
-          switch (shape.type) {
-            case RECT:
-              var r:Rect = cast shape;
-              draw_rect(v.x - r.ex, v.y - r.ey, r.width, r.height, shape_fill_color, shape
-                .collided ? shape_collided_color : shape_color, 0.2);
-            case CIRCLE:
-              var c:Circle = cast shape;
+    if (draw_bodies) world.for_each(member -> if (member.shapes.length != 0) {
+      // var cos = Math.cos(member.rotation);
+      // var sin = Math.sin(member.rotation);
+      var v = new Vector2(0, 0);
+      for (shape in member.shapes) {
+        // member.rotation != 0 ? v.set(shape.x * cos - shape.y * sin, shape.y * cos + shape.x * sin) :
+        v.set(shape.x, shape.y);
+        v.addWith(member.position);
+        switch (shape.type) {
+          case RECT:
+            var r:Rect = cast shape;
+            draw_rect(v.x - r.ex, v.y - r.ey, r.width, r.height, shape_fill_color, shape.collided ? shape_collided_color : shape_color, 0.2);
+          case CIRCLE:
+            var c:Circle = cast shape;
 
-              draw_circle(v.x, v.y, c.radius, shape_fill_color, shape.collided ? shape_collided_color : shape_color, 0.2);
-            case POLYGON:
-          }
+            draw_circle(v.x, v.y, c.radius, shape_fill_color, shape.collided ? shape_collided_color : shape_color, 0.2);
+          case POLYGON:
         }
       }
-    }
+    });
   }
 
   public function draw_line(from_x:Float, from_y:Float, to_x:Float, to_y:Int, color:Int, alpha:Float = 1.) {}

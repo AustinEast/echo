@@ -10,9 +10,12 @@ typedef Group = TypedGroup<Body>;
 /**
  * Typed container for storing a collection of Bodies. Use these to group Bodies for a `Listener`
  */
+@:generic
 class TypedGroup<T:Body> implements IEcho implements IDisposable {
-  public var members:Array<Body>;
+  public var count(get, null):Int;
   public var echo_type(default, null):EchoType;
+
+  var members:Array<Body>;
 
   public function new(?members:Array<Body>) {
     this.members = members == null ? [] : members;
@@ -43,4 +46,6 @@ class TypedGroup<T:Body> implements IEcho implements IDisposable {
   public function clear() members = [];
 
   public function dispose() members = null;
+
+  inline function get_count():Int return members.length;
 }

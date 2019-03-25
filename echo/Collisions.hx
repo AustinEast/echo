@@ -54,13 +54,19 @@ class Collisions {
       listener.collisions = [];
       for (result in results) {
         // Filterout self collisions/
-        if (result.a.id == result.b.id) continue;
+        if (result.a.id == result.b.id) {
+          result.put();
+          continue;
+        }
         // Filter out duplicate pairs
         if (listener.collisions.filter((pair) -> {
           if (pair.a.id == result.a.id && pair.b.id == result.b.id) return true;
           if (pair.b.id == result.a.id && pair.a.id == result.b.id) return true;
           return false;
-        }).length > 0) continue;
+        }).length > 0) {
+          result.put();
+          continue;
+        }
         // Preform the full collision check
         var use_a_cache = result.a.mass == 0;
         var ssa = use_a_cache ? result.a.cache.shapes : result.a.shapes;
@@ -98,9 +104,15 @@ class Collisions {
           sac.put();
         }
         // If there was no collision, continue
-        if (result.data.length == 0) continue;
+        if (result.data.length == 0) {
+          result.put();
+          continue;
+        }
         // Check if the collision passes the listener's condition if it has one
-        if (listener.condition != null && listener.condition(result.a, result.b, result.data)) continue;
+        if (listener.condition != null && listener.condition(result.a, result.b, result.data)) {
+          result.put();
+          continue;
+        }
         for (data in result.data) data.sa.collided = data.sb.collided = true;
         result.a.collided = result.b.collided = true;
         listener.collisions.push(result);
@@ -134,9 +146,9 @@ class Collisions {
   }
 
   static function group_and_group(a:Group, b:Group, ?world:World):Array<Collision> {
-    if (a.members.length == 0 || b.members.length == 0) return [];
+    if (a.count == 0 || b.count == 0) return [];
     var results:Array<Collision> = [];
-    for (member in a.members) if (member.active && member.mass > 0) results = results.concat(body_and_group(member, b, world));
+    a.for_each_dynamic(member -> if (member.active && member.mass > 0) results = results.concat(body_and_group(member, b, world)));
     return results;
   }
 
@@ -145,10 +157,10 @@ class Collisions {
     var bounds = body.bounds();
     var results:Array<Collision> = [];
     for (result in world.quadtree.query(bounds)) {
-      group.members.map((member) -> if (result.id == member.id) results.push(Collision.get(body, member)));
+      group.for_each_dynamic((member) -> if (result.id == member.id) results.push(Collision.get(body, member)));
     }
     for (result in world.static_quadtree.query(bounds)) {
-      group.members.map((member) -> if (result.id == member.id) results.push(Collision.get(body, member)));
+      group.for_each_static((member) -> if (result.id == member.id) results.push(Collision.get(body, member)));
     }
     bounds.put();
     return results;

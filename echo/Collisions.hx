@@ -12,18 +12,17 @@ using Lambda;
 class Collisions {
   /**
    * Queries a World's Listeners for Collisions
-   * TODO: Keep a Quadtree of Cached Static Objects
    */
   public static function query(world:World) {
     // Populate the Quadtree
-    // if (world.quadtree != null) world.quadtree.put();
-    // world.quadtree = QuadTree.get(world.x + (world.width * 0.5), world.y + (world.height * 0.5), world.width, world.height);
+    if (world.quadtree != null) world.quadtree.put();
+    world.quadtree = QuadTree.get(world.x + (world.width * 0.5), world.y + (world.height * 0.5), world.width, world.height);
     world.for_each((b) -> {
       b.collided = false;
       for (shape in b.shapes) shape.collided = false;
       if (b.active && b.mass > 0 && (b.x != b.last_x || b.y != b.last_y)) {
         b.bounds(b.cache.quadtree_data.bounds);
-        world.quadtree.update(b.cache.quadtree_data);
+        world.quadtree.insert(b.cache.quadtree_data);
       }
     });
 

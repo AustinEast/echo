@@ -71,13 +71,13 @@ class MultiShapeState extends State<World> {
 
   override function step(world:World, dt:Float) {
     // Reset any off-screen Bodies
-    for (member in world.members) {
+    world.for_each((member) -> {
       member.rotation += 1 * dt;
       if (offscreen(member, world)) {
         member.velocity.set(0, 0);
         member.position.set(Random.range(0, world.width), 0);
       }
-    }
+    });
   }
 
   override public function exit(world:World) world.clear();

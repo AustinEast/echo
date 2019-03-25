@@ -51,7 +51,7 @@ class CirclesState extends State<World> {
 
     timer += dt;
     if (timer > 0.3 + Random.range(-0.2, 0.2)) {
-      if (world.members.length < body_count) world.add(new Body({
+      if (world.count < body_count) world.add(new Body({
         x: Random.range(0, world.width),
         elasticity: 0.3,
         shape: {
@@ -65,14 +65,14 @@ class CirclesState extends State<World> {
       timer = 0;
     }
     // Reset any off-screen Bodies
-    for (member in world.members) {
+    world.for_each((member) -> {
       // Exclude the cursor
       if (member.id == cursor.id) continue;
       if (offscreen(member, world)) {
         member.velocity.set(0, 0);
         member.position.set(Random.range(0, world.width), 0);
       }
-    }
+    });
   }
 
   override public function exit(world:World) world.clear();

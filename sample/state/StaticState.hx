@@ -65,17 +65,17 @@ class StaticState extends State<World> {
 
     timer += dt;
     if (timer > 0.1 + Random.range(-0.2, 0.2)) {
-      if (world.members.length < body_count + static_count) dynamics.add(world.add(new Body({
-          x: (world.width * 0.5) + Random.range(-world.width * 0.3, world.width * 0.3),
-          y: (world.height * 0.5) + Random.range(-world.height * 0.3, world.height * 0.3),
-          elasticity: 1,
-          shape: {
-            type: Random.chance() ? RECT : CIRCLE,
-            radius: Random.range(8, 32),
-            width: Random.range(8, 48),
-            height: Random.range(8, 48),
-          }
-        })));
+      if (world.count < body_count + static_count) dynamics.add(world.add(new Body({
+        x: (world.width * 0.5) + Random.range(-world.width * 0.3, world.width * 0.3),
+        y: (world.height * 0.5) + Random.range(-world.height * 0.3, world.height * 0.3),
+        elasticity: 1,
+        shape: {
+          type: Random.chance() ? RECT : CIRCLE,
+          radius: Random.range(8, 32),
+          width: Random.range(8, 48),
+          height: Random.range(8, 48),
+        }
+      })));
       timer = 0;
     }
   }

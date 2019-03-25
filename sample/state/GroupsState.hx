@@ -47,16 +47,16 @@ class GroupsState extends State<World> {
   override function step(world:World, dt:Float) {
     timer += dt;
     if (timer > 0.3 + Random.range(-0.2, 0.2)) {
-      if (circles.members.length < body_count) launch(world.add(circles.add(make_circle())), world, true);
+      if (circles.count < body_count) launch(world.add(circles.add(make_circle())), world, true);
       else {
         var found = false;
-        for (member in circles.members) {
+        circles.for_each((member) -> {
           if (found) continue;
           if (offscreen(member, world)) {
             launch(member, world, true);
             found = true;
           }
-        }
+        });
       }
 
       if (rects.members.length < body_count) launch(world.add(rects.add(make_rect())), world, false);

@@ -5,8 +5,8 @@
     "description": "Simple Physics Library written in Haxe",
     "contributors": ["austineast"],
     "url": "https://austineast.dev/echo",
-    "releasenote": "multiple shapes per body + optimization",
-    "version": "0.4.0",
+    "releasenote": "Allocation Optimization",
+    "version": "0.4.1",
     "dependencies": {
       "ghostlib": "",
       "hxmath": ""

@@ -34,10 +34,10 @@ class World extends Group {
   public var gravity(default, null):Vector2;
   public var quadtree:QuadTree;
   public var static_quadtree:QuadTree;
+  public var listeners:Listeners;
   /**
    * The amount of iterations that occur each time the World is stepped. The higher the number, the more stable the Physics Simulation will be, at the cost of performance.
    */
-  public var listeners:Listeners;
   public var iterations:Int;
   public var history:Vector<{bodies:Array<Body>, collisions:Array<Collision>}>;
   var init:Bool;

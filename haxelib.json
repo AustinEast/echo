@@ -5,7 +5,7 @@
     "description": "Simple Physics Library written in Haxe",
     "contributors": ["austineast"],
     "url": "https://austineast.dev/echo",
-    "releasenote": "Allocation Optimization",
+    "releasenote": "Memory Managed",
     "version": "0.4.1",
     "dependencies": {
       "ghostlib": "",

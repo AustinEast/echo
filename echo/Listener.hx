@@ -47,6 +47,10 @@ typedef Listener = {
    * If it returns true, the collision is valid. Otherwise the collision is discarded and no physics resolution/collision callbacks occur
    */
   var ?condition:Body->Body->Array<CollisionData>->Bool;
+  /**
+   * Store of the latest quadtree query results
+   */
+  var ?quadtree_results:Array<Collision>;
 }
 /**
  * Container used to store Listeners
@@ -75,7 +79,8 @@ class Listeners implements IDisposable {
       b: b,
       separate: options.separate,
       collisions: [],
-      last_collisions: []
+      last_collisions: [],
+      quadtree_results: []
     };
     if (options.enter != null) listener.enter = options.enter;
     if (options.stay != null) listener.stay = options.stay;

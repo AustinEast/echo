@@ -102,32 +102,36 @@ class SAT {
 
   public static function rect_and_circle(r:Rect, c:Circle, flip:Bool = false):Null<CollisionData> {
     // Vector from A to B
-    var n = flip ? c.position - r.position : r.position - c.position;
+    var nx = flip ? c.position.x - r.position.x : r.position.x - c.position.x;
+    var ny = flip ? c.position.y - r.position.y : r.position.y - c.position.y;
     // Closest point on A to center of B
-    var closest = n.clone();
+    var cx = nx;
+    var cy = ny;
 
     // Clamp point to edges of the AABB
-    closest.x = closest.x.clamp(-r.ex, r.ex);
-    closest.y = closest.y.clamp(-r.ey, r.ey);
+    cx = cx.clamp(-r.ex, r.ex);
+    cy = cy.clamp(-r.ey, r.ey);
     var inside = false;
 
     // Circle is inside the AABB, so we need to clamp the circle's center
     // to the closest edge
-    if (n == closest) {
+    if (nx == cx && ny == cy) {
       inside = true;
       // Find closest axis
-      if (Math.abs(n.x) > Math.abs(n.y)) {
+      if (Math.abs(nx) > Math.abs(ny)) {
         // Clamp to closest extent
-        closest.x = closest.x > 0 ? r.ex + c.radius + 0.1 : -r.ex - c.radius - 0.1;
+        cx = cx > 0 ? r.ex + c.radius + 0.1 : -r.ex - c.radius - 0.1;
       }
       else {
         // Clamp to closest extent
-        closest.y = closest.y > 0 ? r.ey + c.radius + 0.1 : -r.ey - c.radius - 0.1;
+        cy = cy > 0 ? r.ey + c.radius + 0.1 : -r.ey - c.radius - 0.1;
       }
     }
 
-    var normal = n - closest;
-    var d = normal.lengthSq;
+    nx -= cx;
+    ny -= cy;
+    // length squared
+    var d = nx * nx + ny * ny;
     var rad = c.radius;
 
     // Early out of the radius is shorter than distance to closest point and
@@ -136,10 +140,14 @@ class SAT {
 
     // Avoided sqrt until we needed
     d = Math.sqrt(d);
-    normal.normalize();
+    nx /= d;
+    ny /= d;
 
     // Collision normal needs to be flipped to point outside if circle was inside the AABB
-    if (inside) normal *= -1;
-    return CollisionData.get(Math.abs(rad - d), normal.x, normal.y);
+    if (inside) {
+      nx *= -1;
+      ny *= -1;
+    }
+    return CollisionData.get(Math.abs(rad - d), nx, ny);
   }
 }

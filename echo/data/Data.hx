@@ -25,7 +25,7 @@ class Collision implements IPooled {
     var c = _pool.get();
     c.a = a;
     c.b = b;
-    c.data = [];
+    c.data.resize(0);
     c.pooled = false;
     return c;
   }
@@ -37,6 +37,8 @@ class Collision implements IPooled {
       _pool.put_unsafe(this);
     }
   }
+
+  inline function new () data = [];
 
   static function get_pool():IPool<Collision> return _pool;
 }

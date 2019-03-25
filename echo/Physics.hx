@@ -21,7 +21,8 @@ class Physics {
       member.velocity.x = compute_velocity(member.velocity.x, member.acceleration.x, member.drag.x, member.max_velocity.x, dt);
       member.velocity.y = compute_velocity(member.velocity.y, member.acceleration.y, member.drag.y, member.max_velocity.y, dt);
       // Apply Velocity
-      member.position.addWith(member.velocity * member.inverse_mass * dt);
+      member.position.x += member.velocity.x * member.inverse_mass * dt;
+      member.position.y += member.velocity.y * member.inverse_mass * dt;
       // Apply Rotations
       member.rotation += member.rotational_velocity * dt;
     });
@@ -75,9 +76,17 @@ class Physics {
       }
     }
     // Provide some positional correction to the objects to help prevent jitter
-    var correction = (Math.max(cd.overlap, 0) / inv_mass_sum) * 0.9 * cd.normal;
-    if (!a.kinematic) a.position.subtractWith(a.inverse_mass * correction);
-    if (!b.kinematic) b.position.addWith(b.inverse_mass * correction);
+    var correction = (Math.max(cd.overlap - 0.013, 0) / inv_mass_sum) * 0.9;
+    var cx = correction * cd.normal.x;
+    var cy = correction * cd.normal.y;
+    if (!a.kinematic) {
+      a.position.x -= a.inverse_mass * cx;
+      a.position.y -= a.inverse_mass * cy;
+    }
+    if (!b.kinematic) {
+      b.position.x += b.inverse_mass * cx;
+      b.position.y += b.inverse_mass * cy;
+    }
   }
 
   public static inline function compute_velocity(v:Float, a:Float, d:Float, m:Float, dt:Float) {

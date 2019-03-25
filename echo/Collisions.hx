@@ -15,9 +15,9 @@ class Collisions {
    */
   public static function query(world:World) {
     // Populate the Quadtree
-    if (world.quadtree != null) world.quadtree.put();
-    world.quadtree = QuadTree.get(world.x + (world.width * 0.5), world.y + (world.height * 0.5), world.width, world.height);
-    world.for_each((b) -> {
+    world.quadtree.clear();
+    world.quadtree.set(world.x + (world.width * 0.5), world.y + (world.height * 0.5), world.width, world.height);
+    world.for_each(b -> {
       b.collided = false;
       for (shape in b.shapes) shape.collided = false;
       if (b.active && b.mass > 0 && (b.x != b.last_x || b.y != b.last_y)) {
@@ -27,43 +27,44 @@ class Collisions {
     });
 
     // Process the Listeners
-    var results = [];
     for (listener in world.listeners.members) {
       // BroadPhase
-      results.resize(0);
+      listener.quadtree_results.resize(0);
       switch (listener.a.echo_type) {
         case BODY:
           switch (listener.b.echo_type) {
             case BODY:
               var col = body_and_body(cast listener.a, cast listener.b);
-              if (col != null) results.push(col);
+              if (col != null) listener.quadtree_results.push(col);
             case GROUP:
-              body_and_group(cast listener.a, cast listener.b, world, results);
+              body_and_group(cast listener.a, cast listener.b, world, listener.quadtree_results);
           }
         case GROUP:
           switch (listener.b.echo_type) {
             case BODY:
-              body_and_group(cast listener.a, cast listener.b, world, results);
+              body_and_group(cast listener.a, cast listener.b, world, listener.quadtree_results);
             case GROUP:
-              group_and_group(cast listener.a, cast listener.b, world, results);
+              group_and_group(cast listener.a, cast listener.b, world, listener.quadtree_results);
           }
       }
       // NarrowPhase
       for (collision in listener.last_collisions) collision.put();
       listener.last_collisions = listener.collisions;
       listener.collisions.resize(0);
-      for (result in results) {
+      for (result in listener.quadtree_results) {
         // Filterout self collisions/
         if (result.a.id == result.b.id) {
           result.put();
           continue;
         }
         // Filter out duplicate pairs
-        if (listener.collisions.filter((pair) -> {
-          if (pair.a.id == result.a.id && pair.b.id == result.b.id) return true;
-          if (pair.b.id == result.a.id && pair.a.id == result.b.id) return true;
-          return false;
-        }).length > 0) {
+        var flag = false;
+        for (collision in listener.collisions) {
+          if (flag) continue;
+          if (collision.a.id == result.a.id && collision.b.id == result.b.id) flag = true;
+          if (collision.b.id == result.a.id && collision.a.id == result.b.id) flag = true;
+        }
+        if (flag) {
           result.put();
           continue;
         }
@@ -146,9 +147,8 @@ class Collisions {
   }
 
   static function group_and_group(a:Group, b:Group, world:World, results:Array<Collision>) {
-    if (a.count == 0 || b.count == 0) return [];
+    if (a.count == 0 || b.count == 0) return;
     a.for_each_dynamic(member -> if (member.active && member.mass > 0) body_and_group(member, b, world, results));
-    return results;
   }
 
   static var qr:Array<QuadTreeData> = [];
@@ -161,17 +161,11 @@ class Collisions {
     sqr.resize(0);
     world.quadtree.query(bounds, qr);
     world.static_quadtree.query(bounds, sqr);
-    group.for_each((member) -> {
+    group.for_each(member -> {
       for (result in (member.mass > 0 ? qr : sqr)) {
         if (result.id == member.id) results.push(Collision.get(body, member));
       }
     });
-    // for (result in world.quadtree.query(bounds)) {
-    //   group.for_each_dynamic((member) -> if (result.id == member.id) results.push(Collision.get(body, member)));
-    // }
-    // for (result in world.static_quadtree.query(bounds)) {
-    //   group.for_each_static((member) -> if (result.id == member.id) results.push(Collision.get(body, member)));
-    // }
     bounds.put();
   }
 

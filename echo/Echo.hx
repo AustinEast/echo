@@ -44,7 +44,10 @@ class Echo {
     // TODO: Save World State to History
     var fdt = dt / world.iterations;
     // Apply Gravity
-    world.for_each(member -> member.acceleration += world.gravity * member.gravity_scale);
+    world.for_each(member -> {
+      member.acceleration.x += world.gravity.x * member.gravity_scale;
+      member.acceleration.y += world.gravity.y * member.gravity_scale;
+    });
     for (i in 0...world.iterations) {
       Physics.step(world, fdt);
       Collisions.query(world);

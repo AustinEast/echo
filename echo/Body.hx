@@ -41,7 +41,7 @@ class Body implements IEcho implements IDisposable implements IProxy {
   /**
    * The Body's array of `Shape` objects. If it **isn't** null, these `Shape` objects act as the Body's Collider, allowing it to be checked for Collisions.
    */
-  public var shapes(get, set):Array<Shape>;
+  public var shapes:Array<Shape>;
   /**
    * Flag to set how a Body is affected by Collisions.
    *

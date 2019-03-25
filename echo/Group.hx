@@ -12,36 +12,35 @@ typedef Group = TypedGroup<Body>;
  */
 @:generic
 class TypedGroup<T:Body> implements IEcho implements IDisposable {
+  public var members:Array<T>;
   public var count(get, null):Int;
   public var echo_type(default, null):EchoType;
 
-  var members:Array<Body>;
-
-  public function new(?members:Array<Body>) {
+  public function new(?members:Array<T>) {
     this.members = members == null ? [] : members;
     echo_type = GROUP;
   }
 
-  public function add(body:Body):Body {
+  public function add(body:T):T {
     members.remove(body);
     members.push(body);
     return body;
   }
 
-  public function remove(body:Body):Body {
+  public function remove(body:T):T {
     members.remove(body);
     return body;
   }
 
-  public inline function dynamics():Array<Body> return members.filter(b -> return b.mass > 0);
+  public inline function dynamics():Array<T> return members.filter(b -> return b.mass > 0);
 
-  public inline function statics():Array<Body> return members.filter(b -> return b.mass == 0);
+  public inline function statics():Array<T> return members.filter(b -> return b.mass == 0);
 
-  public inline function for_each(f:Body->Void) for (b in members) f(b);
+  public inline function for_each(f:T->Void) for (b in members) f(cast b);
 
-  public inline function for_each_dynamic(f:Body->Void) for (b in members) if (b.mass > 0) f(b);
+  public inline function for_each_dynamic(f:T->Void) for (b in members) if (b.mass > 0) f(cast b);
 
-  public inline function for_each_static(f:Body->Void) for (b in members) if (b.mass == 0) f(b);
+  public inline function for_each_static(f:T->Void) for (b in members) if (b.mass == 0) f(cast b);
 
   public function clear() members = [];
 

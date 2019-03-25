@@ -70,16 +70,18 @@ class QuadTree extends Rect implements IPooled {
     insert(data);
   }
 
-  public function query(shape:Shape, ?result:Array<QuadTreeData>):Array<QuadTreeData> {
-    if(result == null) result = [];
-    if (!overlaps(shape)) return result;
+  public function query(shape:Shape, result:Array<QuadTreeData>) {
+    if (!overlaps(shape)) return;
     if (leaf) {
       for (data in contents) if (data.bounds.overlaps(shape)) result.push(data);
     } else {
       for (child in children) child.query(shape, result);
     }
+  }
 
-    return result;
+  public inline function clear() {
+    clear_children();
+    contents.resize(0);
   }
 
   function shake() {

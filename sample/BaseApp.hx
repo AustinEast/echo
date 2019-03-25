@@ -11,7 +11,7 @@ class BaseApp extends hxd.App {
   var debug:HeapsDebug;
   var index:Int = 0;
 
-  function reset_state() return fsm.set(Type.createInstance(sample_states[index], null));
+  function reset_state() return fsm.set(Type.createInstance(sample_states[index], []));
 
   function previous_state() {
     index -= 1;

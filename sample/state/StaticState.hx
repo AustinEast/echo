@@ -11,19 +11,14 @@ class StaticState extends State<World> {
   var dynamics:Group;
   var statics:Group;
   var body_count:Int = 100;
-  var static_count:Int = 1000;
+  var static_count:Int = 500;
   var cursor:Body;
   var cursor_speed:Float = 10;
   var timer:Float;
 
   override public function enter(world:World) {
     Main.instance.state_text.text = "Sample: Optimized Statics";
-    Main.instance.iterations_slider.value = 1;
-    Main.instance.iterations_slider.onChange();
     timer = 0;
-
-    // lower the number of iterations to improve performance (at the cost of some stability)
-    world.iterations = 1;
 
     dynamics = new Group();
     statics = new Group();
@@ -80,10 +75,5 @@ class StaticState extends State<World> {
     }
   }
 
-  override public function exit(world:World) {
-    Main.instance.iterations_slider.value = 5;
-    Main.instance.iterations_slider.onChange();
-    world.iterations = 5;
-    world.clear();
-  }
+  override public function exit(world:World) world.clear();
 }

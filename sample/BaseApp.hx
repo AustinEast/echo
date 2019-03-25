@@ -16,13 +16,13 @@ class BaseApp extends hxd.App {
   function previous_state() {
     index -= 1;
     if (index < 0) index = sample_states.length - 1;
-    return fsm.set(Type.createInstance(sample_states[index], null));
+    return fsm.set(Type.createInstance(sample_states[index], []));
   }
 
   function next_state() {
     index += 1;
     if (index >= sample_states.length) index = 0;
-    return fsm.set(Type.createInstance(sample_states[index], null));
+    return fsm.set(Type.createInstance(sample_states[index], []));
   }
 
   function getFont() {

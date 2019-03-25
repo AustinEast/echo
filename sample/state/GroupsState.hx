@@ -58,7 +58,7 @@ class GroupsState extends State<World> {
         });
       }
 
-      if (rects.members.length < body_count) launch(world.add(rects.add(make_rect())), world, false);
+      if (rects.count < body_count) launch(world.add(rects.add(make_rect())), world, false);
       else {
         var found = false;
         rects.for_each((member) -> {

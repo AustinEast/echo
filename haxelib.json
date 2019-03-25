@@ -4,9 +4,9 @@
     "tags": ["physics", "collisions"],
     "description": "Simple Physics Library written in Haxe",
     "contributors": ["austineast"],
-    "url": "https://austineast.github.io/echo",
-    "releasenote": "acceleration/drag fixes",
-    "version": "0.3.2",
+    "url": "https://austineast.dev/echo",
+    "releasenote": "multiple shapes per body + optimization",
+    "version": "0.4.0",
     "dependencies": {
       "ghostlib": "",
       "hxmath": ""

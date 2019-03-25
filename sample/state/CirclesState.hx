@@ -67,8 +67,7 @@ class CirclesState extends State<World> {
     // Reset any off-screen Bodies
     world.for_each((member) -> {
       // Exclude the cursor
-      if (member.id == cursor.id) continue;
-      if (offscreen(member, world)) {
+      if (!member.id == cursor.id && offscreen(member, world)) {
         member.velocity.set(0, 0);
         member.position.set(Random.range(0, world.width), 0);
       }

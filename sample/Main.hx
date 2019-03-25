@@ -57,7 +57,7 @@ class Main extends BaseApp {
     // Draw the new World
     debug.draw(world);
     // Update GUI text
-    members_text.text = 'Bodies: ${world.members.length}';
+    members_text.text = 'Bodies: ${world.count}';
     fps_text.text = 'FPS: ${engine.fps}';
   }
 

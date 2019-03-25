@@ -51,8 +51,7 @@ class GroupsState extends State<World> {
       else {
         var found = false;
         circles.for_each((member) -> {
-          if (found) continue;
-          if (offscreen(member, world)) {
+          if (!found && offscreen(member, world)) {
             launch(member, world, true);
             found = true;
           }
@@ -62,13 +61,12 @@ class GroupsState extends State<World> {
       if (rects.members.length < body_count) launch(world.add(rects.add(make_rect())), world, false);
       else {
         var found = false;
-        for (member in rects.members) {
-          if (found) continue;
-          if (offscreen(member, world)) {
+        rects.for_each((member) {
+          if (!found && offscreen(member, world)) {
             launch(member, world, false);
             found = true;
           }
-        }
+        });
       }
 
       timer = 0;

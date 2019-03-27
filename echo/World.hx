@@ -72,7 +72,7 @@ class World extends Group {
   override function remove(body:Body):Body {
     quadtree.remove(body.cache.quadtree_data);
     static_quadtree.remove(body.cache.quadtree_data);
-    body.remove();
+    body.world = null;
     return super.remove(body);
   }
 

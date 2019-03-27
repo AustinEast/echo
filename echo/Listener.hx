@@ -12,11 +12,11 @@ typedef Listener = {
   /**
    * The first Body or Group the listener checks each step.
    */
-  var a:IEcho;
+  var a:Echo;
   /**
    * The second Body or Group the listener checks each step.
    */
-  var b:IEcho;
+  var b:Echo;
   /**
    * Flag that determines if Collisions found by this listener should separate the Bodies. Defaults to `true`.
    */
@@ -72,7 +72,7 @@ class Listeners implements IDisposable {
    * @param options Options to define the Listener's behavior
    * @return Listener
    */
-  public function add(a:IEcho, b:IEcho, ?options:ListenerOptions):Listener {
+  public function add(a:Echo, b:Echo, ?options:ListenerOptions):Listener {
     options = ghost.Data.copy_fields(options, listener_defaults);
     var listener:Listener = {
       a: a,

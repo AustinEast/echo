@@ -1,5 +1,6 @@
 package echo;
 
+import echo.Group.TypedGroup;
 import ghost.Pool;
 import echo.Body;
 import echo.util.QuadTree;
@@ -146,7 +147,7 @@ class Collisions {
     }
   }
 
-  static function group_and_group(a:Group, b:Group, world:World, results:Array<Collision>) {
+  static function group_and_group(a:Group, b:TypedGroup<Body>, world:World, results:Array<Collision>) {
     if (a.count == 0 || b.count == 0) return;
     a.for_each_dynamic(member -> if (member.active && member.mass > 0) body_and_group(member, b, world, results));
   }
@@ -154,7 +155,7 @@ class Collisions {
   static var qr:Array<QuadTreeData> = [];
   static var sqr:Array<QuadTreeData> = [];
 
-  static function body_and_group(body:Body, group:Group, world:World, results:Array<Collision>) {
+  static function body_and_group(body:Body, group:TypedGroup<Body>, world:World, results:Array<Collision>) {
     if (body.shapes.length == 0 || !body.active || body.mass == 0) return;
     var bounds = body.bounds();
     qr.resize(0);

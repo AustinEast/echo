@@ -14,7 +14,7 @@ import echo.data.Types;
  *
  * Bodies have position, velocity, mass, an optional collider shape, and many other properties that are used in a `World` simulation.
  */
-class Body implements IEcho implements IDisposable implements IProxy {
+class Body extends Echo implements IDisposable implements IProxy {
   /**
    * Default Body Options
    */
@@ -116,11 +116,7 @@ class Body implements IEcho implements IDisposable implements IProxy {
   /**
    * Dynamic Object to store any user data on the `Body`. Useful for Callbacks.
    */
-  public var data:Dynamic;
-  /**
-   * Enum to determine the whether this Object is a `Body` or a `Group`. This is used in place of Type Casting internally.
-   */
-  public var echo_type(default, null):EchoType;
+  public var data(default, null):Dynamic;
   /**
    * Flag to check if the Body collided with something during the step.
    * Used for debug drawing.
@@ -154,6 +150,7 @@ class Body implements IEcho implements IDisposable implements IProxy {
     drag = new Vector2(0, 0);
     cache = {x: 0, y: 0};
     shapes = [];
+    data = {};
     load_options(options);
   }
   /**

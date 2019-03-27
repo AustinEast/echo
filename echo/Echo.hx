@@ -30,7 +30,7 @@ class Echo {
    * @param options Options to define the Listener's behavior
    * @return Listener
    */
-  public static function listen(world:World, ?a:IEcho, ?b:IEcho, ?options:ListenerOptions):Listener {
+  public static function listen(world:World, ?a:Echo, ?b:Echo, ?options:ListenerOptions):Listener {
     if (a == null) return b == null ? world.listeners.add(world, world, options) : world.listeners.add(b, b, options);
     if (b == null) return world.listeners.add(a, a, options);
     return world.listeners.add(a, b, options);
@@ -79,9 +79,9 @@ class Echo {
    * @param b
    * @param options
    */
-  public static function collide(a:IEcho, b:IEcho, ?options:ListenerOptions) {}
-}
-
-interface IEcho {
+  public static function collide(a:Echo, b:Echo, ?options:ListenerOptions) {}
+  /**
+   * Enum to determine the whether this Echo Object is a `Body` or a `Group`. This is used in place of Type Casting internally.
+   */
   public var echo_type(default, null):EchoType;
 }

@@ -111,7 +111,7 @@ class Collisions {
           continue;
         }
         // Check if the collision passes the listener's condition if it has one
-        if (listener.condition != null && listener.condition(result.a, result.b, result.data)) {
+        if (listener.condition != null && !listener.condition(result.a, result.b, result.data)) {
           result.put();
           continue;
         }

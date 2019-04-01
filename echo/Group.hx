@@ -4,11 +4,11 @@ import ghost.Disposable;
 import echo.Echo;
 import echo.data.Types;
 /**
- * Container for storing a collection of Bodies. Use these to group Bodies for a `Listener`
+ * Container for storing a collection of Bodies. Use these to group Bodies for a `Listener`. Alias for `TypedGroup<Body>`
  */
 typedef Group = TypedGroup<Body>;
 /**
- * Typed container for storing a collection of Bodies. Use these to group Bodies for a `Listener`
+ * Typed container for storing a collection of Bodies. Use these to group Bodies for a `Listener`.
  */
 class TypedGroup<T:Body> extends Echo implements IDisposable {
   public var members:Array<T>;

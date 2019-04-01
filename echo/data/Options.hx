@@ -142,6 +142,14 @@ typedef ListenerOptions = {
    * If it returns true, the collision is valid. Otherwise the collision is discarded and no physics resolution/collision callbacks occur
    */
   var ?condition:Body->Body->Array<CollisionData>->Bool;
+  /**
+   * Percentage of correction along the collision normal to be applied to seperating bodies. Helps prevent objects sinking into each other.
+   */
+  var ?percent_correction:Float;
+  /**
+   * Threshold determining how close two separating bodies must be before position correction occurs. Helps reduce jitter.
+   */
+  var ?correction_threshold:Float;
 }
 
 typedef ShapeOptions = {

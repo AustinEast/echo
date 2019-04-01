@@ -51,6 +51,14 @@ typedef Listener = {
    * Store of the latest quadtree query results
    */
   var ?quadtree_results:Array<Collision>;
+  /**
+   * Percentage of correction along the collision normal to be applied to seperating bodies. Helps prevent objects sinking into each other.
+   */
+  var percent_correction:Float;
+  /**
+   * Threshold determining how close two separating bodies must be before position correction occurs. Helps reduce jitter.
+   */
+  var correction_threshold:Float;
 }
 /**
  * Container used to store Listeners
@@ -80,7 +88,9 @@ class Listeners implements IDisposable {
       separate: options.separate,
       collisions: [],
       last_collisions: [],
-      quadtree_results: []
+      quadtree_results: [],
+      correction_threshold: options.correction_threshold,
+      percent_correction: options.percent_correction
     };
     if (options.enter != null) listener.enter = options.enter;
     if (options.stay != null) listener.stay = options.stay;
@@ -108,6 +118,8 @@ class Listeners implements IDisposable {
   }
 
   static function get_listener_defaults():ListenerOptions return {
-    separate: true
+    separate: true,
+    percent_correction: 0.9,
+    correction_threshold: 0.013
   }
 }

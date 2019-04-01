@@ -15,16 +15,18 @@ class Physics {
    */
   public static function step(world:World, dt:Float) {
     world.for_each_dynamic((member) -> {
-      member.last_x = member.x;
-      member.last_y = member.y;
-      // Compute Velocity
-      member.velocity.x = compute_velocity(member.velocity.x, member.acceleration.x, member.drag.x, member.max_velocity.x, dt);
-      member.velocity.y = compute_velocity(member.velocity.y, member.acceleration.y, member.drag.y, member.max_velocity.y, dt);
-      // Apply Velocity
-      member.position.x += member.velocity.x * member.inverse_mass * dt;
-      member.position.y += member.velocity.y * member.inverse_mass * dt;
-      // Apply Rotations
-      member.rotation += member.rotational_velocity * dt;
+      if (member.active) {
+        member.last_x = member.x;
+        member.last_y = member.y;
+        // Compute Velocity
+        member.velocity.x = compute_velocity(member.velocity.x, member.acceleration.x, member.drag.x, member.max_velocity.x, dt);
+        member.velocity.y = compute_velocity(member.velocity.y, member.acceleration.y, member.drag.y, member.max_velocity.y, dt);
+        // Apply Velocity
+        member.position.x += member.velocity.x * member.inverse_mass * dt;
+        member.position.y += member.velocity.y * member.inverse_mass * dt;
+        // Apply Rotations
+        member.rotation += member.rotational_velocity * dt;
+      }
     });
   }
   /**
@@ -35,7 +37,7 @@ class Physics {
   public static function separate(world:World, dt:Float) {
     for (listener in world.listeners.members) {
       if (listener.separate) for (collision in listener.collisions) {
-        for (i in 0...collision.data.length) resolve(collision.a, collision.b, collision.data[i]);
+        for (i in 0...collision.data.length) resolve(collision.a, collision.b, collision.data[i], listener.correction_threshold, listener.percent_correction);
       }
     }
   }
@@ -45,9 +47,9 @@ class Physics {
    * @param b the second `Body` in the Collision
    * @param cd Data related to the Collision
    */
-  public static function resolve(a:Body, b:Body, cd:CollisionData) {
+  public static function resolve(a:Body, b:Body, cd:CollisionData, correction_threshold:Float = 0.013, percent_correction:Float = 0.9) {
     // Do not resolve if either objects arent solid
-    if (!cd.sa.solid || !cd.sb.solid || a.mass == 0 && b.mass == 0) return;
+    if (!cd.sa.solid || !cd.sb.solid || !a.active || !b.active || a.mass == 0 && b.mass == 0) return;
     // Calculate relative velocity
     var rvx = a.velocity.x - b.velocity.x;
     var rvy = a.velocity.y - b.velocity.y;
@@ -76,7 +78,7 @@ class Physics {
       }
     }
     // Provide some positional correction to the objects to help prevent jitter
-    var correction = (Math.max(cd.overlap - 0.013, 0) / inv_mass_sum) * 0.9;
+    var correction = (Math.max(cd.overlap - correction_threshold, 0) / inv_mass_sum) * percent_correction;
     var cx = correction * cd.normal.x;
     var cy = correction * cd.normal.y;
     if (!a.kinematic) {

@@ -206,13 +206,14 @@ class Body extends Echo implements IDisposable implements IProxy {
    * @param rect Optional `Rect` to set the values to. If the Body does not have any shapes, this will not be set.
    * @return Null<Rect>
    */
-  public function bounds(?rect:Rect):Null<Rect> {
+  public function bounds(?rect:Rect, include_solids = true):Null<Rect> {
     if (shapes.length == 0) return null;
     var min_x = 0.;
     var min_y = 0.;
     var max_x = 0.;
     var max_y = 0.;
     for (shape in shapes) {
+      if (!include_solids && !shape.solid) continue;
       if (shape.left < min_x) min_x = shape.left;
       if (shape.top < min_y) min_y = shape.top;
       if (shape.right > max_x) max_x = shape.right;

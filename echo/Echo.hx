@@ -8,6 +8,9 @@ import echo.data.Types;
 import echo.data.Options;
 
 @:expose
+/**
+ * Echo acts as the root Class for `Body`, `Group`, and `World`, and holds helpful utility methods to help streamline the creation and management of Physics Simulations.
+ */
 class Echo {
   /**
    * Shortcut for creating a new `World`

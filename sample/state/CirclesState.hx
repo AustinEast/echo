@@ -69,7 +69,7 @@ class CirclesState extends State<World> {
       // Exclude the cursor
       if (member.id != cursor.id && offscreen(member, world)) {
         member.velocity.set(0, 0);
-        member.position.set(Random.range(0, world.width), 0);
+        member.set_position(Random.range(0, world.width), 0);
       }
     });
   }

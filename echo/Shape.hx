@@ -62,9 +62,8 @@ class Shape implements IProxy {
    * Creates a new Shape
    * @param x
    * @param y
-   * @return position = new Vector2(x, y)
    */
-  function new(x:Float = 0, y:Float = 0) {
+  inline function new(x:Float = 0, y:Float = 0) {
     solid = true;
     position = new Vector2(x, y);
   }

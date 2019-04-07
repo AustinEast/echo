@@ -93,7 +93,7 @@ class GroupsState extends State<World> {
   });
 
   inline function launch(b:Body, w:World, left:Bool) {
-    b.position.set(left ? 20 : w.width - 20, w.height / 2);
+    b.set_position(left ? 20 : w.width - 20, w.height / 2);
     b.velocity.set(left ? 130 : -130, hxd.Math.lerp(-60, 20, Main.instance.scene.mouseY / w.height));
   }
 

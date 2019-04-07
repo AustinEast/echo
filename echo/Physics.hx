@@ -18,12 +18,13 @@ class Physics {
       if (member.active) {
         member.last_x = member.x;
         member.last_y = member.y;
+        member.last_rotation = member.rotation;
         // Compute Velocity
         member.velocity.x = compute_velocity(member.velocity.x, member.acceleration.x, member.drag.x, member.max_velocity.x, dt);
         member.velocity.y = compute_velocity(member.velocity.y, member.acceleration.y, member.drag.y, member.max_velocity.y, dt);
         // Apply Velocity
-        member.position.x += member.velocity.x * member.inverse_mass * dt;
-        member.position.y += member.velocity.y * member.inverse_mass * dt;
+        member.x += member.velocity.x * member.inverse_mass * dt;
+        member.y += member.velocity.y * member.inverse_mass * dt;
         // Apply Rotations
         member.rotation += member.rotational_velocity * dt;
       }
@@ -82,12 +83,12 @@ class Physics {
     var cx = correction * cd.normal.x;
     var cy = correction * cd.normal.y;
     if (!a.kinematic) {
-      a.position.x -= a.inverse_mass * cx;
-      a.position.y -= a.inverse_mass * cy;
+      a.x -= a.inverse_mass * cx;
+      a.y -= a.inverse_mass * cy;
     }
     if (!b.kinematic) {
-      b.position.x += b.inverse_mass * cx;
-      b.position.y += b.inverse_mass * cy;
+      b.x += b.inverse_mass * cx;
+      b.y += b.inverse_mass * cy;
     }
   }
 

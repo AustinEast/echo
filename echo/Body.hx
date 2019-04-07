@@ -26,18 +26,12 @@ class Body extends Echo implements IDisposable implements IProxy {
   public var id(default, null):Int;
   /**
    * The Body's position on the X axis.
-   *
-   * Alias for `position.x`.
    */
-  @:alias(position.x)
-  public var x:Float;
+  public var x(get, set):Float;
   /**
    * The Body's position on the Y axis.
-   *
-   * Alias for `position.y`.
    */
-  @:alias(position.y)
-  public var y:Float;
+  public var y(get, set):Float;
   /**
    * The Body's array of `Shape` objects. If it **isn't** null, these `Shape` objects act as the Body's Collider, allowing it to be checked for Collisions.
    */
@@ -56,10 +50,6 @@ class Body extends Echo implements IDisposable implements IProxy {
    * If a Body's mass is set to `0`, it becomes static - unmovable by forces and collisions.
    */
   public var mass(get, set):Float;
-  /**
-   * Body's position on the X and Y axis.
-   */
-  public var position(get, null):Vector2;
   /**
    * Body's current rotational angle. Currently is not implemented.
    */
@@ -126,12 +116,15 @@ class Body extends Echo implements IDisposable implements IProxy {
   public var last_x(default, null):Float;
   @:allow(echo.Physics.step)
   public var last_y(default, null):Float;
+  @:allow(echo.Physics.step)
+  public var last_rotation(default, null):Float;
 
   @:dox(hide)
   @:allow(echo.World, echo.Collisions)
   var cache:{
     x:Float,
     y:Float,
+    rotation:Float,
     ?shapes:Array<Shape>,
     ?quadtree_data:QuadTreeData
   };
@@ -143,12 +136,13 @@ class Body extends Echo implements IDisposable implements IProxy {
     this.id = ++ids;
     active = true;
     echo_type = BODY;
-    position = new Vector2(0, 0);
+    x = 0;
+    y = 0;
     velocity = new Vector2(0, 0);
     acceleration = new Vector2(0, 0);
     max_velocity = new Vector2(0, 0);
     drag = new Vector2(0, 0);
-    cache = {x: 0, y: 0};
+    cache = {x: 0, y: 0, rotation: 0};
     shapes = [];
     data = {};
     load_options(options);
@@ -162,7 +156,8 @@ class Body extends Echo implements IDisposable implements IProxy {
     clear_shapes();
     if (options.shape != null) add_shape(options.shape);
     if (options.shapes != null) for (shape in options.shapes) add_shape(shape);
-    position.set(options.x, options.y);
+    x = options.x;
+    y = options.y;
     rotation = options.rotation;
     kinematic = options.kinematic;
     mass = options.mass;
@@ -175,6 +170,7 @@ class Body extends Echo implements IDisposable implements IProxy {
     gravity_scale = options.gravity_scale;
     last_x = x;
     last_y = y;
+    last_rotation = rotation;
   }
 
   public function add_shape(options:ShapeOptions):Shape {
@@ -191,6 +187,11 @@ class Body extends Echo implements IDisposable implements IProxy {
   public inline function clear_shapes() {
     for (shape in shapes) shape.put();
     shapes = [];
+  }
+
+  public function set_position(x:Float = 0, y:Float = 0) {
+    this.x = x;
+    this.y = y;
   }
   /**
    * Adds forces to a Body's acceleration.
@@ -219,10 +220,10 @@ class Body extends Echo implements IDisposable implements IProxy {
       if (shape.right > max_x) max_x = shape.right;
       if (shape.bottom > max_y) max_y = shape.bottom;
     }
-    min_x += position.x;
-    min_y += position.y;
-    max_x += position.x;
-    max_y += position.y;
+    min_x += x;
+    min_y += y;
+    max_x += x;
+    max_y += y;
     return rect == null ? Rect.get_from_min_max(min_x, min_y, max_x, max_y) : rect.set_from_min_max(min_x, min_y, max_x, max_y);
   }
 
@@ -235,6 +236,7 @@ class Body extends Echo implements IDisposable implements IProxy {
   public function refresh_cache() {
     cache.x = x;
     cache.y = y;
+    cache.rotation = rotation;
     cache.shapes = shapes.copy();
     if (cache.quadtree_data != null) {
       bounds(cache.quadtree_data.bounds);

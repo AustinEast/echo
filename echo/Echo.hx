@@ -9,7 +9,7 @@ import echo.data.Options;
 
 @:expose
 /**
- * Echo acts as the root Class for `Body`, `Group`, and `World`, and holds helpful utility methods to help streamline the creation and management of Physics Simulations.
+ * Echo acts as the root Class for `Body`, `Group`, and `World`. It also holds helpful utility methods to help streamline the creation and management of Physics Simulations.
  */
 class Echo {
   /**
@@ -87,4 +87,10 @@ class Echo {
    * Enum to determine the whether this Echo Object is a `Body` or a `Group`. This is used in place of Type Casting internally.
    */
   public var echo_type(default, null):EchoType;
+  #if ghost
+  /**
+   * This Object's Entity. Only available if using the Ghost Framework.
+   */
+  public var entity:hxd.Entity;
+  #end
 }

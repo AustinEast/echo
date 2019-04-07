@@ -75,7 +75,7 @@ class MultiShapeState extends State<World> {
       member.rotation += 1 * dt;
       if (offscreen(member, world)) {
         member.velocity.set(0, 0);
-        member.position.set(Random.range(0, world.width), 0);
+        member.set_position(Random.range(0, world.width), 0);
       }
     });
   }

@@ -125,7 +125,7 @@ class Body extends Echo implements IDisposable implements IProxy {
     x:Float,
     y:Float,
     rotation:Float,
-    ?shapes:Array<Shape>,
+    shapes:Array<Shape>,
     ?quadtree_data:QuadTreeData
   };
   /**
@@ -136,14 +136,19 @@ class Body extends Echo implements IDisposable implements IProxy {
     this.id = ++ids;
     active = true;
     echo_type = BODY;
+    shapes = [];
+    cache = {
+      x: 0,
+      y: 0,
+      rotation: 0,
+      shapes: []
+    };
     x = 0;
     y = 0;
     velocity = new Vector2(0, 0);
     acceleration = new Vector2(0, 0);
     max_velocity = new Vector2(0, 0);
     drag = new Vector2(0, 0);
-    cache = {x: 0, y: 0, rotation: 0};
-    shapes = [];
     data = {};
     load_options(options);
   }
@@ -186,7 +191,7 @@ class Body extends Echo implements IDisposable implements IProxy {
 
   public inline function clear_shapes() {
     for (shape in shapes) shape.put();
-    shapes = [];
+    shapes.resize(0);
   }
 
   public function set_position(x:Float = 0, y:Float = 0) {

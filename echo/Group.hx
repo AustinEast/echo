@@ -40,7 +40,7 @@ class TypedGroup<T:Body> extends Echo implements IDisposable {
 
   public inline function for_each_static(f:T->Void) for (b in members) if (b.mass == 0) f(cast b);
 
-  public function clear() members = [];
+  public function clear() members.resize(0);
 
   public function dispose() members = null;
 

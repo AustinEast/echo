@@ -1,10 +1,12 @@
 package echo;
 
-import echo.Body;
+import haxe.ds.Either;
 import ghost.Disposable;
+import echo.Body;
 import echo.Echo;
 import echo.data.Data;
 import echo.data.Options;
+import echo.util.BodyOrBodies;
 /**
  * Data Structure used to listen for Collisions between Bodies and Groups of Bodies.
  */
@@ -12,11 +14,11 @@ typedef Listener = {
   /**
    * The first Body or Group the listener checks each step.
    */
-  var a:Echo;
+  var a:Either<Body, Array<Body>>;
   /**
    * The second Body or Group the listener checks each step.
    */
-  var b:Echo;
+  var b:Either<Body, Array<Body>>;
   /**
    * Flag that determines if Collisions found by this listener should separate the Bodies. Defaults to `true`.
    */
@@ -80,7 +82,7 @@ class Listeners implements IDisposable {
    * @param options Options to define the Listener's behavior
    * @return Listener
    */
-  public function add(a:Echo, b:Echo, ?options:ListenerOptions):Listener {
+  public function add(a:BodyOrBodies, b:BodyOrBodies, ?options:ListenerOptions):Listener {
     options = ghost.Data.copy_fields(options, listener_defaults);
     var listener:Listener = {
       a: a,

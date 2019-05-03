@@ -1,6 +1,7 @@
 package echo;
 
 import hxmath.math.Vector2;
+import ghost.Disposable;
 import echo.util.QuadTree;
 import echo.Listener;
 import echo.shape.Rect;
@@ -11,7 +12,7 @@ import haxe.ds.Vector;
  * A `World` is an Object representing the state of a Physics simulation and it configurations. 
  */
  @:using(echo.Echo)
-class World extends Group {
+class World implements IDisposable {
   /**
    * Width of the World, extending right from the World's X position.
    */
@@ -35,6 +36,8 @@ class World extends Group {
   public var quadtree:QuadTree;
   public var static_quadtree:QuadTree;
   public var listeners:Listeners;
+  public var members:Array<Body>;
+  public var count(get, null):Int;
   /**
    * The amount of iterations that occur each time the World is stepped. The higher the number, the more stable the Physics Simulation will be, at the cost of performance.
    */
@@ -43,7 +46,7 @@ class World extends Group {
   var init:Bool;
 
   public function new(options:WorldOptions) {
-    super(options.members);
+    members = options.members == null ? [] : options.members;
     init = false;
     width = options.width < 1 ? throw("World must have a width of at least 1") : options.width;
     height = options.height < 1 ? throw("World must have a width of at least 1") : options.height;
@@ -60,7 +63,7 @@ class World extends Group {
     return rect != null ? rect.set(x + (width * 0.5), y + (height * 0.5), width, height) : Rect.get(x + (width * 0.5), y + (height * 0.5), width, height);
   }
 
-  override function add(body:Body):Body {
+  public function add(body:Body):Body {
     if (body.world != null) body.remove();
     body.world = this;
     members.push(body);
@@ -69,27 +72,40 @@ class World extends Group {
     return body;
   }
 
-  override function remove(body:Body):Body {
+  public function remove(body:Body):Body {
     quadtree.remove(body.cache.quadtree_data);
     static_quadtree.remove(body.cache.quadtree_data);
+    members.remove(body);
     body.world = null;
-    return super.remove(body);
+    return body;
   }
+
+  public inline function iterator():Iterator<Body> return members.iterator();
+
+  public inline function dynamics():Array<Body> return members.filter(b -> return b.mass > 0);
+
+  public inline function statics():Array<Body> return members.filter(b -> return b.mass == 0);
+
+  public inline function for_each(f:Body->Void, recursive:Bool = true) for (b in members) f(cast b);
+
+  public inline function for_each_dynamic(f:Body->Void, recursive:Bool = true) for (b in members) if (b.mass > 0) f(cast b);
+
+  public inline function for_each_static(f:Body->Void, recursive:Bool = true) for (b in members) if (b.mass == 0) f(cast b);
 
   /**
    * Clears the World's members and listeners.
    */
-  override function clear() {
-    super.clear();
+  public function clear() {
+    members.resize(0);
     refresh();
     listeners.clear();
   }
   /**
    * Disposes the World. DO NOT use the World after disposing it, as it could lead to null reference errors.
    */
-  override function dispose() {
+  public function dispose() {
     for_each(b -> b.remove());
-    super.dispose();
+    members = null;
     gravity = null;
     quadtree.put();
     listeners.dispose();
@@ -113,25 +129,27 @@ class World extends Group {
     });
   }
 
-  function set_x(value:Float) {
+  inline function get_count():Int return members.length;
+
+  inline function set_x(value:Float) {
     x = value;
     if (init) refresh();
     return x;
   }
 
-  function set_y(value:Float) {
+  inline function set_y(value:Float) {
     y = value;
     if (init) refresh();
     return y;
   }
 
-  function set_width(value:Float) {
+  inline function set_width(value:Float) {
     width = value;
     if (init) refresh();
     return height;
   }
 
-  function set_height(value:Float) {
+  inline function set_height(value:Float) {
     height = value;
     if (init) refresh();
     return height;

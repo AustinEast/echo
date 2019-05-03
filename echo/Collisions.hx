@@ -31,21 +31,21 @@ class Collisions {
     for (listener in world.listeners.members) {
       // BroadPhase
       listener.quadtree_results.resize(0);
-      switch (listener.a.echo_type) {
-        case BODY:
-          switch (listener.b.echo_type) {
-            case BODY:
-              var col = body_and_body(cast listener.a, cast listener.b);
+      switch (listener.a) {
+        case Left(ba):
+          switch (listener.b) {
+            case Left(bb):
+              var col = body_and_body(ba, bb);
               if (col != null) listener.quadtree_results.push(col);
-            case GROUP:
-              body_and_group(cast listener.a, cast listener.b, world, listener.quadtree_results);
+            case Right(ab):
+              body_and_bodies(ba, ab, world, listener.quadtree_results);
           }
-        case GROUP:
-          switch (listener.b.echo_type) {
-            case BODY:
-              body_and_group(cast listener.a, cast listener.b, world, listener.quadtree_results);
-            case GROUP:
-              group_and_group(cast listener.a, cast listener.b, world, listener.quadtree_results);
+        case Right(aa):
+          switch (listener.b) {
+            case Left(bb):
+              body_and_bodies(bb, aa, world, listener.quadtree_results);
+            case Right(ab):
+              bodies_and_bodies(aa, ab, world, listener.quadtree_results);
           }
       }
       // NarrowPhase
@@ -147,26 +147,26 @@ class Collisions {
     }
   }
 
-  static function group_and_group(a:Group, b:TypedGroup<Body>, world:World, results:Array<Collision>) {
-    if (a.count == 0 || b.count == 0) return;
-    a.for_each_dynamic(member -> if (member.active && member.mass > 0) body_and_group(member, b, world, results));
+  static function bodies_and_bodies(a:Array<Body>, b:Array<Body>, world:World, results:Array<Collision>) {
+    if (a.length == 0 || b.length == 0) return;
+    for (body in a) if (body.active && body.mass > 0) body_and_bodies(body, b, world, results);
   }
 
   static var qr:Array<QuadTreeData> = [];
   static var sqr:Array<QuadTreeData> = [];
 
-  static function body_and_group(body:Body, group:TypedGroup<Body>, world:World, results:Array<Collision>) {
+  static function body_and_bodies(body:Body, bodies:Array<Body>, world:World, results:Array<Collision>) {
     if (body.shapes.length == 0 || !body.active || body.mass == 0) return;
     var bounds = body.bounds();
     qr.resize(0);
     sqr.resize(0);
     world.quadtree.query(bounds, qr);
     world.static_quadtree.query(bounds, sqr);
-    group.for_each(member -> {
+    for (member in bodies) {
       for (result in (member.mass > 0 ? qr : sqr)) {
         if (result.id == member.id) results.push(Collision.get(body, member));
       }
-    });
+    }
     bounds.put();
   }
 

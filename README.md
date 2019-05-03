@@ -67,6 +67,10 @@ A Body's collider is represented by different Shapes. Available Shapes:
 * Capsule (Coming Soon)
 * Polygon (Coming Soon)
 
+#### Lines
+
+Coming Soon
+
 #### Groups
 
 Groups are collections of Bodys. These can be used for grouping collisions.

@@ -8,18 +8,18 @@ import ghost.Random;
 
 class GroupsState extends State<World> {
   var body_count:Int = 50;
-  var circles:Group;
-  var rects:Group;
-  var floors:Group;
+  var circles:Array<Body>;
+  var rects:Array<Body>;
+  var floors:Array<Body>;
   var timer:Float;
 
   override public function enter(world:World) {
     Main.instance.state_text.text = "Sample: Group Collisions";
     timer = 0;
     // And split them between the two groups
-    circles = new Group();
-    rects = new Group();
-    floors = new Group();
+    circles = [];
+    rects = [];
+    floors = [];
 
     // Add some platforms for the bodies to bounce off of
     // Setting the Mass to 0 makes them unmovable
@@ -35,7 +35,7 @@ class GroupsState extends State<World> {
           height: 10
         }
       });
-      floors.add(floor);
+      floors.push(floor);
       world.add(floor);
     }
 
@@ -47,26 +47,34 @@ class GroupsState extends State<World> {
   override function step(world:World, dt:Float) {
     timer += dt;
     if (timer > 0.3 + Random.range(-0.2, 0.2)) {
-      if (circles.count < body_count) launch(world.add(circles.add(make_circle())), world, true);
+      if (circles.length < body_count) {
+        var c = make_circle();
+        circles.push(c);
+        launch(world.add(c), world, true);
+      }
       else {
         var found = false;
-        circles.for_each((member) -> {
+        for (member in circles) {
           if (!found && offscreen(member, world)) {
             launch(member, world, true);
             found = true;
           }
-        });
+        }
       }
 
-      if (rects.count < body_count) launch(world.add(rects.add(make_rect())), world, false);
+      if (rects.length < body_count) {
+        var r = make_rect();
+        rects.push(r);
+        launch(world.add(r), world, false);
+      }
       else {
         var found = false;
-        rects.for_each((member) -> {
+        for (member in rects) {
           if (!found && offscreen(member, world)) {
             launch(member, world, false);
             found = true;
           }
-        });
+        }
       }
 
       timer = 0;

@@ -8,8 +8,8 @@ import ghost.FSM;
 import ghost.Random;
 
 class StaticState extends State<World> {
-  var dynamics:Group;
-  var statics:Group;
+  var dynamics:Array<Body>;
+  var statics:Array<Body>;
   var body_count:Int = 100;
   var static_count:Int = 500;
   var cursor:Body;
@@ -20,8 +20,8 @@ class StaticState extends State<World> {
     Main.instance.state_text.text = "Sample: Optimized Statics";
     timer = 0;
 
-    dynamics = new Group();
-    statics = new Group();
+    dynamics = [];
+    statics = [];
 
     for (i in 0...static_count) {
       var b = new Body({
@@ -35,7 +35,7 @@ class StaticState extends State<World> {
         }
       });
       world.add(b);
-      statics.add(b);
+      statics.push(b);
     }
 
     cursor = new Body({
@@ -60,7 +60,7 @@ class StaticState extends State<World> {
 
     timer += dt;
     if (timer > 0.1 + Random.range(-0.2, 0.2)) {
-      if (world.count < body_count + static_count) dynamics.add(world.add(new Body({
+      if (world.count < body_count + static_count) dynamics.push(world.add(new Body({
         x: (world.width * 0.5) + Random.range(-world.width * 0.3, world.width * 0.3),
         y: (world.height * 0.5) + Random.range(-world.height * 0.3, world.height * 0.3),
         elasticity: 1,

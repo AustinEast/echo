@@ -14,7 +14,7 @@ import echo.data.Types;
  *
  * Bodies have position, velocity, mass, an optional collider shape, and many other properties that are used in a `World` simulation.
  */
-class Body extends Echo implements IDisposable implements IProxy {
+class Body implements IDisposable implements IProxy {
   /**
    * Default Body Options
    */
@@ -128,6 +128,12 @@ class Body extends Echo implements IDisposable implements IProxy {
     shapes:Array<Shape>,
     ?quadtree_data:QuadTreeData
   };
+  #if ghost
+  /**
+   * This Object's Entity. Only available if using the Ghost Framework.
+   */
+  public var entity:h2d.Entity;
+  #end
   /**
    * Creates a new Body.
    * @param options Optional values to configure the new Body
@@ -135,7 +141,6 @@ class Body extends Echo implements IDisposable implements IProxy {
   public function new(?options:BodyOptions) {
     this.id = ++ids;
     active = true;
-    echo_type = BODY;
     shapes = [];
     cache = {
       x: 0,

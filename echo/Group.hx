@@ -10,13 +10,12 @@ typedef Group = TypedGroup<Body>;
 /**
  * Typed container for storing a collection of Bodies. Use these to group Bodies for a `Listener`.
  */
-class TypedGroup<T:Body> extends Echo implements IDisposable {
+class TypedGroup<T:Body> implements IDisposable {
   public var members:Array<T>;
   public var count(get, null):Int;
 
   public function new(?members:Array<T>) {
     this.members = members == null ? [] : members;
-    echo_type = GROUP;
   }
 
   public function add(body:T):T {
@@ -34,11 +33,13 @@ class TypedGroup<T:Body> extends Echo implements IDisposable {
 
   public inline function statics():Array<T> return members.filter(b -> return b.mass == 0);
 
-  public inline function for_each(f:T->Void) for (b in members) f(cast b);
+  public function iterator() return members.iterator();
 
-  public inline function for_each_dynamic(f:T->Void) for (b in members) if (b.mass > 0) f(cast b);
+  public inline function for_each(f:T->Void, recursive:Bool = true) for (b in members) f(cast b);
 
-  public inline function for_each_static(f:T->Void) for (b in members) if (b.mass == 0) f(cast b);
+  public inline function for_each_dynamic(f:T->Void, recursive:Bool = true) for (b in members) if (b.mass > 0) f(cast b);
+
+  public inline function for_each_static(f:T->Void, recursive:Bool = true) for (b in members) if (b.mass == 0) f(cast b);
 
   public function clear() members.resize(0);
 

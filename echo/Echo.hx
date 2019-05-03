@@ -1,11 +1,13 @@
 package echo;
 
+import haxe.ds.Either;
 import echo.Body;
 import echo.Listener;
 import echo.Collisions;
 import echo.World;
 import echo.data.Types;
 import echo.data.Options;
+import echo.util.BodyOrBodies;
 
 @:expose
 /**
@@ -33,8 +35,8 @@ class Echo {
    * @param options Options to define the Listener's behavior
    * @return Listener
    */
-  public static function listen(world:World, ?a:Echo, ?b:Echo, ?options:ListenerOptions):Listener {
-    if (a == null) return b == null ? world.listeners.add(world, world, options) : world.listeners.add(b, b, options);
+  public static function listen(world:World, ?a:BodyOrBodies, ?b:BodyOrBodies, ?options:ListenerOptions):Listener {
+    if (a == null) return b == null ? world.listeners.add(world.members, world.members, options) : world.listeners.add(b, b, options);
     if (b == null) return world.listeners.add(a, a, options);
     return world.listeners.add(a, b, options);
   }
@@ -83,14 +85,4 @@ class Echo {
    * @param options
    */
   public static function collide(a:Echo, b:Echo, ?options:ListenerOptions) {}
-  /**
-   * Enum to determine the whether this Echo Object is a `Body` or a `Group`. This is used in place of Type Casting internally.
-   */
-  public var echo_type(default, null):EchoType;
-  #if ghost
-  /**
-   * This Object's Entity. Only available if using the Ghost Framework.
-   */
-  public var entity:hxd.Entity;
-  #end
 }

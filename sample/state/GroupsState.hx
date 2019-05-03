@@ -13,9 +13,9 @@ class GroupsState extends State<World> {
   var timer:Float;
 
   override public function enter(world:World) {
-    Main.instance.state_text.text = "Sample: Group Collisions";
+    Main.instance.state_text.text = "Sample: Grouped Collisions";
     timer = 0;
-    // And split them between the two groups
+    // create some arrays to hold the different collision groups
     circles = [];
     rects = [];
     floors = [];

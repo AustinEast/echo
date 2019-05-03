@@ -71,13 +71,9 @@ A Body's collider is represented by different Shapes. Available Shapes:
 
 Coming Soon
 
-#### Groups
-
-Groups are collections of Bodys. These can be used for grouping collisions.
-
 #### Listeners
 
-Listeners keep track of collisions between Bodies and Groups, enacting callbacks and physics responses, depending on their configurations.
+Listeners keep track of collisions between Bodies - enacting callbacks and physics responses depending on their configurations.
 
 ### Example
 ```haxe

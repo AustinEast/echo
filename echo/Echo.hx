@@ -11,7 +11,7 @@ import echo.util.BodyOrBodies;
 
 @:expose
 /**
- * Echo acts as the root Class for `Body`, `Group`, and `World`. It also holds helpful utility methods to help streamline the creation and management of Physics Simulations.
+ * Echo holds helpful utility methods to help streamline the creation and management of Physics Simulations.
  */
 class Echo {
   /**
@@ -30,8 +30,8 @@ class Echo {
   /**
    * Shortcut for creating a new `Listener` for a set of Bodies in the `World`.
    * @param world the `World` to add the `Listener` to
-   * @param a The first `Body` or `Group` to collide against
-   * @param b The second `Body` or `Group` to collide against
+   * @param a The first `Body` or Array of Bodies to collide against
+   * @param b The second `Body` or Array of Bodies to collide against
    * @param options Options to define the Listener's behavior
    * @return Listener
    */

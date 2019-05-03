@@ -8,15 +8,15 @@ import echo.data.Data;
 import echo.data.Options;
 import echo.util.BodyOrBodies;
 /**
- * Data Structure used to listen for Collisions between Bodies and Groups of Bodies.
+ * Data Structure used to listen for Collisions between Bodies.
  */
 typedef Listener = {
   /**
-   * The first Body or Group the listener checks each step.
+   * The first Body or Array of Bodies the listener checks each step.
    */
   var a:Either<Body, Array<Body>>;
   /**
-   * The second Body or Group the listener checks each step.
+   * The second Body or Array of Bodies the listener checks each step.
    */
   var b:Either<Body, Array<Body>>;
   /**
@@ -77,8 +77,8 @@ class Listeners implements IDisposable {
   }
   /**
    * Add a new Listener to listen for collisions
-   * @param a The first `Body` or `Group` to collide against
-   * @param b The second `Body` or `Group` to collide against
+   * @param a The first `Body` or Array of Bodies to collide against
+   * @param b The second `Body` or Array of Bodies to collide against
    * @param options Options to define the Listener's behavior
    * @return Listener
    */

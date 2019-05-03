@@ -1,7 +1,9 @@
 package echo.util;
 
 import haxe.ds.Either;
-
+/**
+ * Abstract representing a `Body` or and Array of Bodies.
+ */
 abstract BodyOrBodies(Either<Body, Array<Body>>) from Either<Body, Array<Body>> to Either<Body, Array<Body>> {
   @:from inline static function from_body(a:Body):BodyOrBodies {
     return Left(a);

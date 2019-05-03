@@ -2,7 +2,9 @@ package echo;
 
 import ghost.Proxy;
 import hxmath.math.Vector2;
-
+/**
+ * TODO
+ */
 class Line implements IProxy {
   @:alias(start.x)
   public var x:Float;

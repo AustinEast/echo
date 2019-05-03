@@ -4,11 +4,9 @@ import hxmath.math.Vector2;
 import ghost.Disposable;
 import ghost.Proxy;
 import echo.Shape;
-import echo.Echo;
 import echo.shape.Rect;
 import echo.data.Data;
 import echo.data.Options;
-import echo.data.Types;
 /**
  * A `Body` is an Object representing a Physical Body in a `World`.
  *

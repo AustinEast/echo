@@ -1,9 +1,6 @@
 package echo;
 
-import echo.Group.TypedGroup;
-import ghost.Pool;
 import echo.Body;
-import echo.util.QuadTree;
 import echo.data.Data;
 
 using Lambda;

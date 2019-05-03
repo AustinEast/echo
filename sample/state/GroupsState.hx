@@ -1,7 +1,6 @@
 package state;
 
 import echo.Body;
-import echo.Group;
 import echo.World;
 import ghost.FSM;
 import ghost.Random;

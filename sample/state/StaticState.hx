@@ -1,7 +1,5 @@
 package state;
 
-import echo.Group;
-import echo.util.QuadTree;
 import echo.Body;
 import echo.World;
 import ghost.FSM;

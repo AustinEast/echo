@@ -5,6 +5,7 @@
 # libraries
 -lib echo
 -lib heaps
+-lib ghostlib
 # copy assets
 --macro ghost.Assets.copyProjectAssets()
 # output

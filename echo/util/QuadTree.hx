@@ -1,6 +1,6 @@
 package echo.util;
 
-import ghost.Pool;
+import echo.util.Pool;
 import echo.Body;
 import echo.Shape;
 import echo.shape.Rect;

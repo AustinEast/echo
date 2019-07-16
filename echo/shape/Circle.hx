@@ -1,6 +1,6 @@
 package echo.shape;
 
-import ghost.Pool;
+import echo.util.Pool;
 import echo.shape.*;
 import echo.data.Data;
 import hxmath.math.Vector2;
@@ -22,7 +22,7 @@ class Circle extends Shape implements IPooled {
     return circle;
   }
 
-  function new() {
+  inline function new() {
     super();
     type = CIRCLE;
     radius = 0;

@@ -64,7 +64,6 @@ A `Body` is an Object representing a Physical Body in a `World`. A `Body` has a 
 A Body's collider is represented by different Shapes. Available Shapes:
 * Rectangle
 * Circle
-* Capsule (Coming Soon)
 * Polygon (Coming Soon)
 
 #### Lines

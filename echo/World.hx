@@ -1,7 +1,7 @@
 package echo;
 
 import hxmath.math.Vector2;
-import ghost.Disposable;
+import echo.util.Disposable;
 import echo.util.QuadTree;
 import echo.Listener;
 import echo.shape.Rect;

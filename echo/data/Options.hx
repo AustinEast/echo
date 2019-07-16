@@ -82,6 +82,7 @@ typedef BodyOptions = {
    * A measure of how fast a Body will move its velocity towards 0 on the Y axis when there is no acceleration.
    */
   var ?drag_y:Float;
+
   var ?gravity_scale:Float;
 }
 
@@ -110,12 +111,14 @@ typedef WorldOptions = {
    * The amount of acceleration on the Y axis applied to each `Body` member every Step.
    */
   var ?gravity_y:Float;
+
   var ?members:Array<Body>;
   var ?listeners:Array<Listener>;
   /**
    * The amount of iterations that occur each time the World is stepped. The higher the number, the more stable the Physics Simulation will be, at the cost of performance.
    */
   var ?iterations:Int;
+
   var ?history:Int;
 }
 
@@ -157,6 +160,7 @@ typedef ShapeOptions = {
    * Enum describing the Shape to create. Currently supports RECT and CIRCLE.
    */
   var ?type:ShapeType;
+
   var ?solid:Bool;
   /**
    * If the Shape is a Circle, it's radius will be taken from this value. Otherwise this is ignored.
@@ -174,6 +178,7 @@ typedef ShapeOptions = {
    * If this value isnt set and width isnt, the Rect will use its width value for it's height.
    */
   var ?height:Float;
+
   var ?points:Array<Vector2>;
   var ?rotation:Float;
   /**
@@ -206,7 +211,7 @@ typedef PolygonOptions = {
   var rotation:Float;
 }
 
-typedef LineOptions = {
+typedef RayOptions = {
   var x:Float;
   var y:Float;
   var dx:Float;

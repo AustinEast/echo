@@ -1,6 +1,6 @@
 package echo.data;
 
-import ghost.Pool;
+import echo.util.Pool;
 import echo.shape.Rect;
 import hxmath.math.Vector2;
 
@@ -19,6 +19,7 @@ class Collision implements IPooled {
    * Array containing Data from Each Collision found between the two Bodies' Shapes.
    */
   public var data:Array<CollisionData>;
+
   public var pooled:Bool;
 
   public static inline function get(a:Body, b:Body):Collision {
@@ -38,7 +39,7 @@ class Collision implements IPooled {
     }
   }
 
-  inline function new () data = [];
+  inline function new() data = [];
 
   static function get_pool():IPool<Collision> return _pool;
 }
@@ -62,6 +63,7 @@ class CollisionData implements IPooled {
    * The normal vector (direction) of Shape A's penetration into Shape B.
    */
   public var normal:Vector2;
+
   public var pooled:Bool;
 
   public static inline function get(overlap:Float, x:Float, y:Float):CollisionData {

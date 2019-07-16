@@ -1,6 +1,6 @@
 package echo;
 
-import ghost.Proxy;
+import echo.util.Proxy;
 import echo.shape.*;
 import echo.data.Data;
 import echo.data.Options;
@@ -20,7 +20,7 @@ class Shape implements IProxy {
    * @return Shape
    */
   public static function get(options:ShapeOptions):Shape {
-    options = ghost.Data.copy_fields(options, defaults);
+    options = echo.util.JSON.copy_fields(options, defaults);
     var s:Shape;
     switch (options.type) {
       case RECT:
@@ -95,6 +95,7 @@ class Shape implements IProxy {
    * If added to a `Body`, this value is treated as an offset to the Body's position.
    */
   public var position:Vector2;
+
   public var rotation(get, set):Float;
   /**
    * Flag to set whether the Shape collides with other Shapes.
@@ -122,6 +123,7 @@ class Shape implements IProxy {
    */
   @:alias(position.x)
   public var right(get, null):Float;
+
   public var collided:Bool;
 
   public function put() {}

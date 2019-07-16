@@ -1,8 +1,8 @@
 package echo;
 
 import hxmath.math.Vector2;
-import ghost.Disposable;
-import ghost.Proxy;
+import echo.util.Disposable;
+import echo.util.Proxy;
 import echo.Shape;
 import echo.shape.Rect;
 import echo.data.Data;
@@ -17,6 +17,7 @@ class Body implements IDisposable implements IProxy {
    * Default Body Options
    */
   public static var defaults(get, null):BodyOptions;
+
   static var ids:Int = 0;
   /**
    * Unique id of the Body.
@@ -110,6 +111,7 @@ class Body implements IDisposable implements IProxy {
    * Used for debug drawing.
    */
   public var collided:Bool;
+
   @:allow(echo.Physics.step)
   public var last_x(default, null):Float;
   @:allow(echo.Physics.step)
@@ -126,12 +128,6 @@ class Body implements IDisposable implements IProxy {
     shapes:Array<Shape>,
     ?quadtree_data:QuadTreeData
   };
-  #if ghost
-  /**
-   * This Object's Entity. Only available if using the Ghost Framework.
-   */
-  public var entity:h2d.Entity;
-  #end
   /**
    * Creates a new Body.
    * @param options Optional values to configure the new Body
@@ -160,7 +156,7 @@ class Body implements IDisposable implements IProxy {
    * @param options
    */
   public function load_options(?options:BodyOptions) {
-    options = ghost.Data.copy_fields(options, defaults);
+    options = echo.util.JSON.copy_fields(options, defaults);
     clear_shapes();
     if (options.shape != null) add_shape(options.shape);
     if (options.shapes != null) for (shape in options.shapes) add_shape(shape);
@@ -235,9 +231,9 @@ class Body implements IDisposable implements IProxy {
     return rect == null ? Rect.get_from_min_max(min_x, min_y, max_x, max_y) : rect.set_from_min_max(min_x, min_y, max_x, max_y);
   }
 
-  public inline function remove():Body {
+  public function remove():Body {
     if (world != null) world.remove(this);
-    if (cache.quadtree_data.bounds != null) cache.quadtree_data.bounds.put();
+    if (cache.quadtree_data != null && cache.quadtree_data.bounds != null) cache.quadtree_data.bounds.put();
     return this;
   }
 

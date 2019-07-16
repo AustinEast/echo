@@ -1,7 +1,6 @@
 package echo.util;
 
 import echo.shape.*;
-import ghost.Log;
 
 using hxmath.math.MathUtil;
 

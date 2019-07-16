@@ -4,12 +4,12 @@ dist: trusty
 language: haxe
 
 haxe:
- - "4.0.0-rc.2"
+ - "4.0.0-rc.3"
 
 install:
  - haxelib git dox https://github.com/HaxeFoundation/dox.git
  - haxelib git hxmath https://github.com/tbrosman/hxmath.git
- - haxelib git heaps https://github.com/HeapsIO/heaps.git
+ - haxelib install heaps https://github.com/HeapsIO/heaps.git
  - haxelib install ghostlib
  - haxelib dev echo .
 
@@ -26,7 +26,7 @@ deploy:
    on:
     tags: true
  - provider: script
-   haxe: "4.0.0-rc.2"
+   haxe: "4.0.0-rc.3"
    script: bash ./release_haxelib.sh $HAXELIB_PWD
    on:
     tags: true

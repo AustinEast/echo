@@ -1,6 +1,6 @@
 package echo;
 
-import ghost.Proxy;
+import echo.util.Proxy;
 import hxmath.math.Vector2;
 /**
  * TODO

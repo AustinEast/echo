@@ -1,7 +1,7 @@
 package echo.shape;
 
 import echo.shape.*;
-import ghost.Pool;
+import echo.util.Pool;
 import echo.data.Data;
 import hxmath.math.Vector2;
 
@@ -33,7 +33,7 @@ class Rect extends Shape implements IPooled {
     return rect;
   }
 
-  function new() {
+  inline function new() {
     super();
     ex = 0;
     ey = 0;
@@ -108,13 +108,7 @@ class Rect extends Shape implements IPooled {
   override inline function get_right():Float return x + ex;
 
   // setters
-  inline function set_width(value:Float):Float {
-    ex = value * 0.5;
-    return value;
-  }
+  inline function set_width(value:Float):Float return ex = value * 0.5;
 
-  inline function set_height(value:Float):Float {
-    ey = value * 0.5;
-    return value;
-  }
+  inline function set_height(value:Float):Float return ey = value * 0.5;
 }

@@ -31,7 +31,7 @@ class Physics {
     });
   }
   /**
-   * Separates a World's Bodies that have collided. Use `Collisions.query()` to query for collisions
+   * Loops through all of a World's Listeners, separating all collided Bodies in the World. Use `Collisions.query()` before calling this to query the World's Listeners for collisions.
    * @param world
    * @param dt
    */

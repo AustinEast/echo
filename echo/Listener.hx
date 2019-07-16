@@ -1,7 +1,7 @@
 package echo;
 
 import haxe.ds.Either;
-import ghost.Disposable;
+import echo.util.Disposable;
 import echo.Body;
 import echo.Echo;
 import echo.data.Data;
@@ -64,6 +64,8 @@ typedef Listener = {
 }
 /**
  * Container used to store Listeners
+ *
+ * TODO: Turn into an iterable
  */
 class Listeners implements IDisposable {
   public static var listener_defaults(get, null):ListenerOptions;
@@ -83,7 +85,7 @@ class Listeners implements IDisposable {
    * @return Listener
    */
   public function add(a:BodyOrBodies, b:BodyOrBodies, ?options:ListenerOptions):Listener {
-    options = ghost.Data.copy_fields(options, listener_defaults);
+    options = echo.util.JSON.copy_fields(options, listener_defaults);
     var listener:Listener = {
       a: a,
       b: b,

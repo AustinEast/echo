@@ -47,12 +47,13 @@ class Echo {
    */
   public static function step(world:World, dt:Float) {
     // TODO: Save World State to History
-    var fdt = dt / world.iterations;
     // Apply Gravity
     world.for_each(member -> {
       member.acceleration.x += world.gravity.x * member.gravity_scale;
       member.acceleration.y += world.gravity.y * member.gravity_scale;
     });
+    // Step the World incrementally based on the number of iterations
+    var fdt = dt / world.iterations;
     for (i in 0...world.iterations) {
       Physics.step(world, fdt);
       Collisions.query(world);
@@ -84,5 +85,5 @@ class Echo {
    * @param b
    * @param options
    */
-  public static function collide(a:Echo, b:Echo, ?options:ListenerOptions) {}
+  public static function overlaps(a:BodyOrBodies, b:BodyOrBodies, ?options:ListenerOptions) {}
 }

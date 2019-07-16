@@ -9,7 +9,7 @@ haxe:
 install:
  - haxelib git dox https://github.com/HaxeFoundation/dox.git
  - haxelib git hxmath https://github.com/tbrosman/hxmath.git
- - haxelib install heaps
+ - haxelib git heaps https://github.com/HeapsIO/heaps.git
  - haxelib install ghostlib
  - haxelib dev echo .
 

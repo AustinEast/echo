@@ -8,7 +8,7 @@ using Lambda;
  *	Implementing this interface on a Class will run `Proxy.build`, then remove itself.
 **/
 @:remove
-@:autoBuild(ghost.Proxy.build())
+@:autoBuild(echo.util.Proxy.build())
 interface IProxy {}
 
 class Proxy {

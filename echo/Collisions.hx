@@ -47,7 +47,7 @@ class Collisions {
       }
       // NarrowPhase
       for (collision in listener.last_collisions) collision.put();
-      listener.last_collisions = listener.collisions;
+      listener.last_collisions = listener.collisions.copy();
       listener.collisions.resize(0);
       for (result in listener.quadtree_results) {
         // Filterout self collisions/

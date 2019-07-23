@@ -5,8 +5,8 @@
     "description": "Simple Physics Library written in Haxe",
     "contributors": ["austineast"],
     "url": "https://austineast.dev/echo",
-    "releasenote": "Removed Ghostlib Dependency",
-    "version": "0.5.1",
+    "releasenote": "Fixed Collision Callbacks",
+    "version": "0.5.2",
     "dependencies": {
       "hxmath": ""
     }

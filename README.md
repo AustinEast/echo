@@ -43,6 +43,13 @@ For OpenFL users, add this into your `Project.xml` instead:
 <haxelib name="echo" />
 ```
 
+For Kha users, who don't use haxelib, clone `echo`(this) and [hxmath](https://github.com/tbrosman/hxmath) to `Libraries` folder in your project root and then add following to your `khafile.js`
+
+```
+project.addLibrary('echo');
+project.addLibrary('hxmath');
+```
+
 ## Usage
 
 ### Concepts

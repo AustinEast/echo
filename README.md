@@ -22,7 +22,7 @@ Check out the [API 📖](https://austineast.dev/echo/api/)!
 
 ## Getting Started
 
-Echo requires [Haxe 4](https://haxe.org/download/version/4.0.0-rc.1/) to run.
+Echo requires [Haxe 4](https://haxe.org/download/) to run.
 
 Install the library from haxelib:
 ```
@@ -37,13 +37,13 @@ Then include the library in your project's `.hxml`:
 ```
 -lib echo
 ```
-For OpenFL users, add this into your `Project.xml` instead:
+For OpenFL users, add this into your `Project.xml`:
 
 ```
 <haxelib name="echo" />
 ```
 
-For Kha users, who don't use haxelib, clone `echo`(this) and [hxmath](https://github.com/tbrosman/hxmath) to `Libraries` folder in your project root and then add following to your `khafile.js`
+For Kha users (who don't use haxelib), clone echo and [hxmath](https://github.com/tbrosman/hxmath) to `Libraries` folder in your project root, and then add the following to your `khafile.js`:
 
 ```
 project.addLibrary('echo');

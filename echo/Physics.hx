@@ -3,7 +3,7 @@ package echo;
 import echo.data.Data;
 
 using hxmath.math.MathUtil;
-using hxmath.math.Vector2;
+using echo.util.Ext;
 /**
  * Class containing methods for performing Physics simulations on a World
  */
@@ -50,7 +50,7 @@ class Physics {
    */
   public static function resolve(a:Body, b:Body, cd:CollisionData, correction_threshold:Float = 0.013, percent_correction:Float = 0.9) {
     // Do not resolve if either objects arent solid
-    if (!cd.sa.solid || !cd.sb.solid || !a.active || !b.active || a.mass == 0 && b.mass == 0) return;
+    if (!cd.sa.solid || !cd.sb.solid || !a.active || !b.active || a.is_static() && b.is_static()) return;
     // Calculate relative velocity
     var rvx = a.velocity.x - b.velocity.x;
     var rvy = a.velocity.y - b.velocity.y;
@@ -78,6 +78,7 @@ class Physics {
         b.velocity.y += impulse_y * b.inverse_mass;
       }
     }
+
     // Provide some positional correction to the objects to help prevent jitter
     var correction = (Math.max(cd.overlap - correction_threshold, 0) / inv_mass_sum) * percent_correction;
     var cx = correction * cd.normal.x;
@@ -94,17 +95,17 @@ class Physics {
 
   public static inline function compute_velocity(v:Float, a:Float, d:Float, m:Float, dt:Float) {
     // Apply Acceleration to Velocity
-    if (a != 0) {
+    if (!a.equals(0)) {
       v += a * dt;
     }
-    else if (d != 0) {
+    else if (!d.equals(0)) {
       d = d * dt;
       if (v - d > 0) v -= d;
       else if (v + d < 0) v += d;
       else v = 0;
     }
     // Clamp Velocity if it has a Max
-    if (m != 0) v = v.clamp(-m, m);
+    if (!m.equals(0)) v = v.clamp(-m, m);
     return v;
   }
 }

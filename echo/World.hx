@@ -68,7 +68,7 @@ class World implements IDisposable {
     body.world = this;
     members.push(body);
     body.cache.quadtree_data = {id: body.id, bounds: body.bounds(), flag: false};
-    body.mass == 0 ? static_quadtree.insert(body.cache.quadtree_data) : quadtree.insert(body.cache.quadtree_data);
+    body.is_static() ? static_quadtree.insert(body.cache.quadtree_data) : quadtree.insert(body.cache.quadtree_data);
     return body;
   }
 
@@ -82,15 +82,15 @@ class World implements IDisposable {
 
   public inline function iterator():Iterator<Body> return members.iterator();
 
-  public inline function dynamics():Array<Body> return members.filter(b -> return b.mass > 0);
+  public inline function dynamics():Array<Body> return members.filter(b -> return b.is_dynamic());
 
-  public inline function statics():Array<Body> return members.filter(b -> return b.mass == 0);
+  public inline function statics():Array<Body> return members.filter(b -> return b.is_static());
 
   public inline function for_each(f:Body->Void, recursive:Bool = true) for (b in members) f(cast b);
 
-  public inline function for_each_dynamic(f:Body->Void, recursive:Bool = true) for (b in members) if (b.mass > 0) f(cast b);
+  public inline function for_each_dynamic(f:Body->Void, recursive:Bool = true) for (b in members) if (b.is_dynamic()) f(cast b);
 
-  public inline function for_each_static(f:Body->Void, recursive:Bool = true) for (b in members) if (b.mass == 0) f(cast b);
+  public inline function for_each_static(f:Body->Void, recursive:Bool = true) for (b in members) if (b.is_static()) f(cast b);
 
   /**
    * Clears the World's members and listeners.

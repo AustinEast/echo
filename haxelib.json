@@ -6,7 +6,7 @@
     "contributors": ["austineast"],
     "url": "https://austineast.dev/echo",
     "releasenote": "Fixed Collision Callbacks",
-    "version": "0.5.2",
+    "version": "0.6.0",
     "dependencies": {
       "hxmath": ""
     }

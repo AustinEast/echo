@@ -44,7 +44,7 @@ class BaseApp extends hxd.App {
     return f;
   }
 
-  function addSlider(label:String, get:Void->Float, set:Float->Void, min:Float = 0., max:Float = 1.) {
+  function addSlider(label:String, get:Void->Float, set:Float->Void, min:Float = 0., max:Float = 1., int:Bool = false) {
     var f = new h2d.Flow(fui);
 
     f.horizontalSpacing = 5;
@@ -60,10 +60,10 @@ class BaseApp extends hxd.App {
     sli.value = get();
 
     var tf = new h2d.TextInput(getFont(), f);
-    tf.text = "" + hxd.Math.fmt(sli.value);
+    tf.text = "" + (int ? Std.int(hxd.Math.fmt(sli.value)) : hxd.Math.fmt(sli.value));
     sli.onChange = function() {
       set(sli.value);
-      tf.text = "" + hxd.Math.fmt(sli.value);
+      tf.text = "" + (int ? Std.int(hxd.Math.fmt(sli.value)) : hxd.Math.fmt(sli.value));
       f.needReflow = true;
     };
     tf.onChange = function() {

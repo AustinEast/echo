@@ -5,8 +5,8 @@ import echo.World;
 import ghost.FSM;
 import ghost.Random;
 
-class MultiShapeState extends State<World> {
-  var body_count:Int = 50;
+class MultiShapeState extends BaseState {
+  var body_count:Int = 49;
 
   override public function enter(world:World) {
     Main.instance.state_text.text = "Sample: Bodies With Multiple Shapes";
@@ -16,12 +16,14 @@ class MultiShapeState extends State<World> {
         x: Random.range(0, world.width),
         y: Random.range(0, world.height / 2),
         elasticity: 0.3,
+        // rotational_velocity: 25,
+        rotation: Random.range(0, 360),
         shapes: [
-          {
-            type: RECT,
-            width: 32,
-            radius: 16
-          },
+          // {
+          //   type: RECT,
+          //   width: 32,
+          //   radius: 16
+          // },
           {
             type: i % 2 == 0 ? CIRCLE : RECT,
             offset_x: 16,
@@ -72,20 +74,11 @@ class MultiShapeState extends State<World> {
   override function step(world:World, dt:Float) {
     // Reset any off-screen Bodies
     world.for_each((member) -> {
-      member.rotation += 1 * dt;
+      // member.rotation += 1 * dt;
       if (offscreen(member, world)) {
         member.velocity.set(0, 0);
         member.set_position(Random.range(0, world.width), 0);
       }
     });
-  }
-
-  override public function exit(world:World) world.clear();
-
-  inline function offscreen(b:Body, world:World) {
-    var bounds = b.bounds();
-    var check = bounds.top > world.height || bounds.right < 0 || bounds.left > world.width;
-    bounds.put();
-    return check;
   }
 }

@@ -5,7 +5,7 @@ import echo.World;
 import ghost.FSM;
 import ghost.Random;
 
-class StaticState extends State<World> {
+class StaticState extends BaseState {
   var dynamics:Array<Body>;
   var statics:Array<Body>;
   var body_count:Int = 100;
@@ -72,6 +72,4 @@ class StaticState extends State<World> {
       timer = 0;
     }
   }
-
-  override public function exit(world:World) world.clear();
 }

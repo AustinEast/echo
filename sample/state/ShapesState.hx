@@ -5,14 +5,14 @@ import echo.World;
 import ghost.FSM;
 import ghost.Random;
 
-class CirclesState extends State<World> {
+class ShapesState extends BaseState {
   var body_count:Int = 100;
   var cursor:Body;
   var cursor_speed:Float = 10;
   var timer:Float;
 
   override public function enter(world:World) {
-    Main.instance.state_text.text = "Sample: Circle/Box Collisions";
+    Main.instance.state_text.text = "Sample: Box/Circle/Polygon Collisions";
     timer = 0;
     // Add some platforms for the bodies to bounce off of
     // Setting the Mass to 0 makes them unmovable
@@ -54,11 +54,13 @@ class CirclesState extends State<World> {
       if (world.count < body_count) world.add(new Body({
         x: Random.range(0, world.width),
         elasticity: 0.3,
+        rotational_velocity: Random.range(-30, 30),
         shape: {
-          type: Random.chance() ? RECT : CIRCLE,
-          radius: Random.range(4, 32),
+          type: Random.chance() ? RECT : POLYGON,
+          radius: Random.range(16, 32),
           width: Random.range(8, 64),
           height: Random.range(8, 64),
+          sides: Random.range_int(5, 8)
         }
       }));
 
@@ -72,14 +74,5 @@ class CirclesState extends State<World> {
         member.set_position(Random.range(0, world.width), 0);
       }
     });
-  }
-
-  override public function exit(world:World) world.clear();
-
-  inline function offscreen(b:Body, world:World) {
-    var bounds = b.bounds();
-    var check = bounds.top > world.height || bounds.right < 0 || bounds.left > world.width;
-    bounds.put();
-    return check;
   }
 }

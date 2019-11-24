@@ -17,7 +17,7 @@
         },
         {
             "type": "hxml",
-            "file": "js.hxml",
+            "file": "sample.hxml",
             "problemMatcher": [
                 "$haxe-absolute",
                 "$haxe",

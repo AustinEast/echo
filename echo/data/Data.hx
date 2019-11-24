@@ -68,13 +68,19 @@ class CollisionData implements IPooled {
 
   public static inline function get(overlap:Float, x:Float, y:Float):CollisionData {
     var c = _pool.get();
-    c.overlap = overlap;
-    c.normal.set(x, y);
+    c.sa = null;
+    c.sb = null;
+    c.set(overlap, x, y);
     c.pooled = false;
     return c;
   }
 
   inline function new() normal = new Vector2(0, 0);
+
+  public inline function set(overlap:Float, x:Float, y:Float) {
+    this.overlap = overlap;
+    normal.set(x, y);
+  }
 
   public function put() {
     if (!pooled) {

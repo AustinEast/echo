@@ -5,7 +5,7 @@ import echo.World;
 import ghost.FSM;
 import ghost.Random;
 
-class GroupsState extends State<World> {
+class GroupsState extends BaseState {
   var body_count:Int = 50;
   var circles:Array<Body>;
   var rects:Array<Body>;
@@ -80,8 +80,6 @@ class GroupsState extends State<World> {
     }
   }
 
-  override public function exit(world:World) world.clear();
-
   inline function make_circle():Body return new Body({
     elasticity: 0.5,
     shape: {
@@ -102,12 +100,5 @@ class GroupsState extends State<World> {
   inline function launch(b:Body, w:World, left:Bool) {
     b.set_position(left ? 20 : w.width - 20, w.height / 2);
     b.velocity.set(left ? 130 : -130, hxd.Math.lerp(-60, 20, Main.instance.scene.mouseY / w.height));
-  }
-
-  inline function offscreen(b:Body, world:World) {
-    var bounds = b.bounds();
-    var check = bounds.top > world.height || bounds.right < 0 || bounds.left > world.width;
-    bounds.put();
-    return check;
   }
 }

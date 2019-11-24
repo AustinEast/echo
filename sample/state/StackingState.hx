@@ -5,17 +5,17 @@ import echo.World;
 import ghost.FSM;
 import ghost.Random;
 
-class StackingState extends State<World> {
-  var body_count:Int = 100;
+class StackingState extends BaseState {
+  var body_count:Int = 99;
 
   override public function enter(world:World) {
     Main.instance.state_text.text = "Sample: Stacking Boxes";
     // Add a bunch of random Physics Bodies to the World
     for (i in 0...body_count) {
       var b = new Body({
-        x: Random.range(0, world.width),
+        x: Random.range(60, world.width - 60),
         y: Random.range(0, world.height / 2),
-        elasticity: 0.3,
+        elasticity: 0.7,
         shape: {
           type: RECT,
           width: Random.range(16, 48),
@@ -42,6 +42,4 @@ class StackingState extends State<World> {
     // Create a listener for collisions between the Physics Bodies
     world.listen();
   }
-
-  override public function exit(world:World) world.clear();
 }

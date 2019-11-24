@@ -163,7 +163,9 @@ typedef ShapeOptions = {
 
   var ?solid:Bool;
   /**
-   * If the Shape is a Circle, it's radius will be taken from this value. Otherwise this is ignored.
+   * If the Shape is a Circle or Polygon, it's radius will be taken from this value. Otherwise this is ignored.
+   *
+   * For Polygon's, this value is ignored if `vertices` is set.
    */
   var ?radius:Float;
   /**
@@ -178,8 +180,19 @@ typedef ShapeOptions = {
    * If this value isnt set and width isnt, the Rect will use its width value for it's height.
    */
   var ?height:Float;
-
-  var ?points:Array<Vector2>;
+  /**
+   * If the Shape is a Polygon, this will determine how many faces the Polygon will generate. Otherwise this is ignored.
+   *
+   * If `vertices` is set, this will be overriden.
+   */
+  var ?sides:Int;
+  /**
+   * If the Shape is a Polygon, this will create one in the shape of the vectors passed in. Otherwise this is ignored.
+   */
+  var ?vertices:Array<Vector2>;
+  /**
+   * The Shape's rotation.
+   */
   var ?rotation:Float;
   /**
    * The Shape's offset from it's parent Body on the X-Axis.

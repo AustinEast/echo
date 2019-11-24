@@ -27,14 +27,21 @@ class Main extends BaseApp {
     world = Echo.start({
       width: width,
       height: height,
-      gravity_y: 20,
+      gravity_y: 50,
       iterations: 5
     });
     // Set up our Sample States
-    sample_states = [StackingState, MultiShapeState, CirclesState, GroupsState, StaticState];
+    sample_states = [
+      PolygonState,
+      StackingState,
+      MultiShapeState,
+      ShapesState,
+      GroupsState,
+      StaticState
+    ];
     index = 0;
     // Create a State Manager and pass it the World and the first Sample
-    fsm = new FSM<World>(world, new StackingState());
+    fsm = new FSM<World>(world, new PolygonState());
     // Create a Debug drawer to display debug graphics
     debug = new HeapsDebug(s2d);
     // Set the Background color of the Scene
@@ -81,8 +88,8 @@ class Main extends BaseApp {
     addButton("Previous", previous_state, buttons);
     addButton("Restart", reset_state, buttons);
     addButton("Next", next_state, buttons);
-    gravity_slider = addSlider("Gravity", () -> return world.gravity.y, (v) -> world.gravity.y = v, -100, 100);
-    iterations_slider = addSlider("Iterations", () -> return world.iterations, (v) -> world.iterations = Std.int(v), 1, 10);
+    gravity_slider = addSlider("Gravity", () -> return world.gravity.y, (v) -> world.gravity.y = v, -200, 200);
+    iterations_slider = addSlider("Iterations", () -> return world.iterations, (v) -> world.iterations = Std.int(v), 1, 10, true);
   }
 
   static function main() {

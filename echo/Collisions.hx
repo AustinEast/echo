@@ -18,7 +18,7 @@ class Collisions {
     world.for_each(b -> {
       b.collided = false;
       for (shape in b.shapes) shape.collided = false;
-      if (b.active && b.mass > 0 && (b.x != b.last_x || b.y != b.last_y)) {
+      if (b.active && b.is_dynamic() && (b.x != b.last_x || b.y != b.last_y)) {
         b.bounds(b.cache.quadtree_data.bounds);
         world.quadtree.insert(b.cache.quadtree_data);
       }
@@ -45,12 +45,12 @@ class Collisions {
               bodies_and_bodies(aa, ab, world, listener.quadtree_results);
           }
       }
-      // NarrowPhase
+      // Narrow Phase
       for (collision in listener.last_collisions) collision.put();
       listener.last_collisions = listener.collisions.copy();
       listener.collisions.resize(0);
       for (result in listener.quadtree_results) {
-        // Filterout self collisions/
+        // Filter out self collisions
         if (result.a.id == result.b.id) {
           result.put();
           continue;
@@ -67,40 +67,16 @@ class Collisions {
           continue;
         }
         // Preform the full collision check
-        var use_a_cache = result.a.mass == 0;
+        var use_a_cache = result.a.is_static();
         var ssa = use_a_cache ? result.a.cache.shapes : result.a.shapes;
 
         for (sa in ssa) {
-          var sac = sa.clone();
-          if (use_a_cache) {
-            sac.x += result.a.cache.x;
-            sac.y += result.a.cache.y;
-          }
-          else {
-            sac.x += result.a.x;
-            sac.y += result.a.y;
-          }
-          var use_b_cache = result.b.mass == 0;
+          var use_b_cache = result.b.is_static();
           var ssb = use_b_cache ? result.b.cache.shapes : result.b.shapes;
           for (sb in ssb) {
-            var sbc = sb.clone();
-            if (use_b_cache) {
-              sbc.x += result.b.cache.x;
-              sbc.y += result.b.cache.y;
-            }
-            else {
-              sbc.x += result.b.x;
-              sbc.y += result.b.y;
-            }
-            var col = sac.collides(sbc);
-            if (col != null) {
-              col.sa = sa;
-              col.sb = sb;
-              result.data.push(col);
-            }
-            sbc.put();
+            var col = sa.collides(sb);
+            if (col != null) result.data.push(col);
           }
-          sac.put();
         }
         // If there was no collision, continue
         if (result.data.length == 0) {
@@ -146,21 +122,21 @@ class Collisions {
 
   static function bodies_and_bodies(a:Array<Body>, b:Array<Body>, world:World, results:Array<Collision>) {
     if (a.length == 0 || b.length == 0) return;
-    for (body in a) if (body.active && body.mass > 0) body_and_bodies(body, b, world, results);
+    for (body in a) if (body.active && body.is_dynamic()) body_and_bodies(body, b, world, results);
   }
 
   static var qr:Array<QuadTreeData> = [];
   static var sqr:Array<QuadTreeData> = [];
 
   static function body_and_bodies(body:Body, bodies:Array<Body>, world:World, results:Array<Collision>) {
-    if (body.shapes.length == 0 || !body.active || body.mass == 0) return;
+    if (body.shapes.length == 0 || !body.active || body.is_static()) return;
     var bounds = body.bounds();
     qr.resize(0);
     sqr.resize(0);
     world.quadtree.query(bounds, qr);
     world.static_quadtree.query(bounds, sqr);
     for (member in bodies) {
-      for (result in (member.mass > 0 ? qr : sqr)) {
+      for (result in (member.is_dynamic() ? qr : sqr)) {
         if (result.id == member.id) results.push(Collision.get(body, member));
       }
     }
@@ -168,7 +144,7 @@ class Collisions {
   }
 
   static function body_and_body(a:Body, b:Body):Null<Collision> {
-    if (a.shapes.length == 0 || b.shapes.length == 0 || !a.active || !b.active || a == b || a.mass == 0 && b.mass == 0) return null;
+    if (a.shapes.length == 0 || b.shapes.length == 0 || !a.active || !b.active || a == b || a.is_static() && b.is_static()) return null;
     var ab = a.bounds();
     var bb = b.bounds();
     var col = ab.collides(bb);

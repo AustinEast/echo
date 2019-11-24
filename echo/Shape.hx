@@ -1,5 +1,6 @@
 package echo;
 
+import hxmath.frames.Frame2;
 import echo.util.Proxy;
 import echo.shape.*;
 import echo.data.Data;
@@ -28,7 +29,7 @@ class Shape implements IProxy {
       case CIRCLE:
         s = Circle.get(options.offset_x, options.offset_y, options.radius);
       case POLYGON:
-        throw 'Polygon Shape has not been implemented';
+        s = Polygon.get(options.offset_x, options.offset_y, options.sides, options.radius);
     }
     s.solid = options.solid;
     return s;
@@ -63,89 +64,109 @@ class Shape implements IProxy {
    * @param x
    * @param y
    */
-  inline function new(x:Float = 0, y:Float = 0) {
+  inline function new(x:Float = 0, y:Float = 0, rotation:Float = 0) {
     solid = true;
-    position = new Vector2(x, y);
+    local_x = _x = x;
+    local_y = _y = y;
+    local_rotation = _rotation = rotation;
   }
-  /**
-   * The Shape's position on the X axis.
-   *
-   * If added to a `Body`, this value is treated as an offset to the Body's X position.
-   *
-   * Alias for `position.x`.
-   */
-  @:alias(position.x)
-  public var x:Float;
-  /**
-   * The Shape's position on the Y axis.
-   *
-   * If added to a `Body`, this value is treated as an offset to the Body's Y position.
-   *
-   * Alias for `position.y`.
-   */
-  @:alias(position.y)
-  public var y:Float;
   /**
    * Enum value determining what shape this Object is (Rect, Circle, Polygon).
    */
   public var type:ShapeType;
   /**
-   * Shape's position on the X and Y axis.
+   * The Shape's position on the X axis.
    *
-   * If added to a `Body`, this value is treated as an offset to the Body's position.
+   * If added to a `Body`, this value is treated as an offset to the Body's X position.
    */
-  public var position:Vector2;
+  public var x(get, never):Float;
+  /**
+   * The Shape's position on the Y axis.
+   *
+   * If added to a `Body`, this value is treated as an offset to the Body's Y position.
+   */
+  public var y(get, never):Float;
 
-  public var rotation(get, set):Float;
+  public var rotation(get, never):Float;
+
+  public var local_x(default, set):Float;
+
+  public var local_y(default, set):Float;
+
+  public var local_rotation(default, set):Float;
   /**
    * Flag to set whether the Shape collides with other Shapes.
    *
    * If false, this Shape's Body will not have its position or velocity affected by other Bodies, but it will still call collision callbacks
    */
-  public var solid(get, set):Bool;
+  public var solid:Bool;
   /**
    * The Upper Bounds of the Shape.
    */
-  @:alias(position.y)
-  public var top(get, null):Float;
+  public var top(get, never):Float;
   /**
    * The Lower Bounds of the Shape.
    */
-  @:alias(position.y)
-  public var bottom(get, null):Float;
+  public var bottom(get, never):Float;
   /**
    * The Left Bounds of the Shape.
    */
-  @:alias(position.x)
-  public var left(get, null):Float;
+  public var left(get, never):Float;
   /**
    * The Right Bounds of the Shape.
    */
-  @:alias(position.x)
-  public var right(get, null):Float;
+  public var right(get, never):Float;
 
   public var collided:Bool;
 
-  public function put() {}
+  var parent_frame:Frame2;
+
+  var _x:Float;
+
+  var _y:Float;
+
+  var _rotation:Float;
+
+  public function put() {
+    parent_frame = null;
+  }
+
+  public function sync() {}
+  /**
+   * Gets the Shape's position on the X and Y axis as a `Vector2`.
+   */
+  public inline function get_position():Vector2 return new Vector2(_x, _y);
+
+  public inline function get_local_position():Vector2 return new Vector2(local_x, local_y);
+
+  public inline function set_local_position(value:Vector2):Vector2 {
+    local_x = value.x;
+    local_y = value.y;
+    return value;
+  }
+
+  public function set_parent(?frame:Frame2) {
+    parent_frame = frame;
+    if (parent_frame != null) sync();
+  }
   /**
    * Returns an AABB `Rect` representing the bounds of the `Shape`.
    * @param rect Optional `Rect` to set the values to.
    * @return Rect
    */
-  public function bounds(?rect:Rect) return rect == null ? Rect.get(x, y, 0, 0) : rect.set(x, y, 0, 0);
+  public function bounds(?rect:Rect):Rect return rect == null ? Rect.get(x, y, 0, 0) : rect.set(x, y, 0, 0);
   /**
    * Clones the Shape into a new Shape
    * @return Shape return new Shape(x, y)
    */
-  public function clone():Shape return new Shape(x, y);
+  public function clone():Shape return new Shape(x, y, rotation);
 
-  public function scale(v:Float) {}
-
-  public function contains(v:Vector2):Bool return position == v;
+  // public function scale(v:Float) {}
+  public function contains(v:Vector2):Bool return get_position() == v;
 
   public function intersects(l:Line):Null<IntersectionData> return null;
 
-  public function overlaps(s:Shape):Bool return contains(s.position);
+  public function overlaps(s:Shape):Bool return contains(s.get_position());
 
   public function collides(s:Shape):Null<CollisionData> return null;
 
@@ -153,12 +174,57 @@ class Shape implements IProxy {
 
   function collide_circle(c:Circle):Null<CollisionData> return null;
 
+  function collide_polygon(p:Polygon):Null<CollisionData> return null;
+
+  // getters
+  inline function get_x():Float return _x;
+
+  inline function get_y():Float return _y;
+
+  inline function get_rotation():Float return _rotation;
+
+  function get_top():Float return y;
+
+  function get_bottom():Float return y;
+
+  function get_left():Float return x;
+
+  function get_right():Float return x;
+
+  // setters
+  inline function set_local_x(value:Float):Float {
+    local_x = value;
+
+    if (parent_frame != null) sync();
+    else _x = local_x;
+
+    return local_x;
+  }
+
+  inline function set_local_y(value:Float):Float {
+    local_y = value;
+
+    if (parent_frame != null) sync();
+    else _y = local_y;
+
+    return local_y;
+  }
+
+  inline function set_local_rotation(value:Float):Float {
+    local_rotation = value;
+
+    if (parent_frame != null) sync();
+    else _rotation = local_rotation;
+
+    return local_rotation;
+  }
+
   static function get_defaults():ShapeOptions return {
     type: RECT,
     radius: 1,
     width: 1,
     height: 0,
-    points: [],
+    sides: 3,
     rotation: 0,
     offset_x: 0,
     offset_y: 0,

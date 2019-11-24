@@ -1,5 +1,6 @@
 package echo;
 
+import hxmath.frames.Frame2;
 import hxmath.math.Vector2;
 import echo.util.Disposable;
 import echo.util.Proxy;
@@ -7,12 +8,14 @@ import echo.Shape;
 import echo.shape.Rect;
 import echo.data.Data;
 import echo.data.Options;
+
+using echo.util.Ext;
 /**
  * A `Body` is an Object representing a Physical Body in a `World`.
  *
  * Bodies have position, velocity, mass, an optional collider shape, and many other properties that are used in a `World` simulation.
  */
-class Body implements IDisposable implements IProxy {
+class Body implements IDisposable {
   /**
    * Default Body Options
    */
@@ -26,13 +29,17 @@ class Body implements IDisposable implements IProxy {
   /**
    * The Body's position on the X axis.
    */
-  public var x(get, set):Float;
+  public var x(default, set):Float;
   /**
    * The Body's position on the Y axis.
    */
-  public var y(get, set):Float;
+  public var y(default, set):Float;
   /**
-   * The Body's array of `Shape` objects. If it **isn't** null, these `Shape` objects act as the Body's Collider, allowing it to be checked for Collisions.
+   * The Body's first `Shape` object in the `shapes` array. If it **isn't** null, this `Shape` object act as the Body's Collider, allowing it to be checked for Collisions.
+   */
+  public var shape(get, set):Null<Shape>;
+  /**
+   * The Body's array of `Shape` objects. If the array **isn't** empty, these `Shape` objects act as the Body's Collider, allowing it to be checked for Collisions.
    */
   public var shapes:Array<Shape>;
   /**
@@ -48,47 +55,47 @@ class Body implements IDisposable implements IProxy {
    * The higher a Body's mass, the more resistant it is to those forces.
    * If a Body's mass is set to `0`, it becomes static - unmovable by forces and collisions.
    */
-  public var mass(get, set):Float;
+  public var mass(default, set):Float;
   /**
-   * Body's current rotational angle. Currently is not implemented.
+   * Body's current rotational angle.
    */
-  public var rotation(get, set):Float;
+  public var rotation(default, set):Float;
   /**
    * Value to determine how much of a Body's `velocity` should be retained during collisions (or how much should the `Body` "bounce" in other words).
    */
-  public var elasticity(get, set):Float;
+  public var elasticity:Float;
   /**
    * The units/second that a `Body` moves.
    */
-  public var velocity(get, set):Vector2;
+  public var velocity:Vector2;
   /**
    * A measure of how fast a `Body` will change it's velocity. Can be thought of the sum of all external forces on an object (such as a World's gravity) during a step.
    */
-  public var acceleration(get, set):Vector2;
+  public var acceleration:Vector2;
   /**
    * The units/second that a `Body` will rotate. Currently is not Implemented.
    */
-  public var rotational_velocity(get, set):Float;
+  public var rotational_velocity:Float;
   /**
    * The maximum velocity range that a `Body` can have.
    *
    * If set to 0, the Body has no restrictions on how fast it can move.
    */
-  public var max_velocity(get, set):Vector2;
+  public var max_velocity:Vector2;
   /**
    * The maximum rotational velocity range that a `Body` can have. Currently not Implemented.
    *
    * If set to 0, the Body has no restrictions on how fast it can rotate.
    */
-  public var max_rotational_velocity(get, set):Float;
+  public var max_rotational_velocity:Float;
   /**
    * A measure of how fast a Body will move its velocity towards 0 when there is no acceleration.
    */
-  public var drag(get, set):Vector2;
+  public var drag:Vector2;
   /**
    * Percentage value that represents how much a World's gravity affects the Body.
    */
-  public var gravity_scale(get, set):Float;
+  public var gravity_scale:Float;
   /**
    * Cached value of 1 divided by the Body's mass. Used in Internal calculations.
    */
@@ -112,6 +119,8 @@ class Body implements IDisposable implements IProxy {
    */
   public var collided:Bool;
 
+  public var frame:Frame2;
+
   @:allow(echo.Physics.step)
   public var last_x(default, null):Float;
   @:allow(echo.Physics.step)
@@ -120,7 +129,7 @@ class Body implements IDisposable implements IProxy {
   public var last_rotation(default, null):Float;
 
   @:dox(hide)
-  @:allow(echo.World, echo.Collisions)
+  @:allow(echo.World, echo.Collisions, echo.util.Debug)
   var cache:{
     x:Float,
     y:Float,
@@ -142,6 +151,7 @@ class Body implements IDisposable implements IProxy {
       rotation: 0,
       shapes: []
     };
+    frame = new Frame2(new Vector2(0, 0), 0);
     x = 0;
     y = 0;
     velocity = new Vector2(0, 0);
@@ -175,18 +185,22 @@ class Body implements IDisposable implements IProxy {
     last_x = x;
     last_y = y;
     last_rotation = rotation;
+    if (mass.equals(0)) refresh_cache();
   }
 
   public function add_shape(options:ShapeOptions):Shape {
     var s = Shape.get(options);
+    s.set_parent(frame);
     shapes.push(s);
     return s;
   }
 
   public function remove_shape(shape:Shape):Shape {
-    shapes.remove(shape);
+    if (shapes.remove(shape)) shape.set_parent();
     return shape;
   }
+
+  public inline function sync_shapes() for (shape in (is_dynamic() ? shapes : cache.shapes)) shape.sync();
 
   public inline function clear_shapes() {
     for (shape in shapes) shape.put();
@@ -213,38 +227,50 @@ class Body implements IDisposable implements IProxy {
    */
   public function bounds(?rect:Rect, include_solids = true):Null<Rect> {
     if (shapes.length == 0) return null;
-    var min_x = 0.;
-    var min_y = 0.;
-    var max_x = 0.;
-    var max_y = 0.;
-    for (shape in shapes) {
+
+    var s = shapes[0];
+    var min_x = s.left;
+    var min_y = s.top;
+    var max_x = s.right;
+    var max_y = s.bottom;
+
+    if (shapes.length > 1) for (i in 1...(is_dynamic() ? shapes.length : cache.shapes.length)) {
+      var shape = is_dynamic() ? shapes[i] : cache.shapes[i];
       if (!include_solids && !shape.solid) continue;
       if (shape.left < min_x) min_x = shape.left;
       if (shape.top < min_y) min_y = shape.top;
       if (shape.right > max_x) max_x = shape.right;
       if (shape.bottom > max_y) max_y = shape.bottom;
     }
-    min_x += x;
-    min_y += y;
-    max_x += x;
-    max_y += y;
+
     return rect == null ? Rect.get_from_min_max(min_x, min_y, max_x, max_y) : rect.set_from_min_max(min_x, min_y, max_x, max_y);
   }
 
   public function remove():Body {
-    if (world != null) world.remove(this);
+    if (world != null) world.remove(cast this);
     if (cache.quadtree_data != null && cache.quadtree_data.bounds != null) cache.quadtree_data.bounds.put();
     return this;
   }
 
-  public function refresh_cache() {
+  public inline function is_dynamic() return mass > 0;
+
+  public inline function is_static() return mass <= 0;
+
+  public inline function refresh_cache() {
     cache.x = x;
     cache.y = y;
     cache.rotation = rotation;
+
+    frame.offset.set(cache.x, cache.y);
+    frame.angleDegrees = cache.rotation;
+
+    sync_shapes();
+
     cache.shapes = shapes.copy();
+
     if (cache.quadtree_data != null) {
       bounds(cache.quadtree_data.bounds);
-      if (world != null && mass == 0) world.static_quadtree.update(cache.quadtree_data);
+      if (world != null && is_static()) world.static_quadtree.update(cache.quadtree_data);
     }
   }
   /**
@@ -259,6 +285,47 @@ class Body implements IDisposable implements IProxy {
     drag = null;
     data = null;
     cache = null;
+  }
+
+  inline function get_shape() return shapes[0];
+
+  // setters
+  inline function set_x(value:Float):Float {
+    x = value;
+
+    if (is_dynamic()) {
+      frame.offset.x = value;
+      sync_shapes();
+    }
+    else refresh_cache();
+
+    return x;
+  }
+
+  inline function set_y(value:Float):Float {
+    y = value;
+
+    if (is_dynamic()) {
+      frame.offset.y = value;
+      sync_shapes();
+    }
+    else refresh_cache();
+
+    return y;
+  }
+
+  inline function set_shape(value:Shape) return shapes[0] = value;
+
+  inline function set_rotation(value:Float):Float {
+    rotation = value;
+
+    if (is_dynamic()) {
+      frame.angleDegrees = value;
+      sync_shapes();
+    }
+    else refresh_cache();
+
+    return rotation;
   }
 
   function set_mass(value:Float):Float {

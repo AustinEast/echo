@@ -71,10 +71,8 @@ class Listeners implements IDisposable {
   public static var listener_defaults(get, null):ListenerOptions;
 
   public var members:Array<Listener>;
-  public var world:World;
 
-  public function new(world:World, ?members:Array<Listener>) {
-    this.world = world;
+  public function new(?members:Array<Listener>) {
     this.members = members == null ? [] : members;
   }
   /**

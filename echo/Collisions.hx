@@ -1,7 +1,9 @@
 package echo;
 
+import echo.util.QuadTree;
 import echo.Body;
 import echo.data.Data;
+import echo.Listener;
 
 using Lambda;
 /**
@@ -11,21 +13,23 @@ class Collisions {
   /**
    * Queries a World's Listeners for Collisions
    */
-  public static function query(world:World) {
+  public static function query(world:World, ?listeners:Listeners) {
     // Populate the Quadtree
-    world.quadtree.clear();
-    world.quadtree.set(world.x + (world.width * 0.5), world.y + (world.height * 0.5), world.width, world.height);
+    var quadtree = listeners == null ? world.quadtree : QuadTree.get();
+    quadtree.clear();
+    quadtree.set(world.x + (world.width * 0.5), world.y + (world.height * 0.5), world.width, world.height);
     world.for_each(b -> {
       b.collided = false;
       for (shape in b.shapes) shape.collided = false;
       if (b.active && b.is_dynamic() && (b.x != b.last_x || b.y != b.last_y)) {
         b.bounds(b.cache.quadtree_data.bounds);
-        world.quadtree.insert(b.cache.quadtree_data);
+        quadtree.insert(b.cache.quadtree_data);
       }
     });
 
     // Process the Listeners
-    for (listener in world.listeners.members) {
+    var members = listeners == null ? world.listeners.members : listeners.members;
+    for (listener in members) {
       // BroadPhase
       listener.quadtree_results.resize(0);
       switch (listener.a) {
@@ -35,14 +39,14 @@ class Collisions {
               var col = body_and_body(ba, bb);
               if (col != null) listener.quadtree_results.push(col);
             case Right(ab):
-              body_and_bodies(ba, ab, world, listener.quadtree_results);
+              body_and_bodies(ba, ab, world, listener.quadtree_results, quadtree);
           }
         case Right(aa):
           switch (listener.b) {
             case Left(bb):
-              body_and_bodies(bb, aa, world, listener.quadtree_results);
+              body_and_bodies(bb, aa, world, listener.quadtree_results, quadtree);
             case Right(ab):
-              bodies_and_bodies(aa, ab, world, listener.quadtree_results);
+              bodies_and_bodies(aa, ab, world, listener.quadtree_results, quadtree);
           }
       }
       // Narrow Phase
@@ -93,12 +97,14 @@ class Collisions {
         listener.collisions.push(result);
       }
     }
+    if (listeners != null) quadtree.put();
   }
   /**
    * Enacts the Callbacks defined in a World's Listeners
    */
-  public static function notify(world:World) {
-    for (listener in world.listeners.members) {
+  public static function notify(world:World, ?listeners:Listeners) {
+    var members = listeners == null ? world.listeners.members : listeners.members;
+    for (listener in members) {
       if (listener.enter != null || listener.stay != null) {
         for (c in listener.collisions) {
           if (listener.enter != null
@@ -120,20 +126,20 @@ class Collisions {
     }
   }
 
-  static function bodies_and_bodies(a:Array<Body>, b:Array<Body>, world:World, results:Array<Collision>) {
+  static function bodies_and_bodies(a:Array<Body>, b:Array<Body>, world:World, results:Array<Collision>, quadtree:QuadTree) {
     if (a.length == 0 || b.length == 0) return;
-    for (body in a) if (body.active && body.is_dynamic()) body_and_bodies(body, b, world, results);
+    for (body in a) if (body.active && body.is_dynamic()) body_and_bodies(body, b, world, results, quadtree);
   }
 
   static var qr:Array<QuadTreeData> = [];
   static var sqr:Array<QuadTreeData> = [];
 
-  static function body_and_bodies(body:Body, bodies:Array<Body>, world:World, results:Array<Collision>) {
+  static function body_and_bodies(body:Body, bodies:Array<Body>, world:World, results:Array<Collision>, quadtree:QuadTree) {
     if (body.shapes.length == 0 || !body.active || body.is_static()) return;
     var bounds = body.bounds();
     qr.resize(0);
     sqr.resize(0);
-    world.quadtree.query(bounds, qr);
+    quadtree.query(bounds, qr);
     world.static_quadtree.query(bounds, sqr);
     for (member in bodies) {
       for (result in (member.is_dynamic() ? qr : sqr)) {

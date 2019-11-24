@@ -55,8 +55,15 @@ class World implements IDisposable {
     gravity = new Vector2(options.gravity_x == null ? 0 : options.gravity_x, options.gravity_y == null ? 0 : options.gravity_y);
     refresh();
 
-    listeners = new Listeners(this, options.listeners);
+    listeners = new Listeners(options.listeners);
     iterations = options.iterations == null ? 5 : options.iterations;
+  }
+
+  public inline function set_from_shape(s:Shape) {
+    x = s.left;
+    y = s.top;
+    width = s.right - x;
+    height = s.bottom - y;
   }
 
   public inline function center(?rect:Rect):Rect {

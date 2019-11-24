@@ -1,6 +1,7 @@
 package echo;
 
 import echo.data.Data;
+import echo.Listener;
 
 using hxmath.math.MathUtil;
 using echo.util.Ext;
@@ -35,8 +36,9 @@ class Physics {
    * @param world
    * @param dt
    */
-  public static function separate(world:World, dt:Float) {
-    for (listener in world.listeners.members) {
+  public static function separate(world:World, ?listeners:Listeners) {
+    var members = listeners == null ? world.listeners.members : listeners.members;
+    for (listener in members) {
       if (listener.separate) for (collision in listener.collisions) {
         for (i in 0...collision.data.length) resolve(collision.a, collision.b, collision.data[i], listener.correction_threshold, listener.percent_correction);
       }

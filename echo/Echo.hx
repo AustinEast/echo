@@ -14,6 +14,7 @@ import echo.util.BodyOrBodies;
  * Echo holds helpful utility methods to help streamline the creation and management of Physics Simulations.
  */
 class Echo {
+  static var listeners:Listeners = new Listeners();
   /**
    * Shortcut for creating a new `World`
    * @param options Options for the new `World`
@@ -41,6 +42,28 @@ class Echo {
     return world.listeners.add(a, b, options);
   }
   /**
+   * Performs a one-time collision check.
+   * @param world the `World` to check for collisions
+   * @param a The first `Body` or Array of Bodies to collide against
+   * @param b The second `Body` or Array of Bodies to collide against
+   * @param options Options to define the Collision Check's behavior
+   */
+  public static function check(world:World, ?a:BodyOrBodies, ?b:BodyOrBodies, ?options:ListenerOptions):Listener {
+    var listener:Listener;
+
+    listeners.clear();
+
+    if (a == null) listener = b == null ? listeners.add(world.members, world.members, options) : listeners.add(b, b, options);
+    else if (b == null) listener = listeners.add(a, a, options);
+    else listener = listeners.add(a, b, options);
+
+    Collisions.query(world, listeners);
+    Physics.separate(world, listeners);
+    Collisions.notify(world, listeners);
+
+    return listener;
+  }
+  /**
    * Steps a `World` forward.
    * @param world
    * @param dt
@@ -57,7 +80,7 @@ class Echo {
     for (i in 0...world.iterations) {
       Physics.step(world, fdt);
       Collisions.query(world);
-      Physics.separate(world, fdt);
+      Physics.separate(world);
       Collisions.notify(world);
     }
     // Reset acceleration
@@ -79,11 +102,4 @@ class Echo {
   public static function redo(world:World):World {
     return world;
   }
-  /**
-   * TODO: Perform a collision check.
-   * @param a
-   * @param b
-   * @param options
-   */
-  public static function overlaps(a:BodyOrBodies, b:BodyOrBodies, ?options:ListenerOptions) {}
 }

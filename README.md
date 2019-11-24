@@ -22,7 +22,7 @@ Check out the [API 📖](https://austineast.dev/echo/api/)!
 
 ## Getting Started
 
-Echo requires [Haxe 4](https://haxe.org/download/version/4.0.0-rc.1/) to run.
+Echo requires [Haxe 4](https://haxe.org/download/) to run.
 
 Install the library from haxelib:
 ```

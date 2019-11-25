@@ -90,19 +90,27 @@ class Main extends BaseApp {
     fui.padding = 5;
     fui.verticalSpacing = 5;
     fui.layout = Vertical;
+
+    var tui = new h2d.Flow(s2d);
+    tui.padding = 5;
+    tui.verticalSpacing = 5;
+    tui.layout = Vertical;
+    tui.y = s2d.height - 90;
+    fps_text = addText("FPS: ", tui);
+    members_text = addText("Bodies: ", tui);
+    state_text = addText("Sample: ", tui);
+    var buttons = new h2d.Flow(tui);
+    buttons.horizontalSpacing = 2;
+
     var bui = new h2d.Flow(s2d);
     bui.padding = 5;
     bui.verticalSpacing = 5;
     bui.layout = Vertical;
-    bui.y = s2d.height - 150;
-    state_text = addText("Sample: ", bui);
-    members_text = addText("Bodies: ", bui);
+    bui.y = s2d.height - 65;
+    bui.x = s2d.width - 150;
     addText("Arrow Keys: Undo/Redo", bui);
     addText("Spacebar: Pause/Play", bui);
     addText("Hold Shift: Slowmo", bui);
-    fps_text = addText("FPS: ", bui);
-    var buttons = new h2d.Flow(bui);
-    buttons.horizontalSpacing = 2;
 
     addButton("Previous", previous_state, buttons);
     addButton("Restart", reset_state, buttons);

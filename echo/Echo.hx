@@ -1,11 +1,9 @@
 package echo;
 
-import haxe.ds.Either;
 import echo.Body;
 import echo.Listener;
 import echo.Collisions;
 import echo.World;
-import echo.data.Types;
 import echo.data.Options;
 import echo.util.BodyOrBodies;
 

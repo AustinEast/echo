@@ -20,7 +20,13 @@ class Collisions {
     quadtree.set(world.x + (world.width * 0.5), world.y + (world.height * 0.5), world.width, world.height);
     world.for_each(b -> {
       b.collided = false;
-      for (shape in b.shapes) shape.collided = false;
+      for (shape in b.shapes) {
+        shape.collided = false;
+        if (shape.type == RECT) {
+          var r:echo.shape.Rect = cast shape;
+          if (r.transformed_rect != null) r.transformed_rect.collided = false;
+        }
+      }
       if (b.active && b.is_dynamic() && (b.x != b.last_x || b.y != b.last_y)) {
         b.bounds(b.cache.quadtree_data.bounds);
         quadtree.insert(b.cache.quadtree_data);

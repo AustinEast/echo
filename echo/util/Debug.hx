@@ -4,6 +4,7 @@ import hxmath.math.Vector2;
 import echo.shape.*;
 
 using hxmath.math.MathUtil;
+using echo.util.Ext;
 
 class Debug {
   public var draw_bodies:Bool = true;
@@ -34,7 +35,7 @@ class Debug {
         switch (shape.type) {
           case RECT:
             var r:Rect = cast shape;
-            if (r.transformed_rect != null) {
+            if (r.transformed_rect != null && !r.rotation.equals(0)) {
               draw_polygon(r.transformed_rect.count, r.transformed_rect.vertices, shape_fill_color,
                 r.transformed_rect.collided ? shape_collided_color : shape_color, 0);
               if (draw_shape_bounds) {

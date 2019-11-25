@@ -256,6 +256,8 @@ class SAT {
 
     var tr = Polygon.get_from_rect(r);
     var col = polygon_and_polygon(tr, p, flip);
+    if (flip) col.sb = r;
+    else col.sa = r;
     tr.put();
 
     return col;

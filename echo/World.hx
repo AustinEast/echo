@@ -3,11 +3,11 @@ package echo;
 import hxmath.math.Vector2;
 import echo.util.Disposable;
 import echo.util.QuadTree;
+import echo.util.History;
 import echo.Listener;
 import echo.shape.Rect;
 import echo.data.Data;
 import echo.data.Options;
-import haxe.ds.Vector;
 /**
  * A `World` is an Object representing the state of a Physics simulation and it configurations. 
  */
@@ -42,7 +42,7 @@ class World implements IDisposable {
    * The amount of iterations that occur each time the World is stepped. The higher the number, the more stable the Physics Simulation will be, at the cost of performance.
    */
   public var iterations:Int;
-  public var history:Vector<{bodies:Array<Body>, collisions:Array<Collision>}>;
+  public var history:Null<History<Array<WorldState>>>;
   var init:Bool;
 
   public function new(options:WorldOptions) {
@@ -57,6 +57,7 @@ class World implements IDisposable {
 
     listeners = new Listeners(options.listeners);
     iterations = options.iterations == null ? 5 : options.iterations;
+    if(options.history != null) history = new History(options.history);
   }
 
   public inline function set_from_shape(s:Shape) {

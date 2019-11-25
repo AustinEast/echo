@@ -20,6 +20,7 @@ class Main extends BaseApp {
   var world:World;
   var members_text:h2d.Text;
   var fps_text:h2d.Text;
+  var playing:Bool = true;
 
   override function init() {
     instance = this;
@@ -28,7 +29,8 @@ class Main extends BaseApp {
       width: width,
       height: height,
       gravity_y: 50,
-      iterations: 5
+      iterations: 5,
+      history: 1000
     });
     // Set up our Sample States
     sample_states = [
@@ -55,12 +57,26 @@ class Main extends BaseApp {
   }
 
   override function update(dt:Float) {
+    if (world.history != null) {
+      // Press Left to undo
+      if (Key.isDown(Key.LEFT)) {
+        world.undo();
+        playing = false;
+      }
+      // Press Right to redo
+      if (Key.isDown(Key.RIGHT)) {
+        world.redo();
+        playing = false;
+      }
+      // Press Space to play/pause
+      if (Key.isPressed(Key.SPACE)) playing = !playing;
+    }
     // Hold Shift for slowmo debugging
-    var fdt = Key.isDown(Key.SHIFT) ? dt * 0.1 : dt;
+    var fdt = Key.isDown(Key.SHIFT) ? dt * 0.3 : dt;
     // Update the current Sample State
     fsm.step(fdt);
     // Step the World Forward
-    world.step(fdt);
+    if (playing) world.step(fdt);
     // Draw the new World
     debug.draw(world);
     // Update GUI text
@@ -78,9 +94,12 @@ class Main extends BaseApp {
     bui.padding = 5;
     bui.verticalSpacing = 5;
     bui.layout = Vertical;
-    bui.y = s2d.height - 90;
+    bui.y = s2d.height - 150;
     state_text = addText("Sample: ", bui);
     members_text = addText("Bodies: ", bui);
+    addText("Arrow Keys: Undo/Redo", bui);
+    addText("Spacebar: Pause/Play", bui);
+    addText("Hold Shift: Slowmo", bui);
     fps_text = addText("FPS: ", bui);
     var buttons = new h2d.Flow(bui);
     buttons.horizontalSpacing = 2;

@@ -188,6 +188,32 @@ class Body implements IDisposable {
     if (mass.equals(0)) refresh_cache();
   }
 
+  public function clone():Body {
+    var b = new Body();
+    b.x = x;
+    b.y = y;
+    b.rotation = rotation;
+    b.kinematic = kinematic;
+    b.mass = mass;
+    b.elasticity = elasticity;
+    b.velocity.set(velocity.x, velocity.y);
+    b.rotational_velocity = rotational_velocity;
+    b.max_velocity.set(max_velocity.x, max_velocity.y);
+    b.max_rotational_velocity = max_rotational_velocity;
+    b.drag.set(drag.x, drag.y);
+    b.gravity_scale = gravity_scale;
+    b.last_x = last_x;
+    b.last_y = last_y;
+    b.last_rotation = last_rotation;
+    b.shapes = shapes.map(s -> {
+      var sc = s.clone();
+      sc.set_parent(frame);
+      return sc;
+    });
+    b.cache = cache;
+    return b;
+  }
+
   public function add_shape(options:ShapeOptions):Shape {
     var s = Shape.get(options);
     s.set_parent(frame);

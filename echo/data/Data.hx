@@ -4,6 +4,23 @@ import echo.util.Pool;
 import echo.shape.Rect;
 import hxmath.math.Vector2;
 
+@:structInit
+class WorldState {
+  public var id:Int;
+  public var x:Float;
+  public var y:Float;
+  public var rotation:Float;
+  public var velocity:Vector2;
+
+  public function new(id:Int, x:Float, y:Float, rotation:Float, velocity:Vector2) {
+    this.id = id;
+    this.x = x;
+    this.y = y;
+    this.rotation = rotation;
+    this.velocity = velocity.clone();
+  }
+}
+
 class Collision implements IPooled {
   public static var pool(get, never):IPool<Collision>;
   static var _pool = new Pool<Collision>(Collision);

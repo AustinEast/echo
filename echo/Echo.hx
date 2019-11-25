@@ -9,11 +9,9 @@ import echo.data.Types;
 import echo.data.Options;
 import echo.util.BodyOrBodies;
 
-@:expose
-/**
+@:expose /**
  * Echo holds helpful utility methods to help streamline the creation and management of Physics Simulations.
- */
-class Echo {
+ */ class Echo {
   static var listeners:Listeners = new Listeners();
   /**
    * Shortcut for creating a new `World`
@@ -70,6 +68,16 @@ class Echo {
    */
   public static function step(world:World, dt:Float) {
     // TODO: Save World State to History
+    if (world.history != null) world.history.add([
+      for (b in world.members) {
+        id: b.id,
+        x: b.x,
+        y: b.y,
+        rotation: b.rotation,
+        velocity: b.velocity
+      }
+    ]);
+
     // Apply Gravity
     world.for_each(member -> {
       member.acceleration.x += world.gravity.x * member.gravity_scale;
@@ -87,19 +95,51 @@ class Echo {
     world.for_each(member -> member.acceleration.set(0, 0));
   }
   /**
-   * TODO: Undo a World's last step
+   * Undo the World's last step
    * @param world
    * @return World
    */
   public static function undo(world:World):World {
+    if (world.history != null) {
+      var state = world.history.undo();
+      if (state != null) {
+        for (item in state) {
+          for (body in world.members) {
+            if (item.id == body.id) {
+              body.x = item.x;
+              body.y = item.y;
+              body.rotation = item.rotation;
+              body.velocity = item.velocity;
+            }
+          }
+        }
+        world.refresh();
+      }
+    }
     return world;
   }
   /**
-   * TODO: Redo a World's last step
+   * Redo the World's last step
    * @param world
    * @return World
    */
   public static function redo(world:World):World {
+    if (world.history != null) {
+      var state = world.history.redo();
+      if (state != null) {
+        for (item in state) {
+          for (body in world.members) {
+            if (item.id == body.id) {
+              body.x = item.x;
+              body.y = item.y;
+              body.rotation = item.rotation;
+              body.velocity = item.velocity;
+            }
+          }
+        }
+      }
+      world.refresh();
+    }
     return world;
   }
 }

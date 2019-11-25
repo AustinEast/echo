@@ -118,7 +118,9 @@ typedef WorldOptions = {
    * The amount of iterations that occur each time the World is stepped. The higher the number, the more stable the Physics Simulation will be, at the cost of performance.
    */
   var ?iterations:Int;
-
+  /**
+   * The number of states to preserve in the World's history.
+   */
   var ?history:Int;
 }
 

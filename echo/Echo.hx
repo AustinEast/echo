@@ -7,9 +7,11 @@ import echo.World;
 import echo.data.Options;
 import echo.util.BodyOrBodies;
 
-@:expose /**
+@:expose
+/**
  * Echo holds helpful utility methods to help streamline the creation and management of Physics Simulations.
- */ class Echo {
+ */
+class Echo {
   static var listeners:Listeners = new Listeners();
   /**
    * Shortcut for creating a new `World`

@@ -42,7 +42,7 @@ class World implements IDisposable {
    * The amount of iterations that occur each time the World is stepped. The higher the number, the more stable the Physics Simulation will be, at the cost of performance.
    */
   public var iterations:Int;
-  public var history:Null<History<Array<WorldState>>>;
+  public var history:Null<History<Array<BodyState>>>;
   var init:Bool;
 
   public function new(options:WorldOptions) {

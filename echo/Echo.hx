@@ -74,7 +74,9 @@ class Echo {
         x: b.x,
         y: b.y,
         rotation: b.rotation,
-        velocity: b.velocity
+        velocity: b.velocity,
+        acceleration: b.acceleration,
+        rotational_velocity: b.rotational_velocity
       }
     ]);
 
@@ -134,6 +136,8 @@ class Echo {
               body.y = item.y;
               body.rotation = item.rotation;
               body.velocity = item.velocity;
+              body.acceleration = item.acceleration;
+              body.rotational_velocity = item.rotational_velocity;
             }
           }
         }

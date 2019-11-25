@@ -5,19 +5,23 @@ import echo.shape.Rect;
 import hxmath.math.Vector2;
 
 @:structInit
-class WorldState {
-  public var id:Int;
-  public var x:Float;
-  public var y:Float;
-  public var rotation:Float;
-  public var velocity:Vector2;
+class BodyState {
+  public final id:Int;
+  public final x:Float;
+  public final y:Float;
+  public final rotation:Float;
+  public final velocity:Vector2;
+  public final acceleration:Vector2;
+  public final rotational_velocity:Float;
 
-  public function new(id:Int, x:Float, y:Float, rotation:Float, velocity:Vector2) {
+  public function new(id:Int, x:Float, y:Float, rotation:Float, velocity:Vector2, acceleration:Vector2, rotational_velocity:Float) {
     this.id = id;
     this.x = x;
     this.y = y;
     this.rotation = rotation;
     this.velocity = velocity.clone();
+    this.acceleration = velocity.clone();
+    this.rotational_velocity = rotational_velocity;
   }
 }
 

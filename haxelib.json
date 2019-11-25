@@ -5,8 +5,8 @@
     "description": "Simple Physics Library written in Haxe",
     "contributors": ["austineast"],
     "url": "https://austineast.dev/echo",
-    "releasenote": "Polygon Support",
-    "version": "0.6.0",
+    "releasenote": "undo/redo",
+    "version": "0.7.0",
     "dependencies": {
       "hxmath": ""
     }

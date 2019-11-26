@@ -164,7 +164,7 @@ class Shape implements IProxy {
   // public function scale(v:Float) {}
   public function contains(v:Vector2):Bool return get_position() == v;
 
-  public function intersects(l:Line):Null<IntersectionData> return null;
+  public function intersect(l:Line):Null<IntersectionData> return null;
 
   public function overlaps(s:Shape):Bool return contains(s.get_position());
 

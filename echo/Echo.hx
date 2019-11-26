@@ -1,5 +1,6 @@
 package echo;
 
+import hxmath.math.Vector2;
 import echo.Body;
 import echo.Listener;
 import echo.Collisions;
@@ -61,6 +62,10 @@ class Echo {
 
     return listener;
   }
+
+  public static function cast_vectors(start:Vector2, end:Vector2) {}
+
+  public static function cast_line() {}
   /**
    * Steps a `World` forward.
    * @param world

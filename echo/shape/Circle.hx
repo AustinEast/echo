@@ -53,7 +53,7 @@ class Circle extends Shape implements IPooled {
 
   override function contains(v:Vector2):Bool return this.circle_contains(v);
 
-  override function intersects(l:Line):Null<IntersectionData> return this.circle_intersects(l);
+  override function intersect(l:Line):Null<IntersectionData> return this.circle_intersects(l);
 
   override inline function overlaps(s:Shape):Bool {
     var cd = s.collides(this);

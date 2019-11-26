@@ -106,7 +106,7 @@ class Rect extends Shape implements IPooled {
 
   override inline function contains(p:Vector2):Bool return this.rect_contains(p);
 
-  override inline function intersects(l:Line):Null<IntersectionData> return this.rect_intersects(l);
+  override inline function intersect(l:Line):Null<IntersectionData> return this.rect_intersects(l);
 
   override inline function overlaps(s:Shape):Bool {
     var cd = transformed_rect == null ? s.collides(this) : transformed_rect.collides(this);

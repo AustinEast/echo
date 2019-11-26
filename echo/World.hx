@@ -37,7 +37,7 @@ class World implements IDisposable {
   public var static_quadtree:QuadTree;
   public var listeners:Listeners;
   public var members:Array<Body>;
-  public var count(get, null):Int;
+  public var count(get, never):Int;
   /**
    * The amount of iterations that occur each time the World is stepped. The higher the number, the more stable the Physics Simulation will be, at the cost of performance.
    */

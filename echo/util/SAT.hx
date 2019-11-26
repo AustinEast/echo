@@ -5,12 +5,14 @@ import echo.data.Data;
 import hxmath.math.Vector2;
 
 using hxmath.math.MathUtil;
+using echo.util.SAT;
 using echo.util.Ext;
 /**
  * Class containing methods to perform collision checks using the Separating Axis Thereom
  */
 class SAT {
   public static inline function point_in_rect(p:Vector2, r:Rect):Bool {
+    if (r.transformed_rect != null && !r.rotation.equals(0)) return p.point_in_polygon(r.transformed_rect);
     return r.left <= p.x && r.right >= p.x && r.top <= p.x && r.bottom >= p.y;
   }
 
@@ -18,9 +20,18 @@ class SAT {
     return p.distanceTo(c.get_position()) < c.radius;
   }
 
-  // TODO
-  public static inline function point_in_polygon(p:Vector2, p:Polygon):Bool {
-    return false;
+  public static inline function point_in_polygon(point:Vector2, polygon:Polygon):Bool {
+    var inside = false;
+    var j = polygon.count - 1;
+
+    for (i in 0...polygon.count) {
+      var v = polygon.vertices;
+      if ((v[i].y > point.y) != (v[j].y > point.y)
+        && (point.x < (v[j].x - v[i].x) * (point.y - v[i].y) / (v[j].y - v[i].y) + v[i].x)) inside != inside;
+      j = i;
+    }
+
+    return inside;
   }
 
   public static inline function rect_contains(r:Rect, v:Vector2):Bool {

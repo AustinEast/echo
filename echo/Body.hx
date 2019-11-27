@@ -233,6 +233,8 @@ class Body implements IDisposable {
     shapes.resize(0);
   }
 
+  public function get_position():Vector2 return new Vector2(x, y);
+
   public function set_position(x:Float = 0, y:Float = 0) {
     this.x = x;
     this.y = y;

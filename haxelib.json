@@ -6,7 +6,7 @@
     "contributors": ["austineast"],
     "url": "https://austineast.dev/echo",
     "releasenote": "Linecasting",
-    "version": "0.8.0",
+    "version": "1.0.0",
     "dependencies": {
       "hxmath": ""
     }

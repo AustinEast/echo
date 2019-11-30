@@ -83,7 +83,6 @@ class Line implements IProxy implements IPooled {
   }
 
   public inline function point_along_ratio(ratio:Float):Vector2 {
-    //  C = B - k(A - B). k = (the distance you want) / (distance from A to B)
     return start - ratio * (start - end);
   }
 

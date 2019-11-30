@@ -24,7 +24,9 @@ class BodyState {
     this.rotational_velocity = rotational_velocity;
   }
 }
-
+/**
+ * Class containing data describing any Collisions between two Bodies.
+ */
 class Collision implements IPooled {
   public static var pool(get, never):IPool<Collision>;
   static var _pool = new Pool<Collision>(Collision);
@@ -64,7 +66,9 @@ class Collision implements IPooled {
 
   static function get_pool():IPool<Collision> return _pool;
 }
-
+/**
+ * Class containing data describing a Collision between two Shapes.
+ */
 class CollisionData implements IPooled {
   public static var pool(get, never):IPool<CollisionData>;
   static var _pool = new Pool<CollisionData>(CollisionData);
@@ -112,7 +116,9 @@ class CollisionData implements IPooled {
 
   static function get_pool():IPool<CollisionData> return _pool;
 }
-
+/**
+ * Class containing data describing any Intersections between a Line and a Body.
+ */
 class Intersection implements IPooled {
   public static var pool(get, never):IPool<Intersection>;
   static var _pool = new Pool<Intersection>(Intersection);
@@ -125,9 +131,13 @@ class Intersection implements IPooled {
    */
   public var body:Body;
   /**
-   * Array containing Data from Each Intersection found between the Line and each Shape.
+   * Array containing Data from Each Intersection found between the Line and each Shape in the Body.
    */
   public var data:Array<IntersectionData>;
+  /**
+   * Gets the IntersectionData that has the closest hit distance from the beginning of the Line.
+   */
+  public var closest(get, never):Null<IntersectionData>;
 
   public var pooled:Bool;
 
@@ -150,18 +160,39 @@ class Intersection implements IPooled {
 
   inline function new() data = [];
 
+  inline function get_closest():Null<IntersectionData> {
+    if (data.length == 0) return null;
+    if (data.length == 1) return data[0];
+
+    var closest = data[0];
+    for (i in 1...data.length) if (data[i] != null && data[i].distance < closest.distance) closest = data[i];
+    return closest;
+  }
+
   static function get_pool():IPool<Intersection> return _pool;
 }
-
+/**
+ * Class containing data describing an Intersection between a Line and a Shape.
+ */
 class IntersectionData implements IPooled {
   public static var pool(get, never):IPool<IntersectionData>;
   static var _pool = new Pool<IntersectionData>(IntersectionData);
 
   public var line:Line;
   public var shape:Shape;
+  /**
+   * The position along the line where the line hit the shape.
+   */
   public var hit:Vector2;
+  /**
+   * The distance between the start of the line and the hit position.
+   */
   public var distance:Float;
+  /**
+   * The length of the line that has overlapped the shape.
+   */
   public var overlap:Float;
+
   public var pooled:Bool;
 
   public static inline function get(distance:Float, overlap:Float, x:Float, y:Float):IntersectionData {

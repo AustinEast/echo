@@ -1,7 +1,7 @@
 package echo;
 
 import haxe.ds.Either;
-import echo.data.Data.IntersectionData;
+import echo.data.Data;
 import hxmath.math.Vector2;
 import echo.Body;
 import echo.Listener;
@@ -65,30 +65,56 @@ class Echo {
 
     return listener;
   }
-
-  public static inline function linecast_floats(x:Float, y:Float, dx:Float, dy:Float, test:BodyOrBodies):Null<IntersectionData> {
+  /**
+   * Casts a Line Created from the supplied floats, returning the Intersection with the closest Body.
+   * @param x The X position to start the cast.
+   * @param y The Y position to start the cast.
+   * @param dx The X position to end the cast.
+   * @param dy The Y position to end the cast.
+   * @param test The Body or Array of Bodies to Cast the Line at.
+   * @return Null<Intersection> the Intersection with the closest Body, if any occured.
+   */
+  public static inline function linecast_floats(x:Float, y:Float, dx:Float, dy:Float, test:BodyOrBodies):Null<Intersection> {
     var line = Line.get(x, y, dx, dy);
     var result = linecast(line, test);
     line.put();
     return result;
   }
-
-  public static inline function linecast_vector(start:Vector2, angle:Float, length:Float, test:BodyOrBodies):Null<IntersectionData> {
+  /**
+   * Casts a Line Created from the supplied vector, angle, and length returning the Intersection with the closest Body.
+   * @param start  The position to start the cast.
+   * @param angle  The anglet of the casted Line.
+   * @param length The lengh of the casted Line.
+   * @param test The Body or Array of Bodies to Cast the Line at.
+   * @return Null<Intersection> the Intersection with the closest Body, if any occured.
+   */
+  public static inline function linecast_vector(start:Vector2, angle:Float, length:Float, test:BodyOrBodies):Null<Intersection> {
     var line = Line.get_from_vector(start, angle, length);
     var result = linecast(line, test);
     line.put();
     return result;
   }
-
-  public static inline function linecast_vectors(start:Vector2, end:Vector2, test:BodyOrBodies):Null<IntersectionData> {
+  /**
+   * Casts a Line Created from the supplied vectors, returning the Intersection with the closest Body.
+   * @param start The position to start the cast.
+   * @param end The position to end the cast.
+   * @param test The Body or Array of Bodies to Cast the Line at.
+   * @return Null<Intersection> the Intersection with the closest Body, if any occured.
+   */
+  public static inline function linecast_vectors(start:Vector2, end:Vector2, test:BodyOrBodies):Null<Intersection> {
     var line = Line.get_from_vectors(start, end);
     var result = linecast(line, test);
     line.put();
     return result;
   }
-
-  public static inline function linecast(line:Line, test:BodyOrBodies):Null<IntersectionData> {
-    var closest:Null<IntersectionData> = null;
+  /**
+   * Casts a Line, returning the Intersection with the closest Body.
+   * @param line Line to Cast.
+   * @param test The Body or Array of Bodies to Cast the Line at.
+   * @return Null<Intersection> the Intersection with the closest Body, if any occured.
+   */
+  public static inline function linecast(line:Line, test:BodyOrBodies):Null<Intersection> {
+    var closest:Null<Intersection> = null;
     var lb = Rect.get_from_min_max(Math.min(line.start.x, line.end.x), Math.min(line.start.y, line.end.y), Math.max(line.start.x, line.end.x),
       Math.max(line.start.y, line.end.y));
     switch (cast test : Either<Body, Array<Body>>) {
@@ -97,7 +123,10 @@ class Echo {
         if (lb.overlaps(bb)) {
           for (i in 0...body.shapes.length) {
             var result = line.intersect(body.shapes[i]);
-            if (result != null && (closest == null || closest.distance > result.distance)) closest = result;
+            if (result != null) {
+              if (closest == null) closest = Intersection.get(line, body);
+              closest.data.push(result);
+            }
           }
         }
         bb.put();
@@ -105,17 +134,69 @@ class Echo {
         for (body in arr) {
           if (body == null) continue;
           var bb = body.bounds();
+          var temp = Intersection.get(line, body);
           if (lb.overlaps(bb)) {
             for (i in 0...body.shapes.length) {
               var result = line.intersect(body.shapes[i]);
-              if (result != null && (closest == null || closest.distance > result.distance)) closest = result;
+              if (result != null) temp.data.push(result);
             }
           }
           bb.put();
+          // loop to check if closest
+          if (temp.data.length > 0 && (closest == null || closest.closest.distance > temp.closest.distance)) {
+            if (closest != null) closest.put();
+            closest = temp;
+          }
+          else temp.put();
         }
     }
     lb.put();
     return closest;
+  }
+  /**
+   * Casts a Line, returning all Intersections.
+   * @param line Line to Cast.
+   * @param test The Body or Array of Bodies to Cast the Line at.
+   * @return Array<Intersection> All Intersections found. if none occured, the length will be 0.
+   */
+  public static inline function linecast_all(line:Line, test:BodyOrBodies):Array<Intersection> {
+    var intersections:Array<Intersection> = [];
+    var lb = Rect.get_from_min_max(Math.min(line.start.x, line.end.x), Math.min(line.start.y, line.end.y), Math.max(line.start.x, line.end.x),
+      Math.max(line.start.y, line.end.y));
+    switch (cast test : Either<Body, Array<Body>>) {
+      case Left(body):
+        var temp = Intersection.get(line, body);
+        var bb = body.bounds();
+        if (lb.overlaps(bb)) {
+          for (i in 0...body.shapes.length) {
+            var result = line.intersect(body.shapes[i]);
+            if (result != null) {
+              temp.data.push(result);
+            }
+          }
+        }
+        bb.put();
+        if (temp.data.length > 0) intersections.push(temp);
+        else temp.put();
+      case Right(arr):
+        for (body in arr) {
+          if (body == null) continue;
+          var bb = body.bounds();
+          var temp = Intersection.get(line, body);
+          if (lb.overlaps(bb)) {
+            for (i in 0...body.shapes.length) {
+              var result = line.intersect(body.shapes[i]);
+              if (result != null) temp.data.push(result);
+            }
+          }
+          bb.put();
+          if (temp.data.length > 0) intersections.push(temp);
+          else temp.put();
+        }
+    }
+    lb.put();
+
+    return intersections;
   }
   /**
    * Steps a `World` forward.
@@ -123,7 +204,7 @@ class Echo {
    * @param dt
    */
   public static function step(world:World, dt:Float) {
-    // TODO: Save World State to History
+    // Save World State to History
     if (world.history != null) world.history.add([
       for (b in world.members) {
         id: b.id,

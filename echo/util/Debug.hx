@@ -25,6 +25,18 @@ class Debug {
     world.for_each(member -> trace(' - Body #${member.id} { x: ${member.x} , y: ${member.y}, colliding: ${member.collided} }'));
   }
 
+  // Override Me!
+  public function draw_line(from_x:Float, from_y:Float, to_x:Float, to_y:Float, color:Int, alpha:Float = 1) {}
+
+  // Override Me!
+  public function draw_rect(x:Float, y:Float, width:Float, height:Float, color:Int, ?stroke:Int, alpha:Float = 1) {}
+
+  // Override Me!
+  public function draw_circle(x:Float, y:Float, radius:Float, color:Int, ?stroke:Int, alpha:Float = 1) {}
+
+  // Override Me!
+  public function clear() {}
+
   public function draw(world:World, clear_canvas:Bool = true) {
     if (clear_canvas) clear();
     if (draw_quadtree) {
@@ -76,17 +88,14 @@ class Debug {
     });
   }
 
-  public function draw_intersection(i:IntersectionData) {
-    if (i == null) return;
-    draw_line(i.line.start.x, i.line.start.y, i.hit.x, i.hit.y, intersection_color);
-    draw_line(i.hit.x, i.hit.y, i.line.end.x, i.line.end.y, intersection_overlap_color);
+  public function draw_intersection(intersection:Intersection, draw_overlap:Bool = true) {
+    if (intersection == null) return;
+    var closest = intersection.closest;
+    if (closest == null) return;
+
+    draw_line(closest.line.start.x, closest.line.start.y, closest.hit.x, closest.hit.y, intersection_color);
+    if (draw_overlap) draw_line(closest.hit.x, closest.hit.y, closest.line.end.x, closest.line.end.y, intersection_overlap_color);
   }
-
-  public function draw_line(from_x:Float, from_y:Float, to_x:Float, to_y:Float, color:Int, alpha:Float = 1) {}
-
-  public function draw_rect(x:Float, y:Float, width:Float, height:Float, color:Int, ?stroke:Int, alpha:Float = 1) {}
-
-  public function draw_circle(x:Float, y:Float, radius:Float, color:Int, ?stroke:Int, alpha:Float = 1) {}
 
   public function draw_polygon(count:Int, vertices:Array<Vector2>, color:Int, ?stroke:Int, alpha:Float = 1) {
     if (count < 2) return;
@@ -94,8 +103,6 @@ class Debug {
     var vl = count - 1;
     draw_line(vertices[vl].x, vertices[vl].y, vertices[0].x, vertices[0].y, stroke, 1);
   }
-
-  public function clear() {}
 
   function draw_qd(tree:QuadTree) for (child in tree.children) {
     draw_rect(child.left, child.top, child.width, child.height, quadtree_fill_color, quadtree_color, 0.1);

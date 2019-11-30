@@ -5,8 +5,8 @@
     "description": "Simple Physics Library written in Haxe",
     "contributors": ["austineast"],
     "url": "https://austineast.dev/echo",
-    "releasenote": "Linecasting",
-    "version": "1.0.0",
+    "releasenote": "Linecasting refinements",
+    "version": "1.1.0",
     "dependencies": {
       "hxmath": ""
     }

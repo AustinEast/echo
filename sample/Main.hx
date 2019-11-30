@@ -40,7 +40,8 @@ class Main extends BaseApp {
       ShapesState,
       GroupsState,
       StaticState,
-      LinecastState
+      LinecastState,
+      Linecast2State
     ];
     index = 0;
     // Create a State Manager and pass it the World and the first Sample

@@ -17,7 +17,7 @@ class LinecastState extends BaseState {
       var b = new Body({
         x: (world.width * 0.35) * Math.cos(i) + world.width * 0.5,
         y: (world.height * 0.35) * Math.sin(i) + world.height * 0.5,
-        mass: 0,
+        gravity_scale: 0,
         shape: {
           type: Random.chance() ? POLYGON : CIRCLE,
           radius: Random.range(16, 32),

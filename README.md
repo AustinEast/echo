@@ -75,7 +75,7 @@ A Body's collider is represented by different Shapes. Available Shapes:
 
 #### Lines
 
-Coming Soon
+Use Lines to perform Linecasts against other Lines, Bodies, and Shapes.
 
 #### Listeners
 

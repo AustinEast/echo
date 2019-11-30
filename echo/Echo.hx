@@ -1,11 +1,14 @@
 package echo;
 
+import haxe.ds.Either;
+import echo.data.Data.IntersectionData;
 import hxmath.math.Vector2;
 import echo.Body;
 import echo.Listener;
 import echo.Collisions;
 import echo.World;
 import echo.data.Options;
+import echo.shape.Rect;
 import echo.util.BodyOrBodies;
 
 @:expose
@@ -63,9 +66,57 @@ class Echo {
     return listener;
   }
 
-  public static function cast_vectors(start:Vector2, end:Vector2) {}
+  public static inline function linecast_floats(x:Float, y:Float, dx:Float, dy:Float, test:BodyOrBodies):Null<IntersectionData> {
+    var line = Line.get(x, y, dx, dy);
+    var result = linecast(line, test);
+    line.put();
+    return result;
+  }
 
-  public static function cast_line() {}
+  public static inline function linecast_vector(start:Vector2, angle:Float, length:Float, test:BodyOrBodies):Null<IntersectionData> {
+    var line = Line.get_from_vector(start, angle, length);
+    var result = linecast(line, test);
+    line.put();
+    return result;
+  }
+
+  public static inline function linecast_vectors(start:Vector2, end:Vector2, test:BodyOrBodies):Null<IntersectionData> {
+    var line = Line.get_from_vectors(start, end);
+    var result = linecast(line, test);
+    line.put();
+    return result;
+  }
+
+  public static inline function linecast(line:Line, test:BodyOrBodies):Null<IntersectionData> {
+    var closest:Null<IntersectionData> = null;
+    var lb = Rect.get_from_min_max(Math.min(line.start.x, line.end.x), Math.min(line.start.y, line.end.y), Math.max(line.start.x, line.end.x),
+      Math.max(line.start.y, line.end.y));
+    switch (cast test : Either<Body, Array<Body>>) {
+      case Left(body):
+        var bb = body.bounds();
+        if (lb.overlaps(bb)) {
+          for (i in 0...body.shapes.length) {
+            var result = line.intersect(body.shapes[i]);
+            if (result != null && (closest == null || closest.distance > result.distance)) closest = result;
+          }
+        }
+        bb.put();
+      case Right(arr):
+        for (body in arr) {
+          if (body == null) continue;
+          var bb = body.bounds();
+          if (lb.overlaps(bb)) {
+            for (i in 0...body.shapes.length) {
+              var result = line.intersect(body.shapes[i]);
+              if (result != null && (closest == null || closest.distance > result.distance)) closest = result;
+            }
+          }
+          bb.put();
+        }
+    }
+    lb.put();
+    return closest;
+  }
   /**
    * Steps a `World` forward.
    * @param world

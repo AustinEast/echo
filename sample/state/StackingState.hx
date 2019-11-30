@@ -2,7 +2,6 @@ package state;
 
 import echo.Body;
 import echo.World;
-import ghost.FSM;
 import ghost.Random;
 
 class StackingState extends BaseState {

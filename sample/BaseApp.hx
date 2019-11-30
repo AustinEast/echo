@@ -5,10 +5,11 @@ import echo.util.Debug;
 import ghost.FSM;
 
 class BaseApp extends hxd.App {
+  public var debug:HeapsDebug;
+
   var sample_states:Array<Class<State<World>>>;
   var fsm:FSM<World>;
   var fui:h2d.Flow;
-  var debug:HeapsDebug;
   var index:Int = 0;
 
   function reset_state() return fsm.set(Type.createInstance(sample_states[index], []));

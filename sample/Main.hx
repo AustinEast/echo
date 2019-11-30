@@ -39,7 +39,8 @@ class Main extends BaseApp {
       MultiShapeState,
       ShapesState,
       GroupsState,
-      StaticState
+      StaticState,
+      LinecastState
     ];
     index = 0;
     // Create a State Manager and pass it the World and the first Sample
@@ -57,6 +58,9 @@ class Main extends BaseApp {
   }
 
   override function update(dt:Float) {
+    // Draw the World
+    debug.draw(world);
+
     if (world.history != null) {
       // Press Left to undo
       if (Key.isDown(Key.LEFT)) {
@@ -77,8 +81,7 @@ class Main extends BaseApp {
     fsm.step(fdt);
     // Step the World Forward
     if (playing) world.step(fdt);
-    // Draw the new World
-    debug.draw(world);
+
     // Update GUI text
     members_text.text = 'Bodies: ${world.count}';
     fps_text.text = 'FPS: ${engine.fps}';

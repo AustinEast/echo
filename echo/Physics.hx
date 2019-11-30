@@ -95,6 +95,9 @@ class Physics {
     }
   }
 
+  // TODO
+  // public static function resolve_intersection(id:Intersection, correction_threshold:Float = 0.013, percent_correction:Float = 0.9) {}
+
   public static inline function compute_velocity(v:Float, a:Float, d:Float, m:Float, dt:Float) {
     // Apply Acceleration to Velocity
     if (!a.equals(0)) {

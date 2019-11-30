@@ -1,5 +1,6 @@
 package echo.util;
 
+import echo.data.Data;
 import hxmath.math.Vector2;
 import echo.shape.*;
 
@@ -14,6 +15,8 @@ class Debug {
   public var shape_color:Int;
   public var shape_fill_color:Int;
   public var shape_collided_color:Int;
+  public var intersection_color:Int;
+  public var intersection_overlap_color:Int;
   public var quadtree_color:Int;
   public var quadtree_fill_color:Int;
 
@@ -73,13 +76,19 @@ class Debug {
     });
   }
 
-  public function draw_line(from_x:Float, from_y:Float, to_x:Float, to_y:Float, color:Int, alpha:Float = 1.) {}
+  public function draw_intersection(i:IntersectionData) {
+    if (i == null) return;
+    draw_line(i.line.start.x, i.line.start.y, i.hit.x, i.hit.y, intersection_color);
+    draw_line(i.hit.x, i.hit.y, i.line.end.x, i.line.end.y, intersection_overlap_color);
+  }
 
-  public function draw_rect(x:Float, y:Float, width:Float, height:Float, color:Int, ?stroke:Int, alpha:Float = 1.) {}
+  public function draw_line(from_x:Float, from_y:Float, to_x:Float, to_y:Float, color:Int, alpha:Float = 1) {}
 
-  public function draw_circle(x:Float, y:Float, radius:Float, color:Int, ?stroke:Int, alpha:Float = 1.) {}
+  public function draw_rect(x:Float, y:Float, width:Float, height:Float, color:Int, ?stroke:Int, alpha:Float = 1) {}
 
-  public function draw_polygon(count:Int, vertices:Array<Vector2>, color:Int, ?stroke:Int, alpha:Float = 1.) {
+  public function draw_circle(x:Float, y:Float, radius:Float, color:Int, ?stroke:Int, alpha:Float = 1) {}
+
+  public function draw_polygon(count:Int, vertices:Array<Vector2>, color:Int, ?stroke:Int, alpha:Float = 1) {
     if (count < 2) return;
     for (i in 1...count) draw_line(vertices[i - 1].x, vertices[i - 1].y, vertices[i].x, vertices[i].y, stroke, 1);
     var vl = count - 1;
@@ -104,6 +113,8 @@ class HeapsDebug extends Debug {
     shape_collided_color = 0x00d95763;
     quadtree_color = 0x00847e87;
     quadtree_fill_color = 0x009badb7;
+    intersection_color = 0x00cbdbfc;
+    intersection_overlap_color = 0x00d95763;
 
     canvas = new h2d.Graphics(parent);
   }

@@ -113,7 +113,83 @@ class CollisionData implements IPooled {
   static function get_pool():IPool<CollisionData> return _pool;
 }
 
-typedef IntersectionData = {}
+class Intersection implements IPooled {
+  public static var pool(get, never):IPool<Intersection>;
+  static var _pool = new Pool<Intersection>(Intersection);
+  /**
+   * Line.
+   */
+  public var line:Line;
+  /**
+   * Body.
+   */
+  public var body:Body;
+  /**
+   * Array containing Data from Each Intersection found between the Line and each Shape.
+   */
+  public var data:Array<IntersectionData>;
+
+  public var pooled:Bool;
+
+  public static inline function get(line:Line, body:Body):Intersection {
+    var i = _pool.get();
+    i.line = line;
+    i.body = body;
+    i.data.resize(0);
+    i.pooled = false;
+    return i;
+  }
+
+  public function put() {
+    if (!pooled) {
+      for (d in data) d.put();
+      pooled = true;
+      _pool.put_unsafe(this);
+    }
+  }
+
+  inline function new() data = [];
+
+  static function get_pool():IPool<Intersection> return _pool;
+}
+
+class IntersectionData implements IPooled {
+  public static var pool(get, never):IPool<IntersectionData>;
+  static var _pool = new Pool<IntersectionData>(IntersectionData);
+
+  public var line:Line;
+  public var shape:Shape;
+  public var hit:Vector2;
+  public var distance:Float;
+  public var overlap:Float;
+  public var pooled:Bool;
+
+  public static inline function get(distance:Float, overlap:Float, x:Float, y:Float):IntersectionData {
+    var i = _pool.get();
+    i.line = null;
+    i.shape = null;
+    i.set(distance, overlap, x, y);
+    i.pooled = false;
+    return i;
+  }
+
+  inline function new() hit = new Vector2(0, 0);
+
+  public inline function set(distance:Float, overlap:Float, x:Float, y:Float) {
+    this.distance = distance;
+    this.overlap = overlap;
+    hit.set(x, y);
+  }
+
+  public function put() {
+    if (!pooled) {
+      pooled = true;
+      _pool.put_unsafe(this);
+    }
+  }
+
+  static function get_pool():IPool<IntersectionData> return _pool;
+}
 
 typedef QuadTreeData = {
   /**

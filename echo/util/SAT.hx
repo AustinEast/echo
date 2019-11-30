@@ -46,19 +46,114 @@ class SAT {
     return point_in_polygon(v, p);
   }
 
-  // TODO
-  public static inline function line_interects_rect(l:Line, r:Rect):Null<IntersectionData> {
+  public static inline function line_interects_line(line1:Line, line2:Line):Null<IntersectionData> {
+    var d = ((line2.dy - line2.y) * (line1.dx - line1.x)) - ((line2.dx - line2.x) * (line1.dy - line1.y));
+
+    if (d.equals(0)) return null;
+
+    var ua = (((line2.dx - line2.x) * (line1.y - line2.y)) - ((line2.dy - line2.y) * (line1.x - line2.x))) / d;
+    var ub = (((line1.dx - line1.x) * (line1.y - line2.y)) - ((line1.dy - line1.y) * (line1.x - line2.x))) / d;
+
+    if ((ua < 0) || (ua > 1) || (ub < 0) || (ub > 1)) return null;
+
+    var hit = line1.start + ua * (line1.end - line1.start);
+    var distance = line1.start.distanceTo(hit);
+    var overlap = line1.length - distance;
+
+    return IntersectionData.get(distance, overlap, hit.x, hit.y);
+  }
+
+  public static function line_interects_rect(l:Line, r:Rect):Null<IntersectionData> {
+    if (r.transformed_rect != null && !r.rotation.equals(0)) return r.transformed_rect.intersect(l);
+    var closest:Null<IntersectionData> = null;
+
+    var left = r.left;
+    var right = r.right;
+    var top = r.top;
+    var bottom = r.bottom;
+
+    var line = Line.get(left, top, right, top);
+    var result = l.line_interects_line(line);
+    if (result != null) closest = result;
+
+    line.set(right, top, right, bottom);
+    result = l.line_interects_line(line);
+    if (result != null && (closest == null || closest.distance > result.distance)) closest = result;
+
+    line.set(right, bottom, left, bottom);
+    result = l.line_interects_line(line);
+    if (result != null && (closest == null || closest.distance > result.distance)) closest = result;
+
+    line.set(left, bottom, left, top);
+    result = l.line_interects_line(line);
+    if (result != null && (closest == null || closest.distance > result.distance)) closest = result;
+
+    if (closest != null) {
+      closest.line = l;
+      closest.shape = r;
+    }
+
+    return closest;
+  }
+
+  public static function line_intersects_circle(l:Line, c:Circle):Null<IntersectionData> {
+    var d = l.end - l.start;
+    var f = l.start - c.get_position();
+
+    var a = d * d;
+    var b = 2 * (f * d);
+    var e = (f * f) - (c.radius * c.radius);
+
+    var discriminant = b * b - 4 * a * e;
+    if (discriminant < 0) return null;
+
+    discriminant = Math.sqrt(discriminant);
+
+    var t1 = (-b - discriminant) / (2 * a);
+    var t2 = (-b + discriminant) / (2 * a);
+
+    if (t1 >= 0 && t1 <= 1) {
+      var hit = l.point_along_ratio(t1);
+      var distance = l.start.distanceTo(hit);
+      var overlap = l.length - distance;
+
+      var i = IntersectionData.get(distance, overlap, hit.x, hit.y);
+      i.line = l;
+      i.shape = c;
+      return i;
+    }
+
+    if (t2 >= 0 && t2 <= 1) {
+      var hit = l.point_along_ratio(t2);
+      var distance = l.start.distanceTo(hit);
+      var overlap = l.length - distance;
+
+      var i = IntersectionData.get(distance, overlap, hit.x, hit.y);
+      i.line = l;
+      i.shape = c;
+      return i;
+    }
+
+    // No intersection
     return null;
   }
 
-  // TODO
-  public static inline function line_intersects_circle(l:Line, c:Circle):Null<IntersectionData> {
-    return null;
-  }
+  public static function line_intersects_polygon(l:Line, p:Polygon):Null<IntersectionData> {
+    var closest:Null<IntersectionData> = null;
+    var line = Line.get();
 
-  // TODO
-  public static inline function line_intersects_polygon(l:Line, p:Polygon):Null<IntersectionData> {
-    return null;
+    for (i in 0...p.count) {
+      line.set_from_vectors(p.vertices[i], p.vertices[(i + 1) % p.count]);
+      var result = l.line_interects_line(line);
+      if (result != null && (closest == null || closest.distance > result.distance)) closest = result;
+    }
+
+    if (closest != null) {
+      closest.line = l;
+      closest.shape = p;
+    }
+
+    return closest;
   }
 
   public static inline function rect_intersects(r:Rect, l:Line):Null<IntersectionData> {

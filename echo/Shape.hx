@@ -29,7 +29,8 @@ class Shape implements IProxy {
       case CIRCLE:
         s = Circle.get(options.offset_x, options.offset_y, options.radius);
       case POLYGON:
-        s = Polygon.get(options.offset_x, options.offset_y, options.sides, options.radius);
+        if (options.vertices != null) s = Polygon.get_from_vertices(options.offset_x, options.offset_y, 0, options.vertices);
+        else s = Polygon.get(options.offset_x, options.offset_y, options.sides, options.radius);
     }
     s.solid = options.solid;
     return s;

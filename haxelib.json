@@ -5,8 +5,8 @@
     "description": "Simple Physics Library written in Haxe",
     "contributors": ["austineast"],
     "url": "https://austineast.dev/echo",
-    "releasenote": "Linecasting refinements",
-    "version": "1.1.0",
+    "releasenote": "fixed getting polygons with vertices",
+    "version": "1.1.1",
     "dependencies": {
       "hxmath": ""
     }

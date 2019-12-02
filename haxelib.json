@@ -5,8 +5,8 @@
     "description": "Simple Physics Library written in Haxe",
     "contributors": ["austineast"],
     "url": "https://austineast.dev/echo",
-    "releasenote": "fixed getting polygons with vertices",
-    "version": "1.1.1",
+    "releasenote": "fixed rect and polygon null ref error",
+    "version": "1.1.2",
     "dependencies": {
       "hxmath": ""
     }

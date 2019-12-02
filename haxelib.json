@@ -5,8 +5,8 @@
     "description": "Simple Physics Library written in Haxe",
     "contributors": ["austineast"],
     "url": "https://austineast.dev/echo",
-    "releasenote": "fixed rect and polygon null ref error",
-    "version": "1.1.2",
+    "releasenote": "TileMap Collider Generation",
+    "version": "1.2.0",
     "dependencies": {
       "hxmath": ""
     }

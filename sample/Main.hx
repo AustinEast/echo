@@ -41,7 +41,8 @@ class Main extends BaseApp {
       GroupsState,
       StaticState,
       LinecastState,
-      Linecast2State
+      Linecast2State,
+      TileMapState
     ];
     index = 0;
     // Create a State Manager and pass it the World and the first Sample

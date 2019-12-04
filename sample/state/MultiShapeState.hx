@@ -18,11 +18,6 @@ class MultiShapeState extends BaseState {
         // rotational_velocity: 25,
         rotation: Random.range(0, 360),
         shapes: [
-          // {
-          //   type: RECT,
-          //   width: 32,
-          //   radius: 16
-          // },
           {
             type: i % 2 == 0 ? CIRCLE : RECT,
             offset_x: 16,

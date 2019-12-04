@@ -82,7 +82,7 @@ class TileMapState extends BaseState {
 
     // Reset any off-screen Bodies
     world.for_each((member) -> {
-      if (offscreen(member, world)) {
+      if (member != cursor && offscreen(member, world)) {
         member.velocity.set(0, 0);
         member.set_position(Random.range(0, world.width), 0);
       }

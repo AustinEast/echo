@@ -156,7 +156,7 @@ class Polygon extends Shape implements IPooled {
       var pos = parent_frame.transformFrom(get_local_position());
       _x = pos.x;
       _y = pos.y;
-      _rotation = parent_frame.angleDegrees.degToRad() + local_rotation;
+      _rotation = parent_frame.angleDegrees + local_rotation;
     }
     else {
       _x = local_x;
@@ -232,11 +232,11 @@ class Polygon extends Shape implements IPooled {
     var pos = get_local_position();
     vertices.resize(0);
     local_frame.offset.set(pos.x, pos.y);
-    local_frame.angleDegrees = rotation;
+    local_frame.angleDegrees = local_rotation;
+    if (parent_frame != null) local_frame = parent_frame.concat(local_frame);
     for (i in 0...count) {
       if (local_vertices[i] == null) continue;
-      if (parent_frame == null) vertices[i] = local_frame.transformFrom(local_vertices[i].clone());
-      else vertices[i] = parent_frame.concat(local_frame).transformFrom(local_vertices[i].clone());
+      vertices[i] = local_frame.transformFrom(local_vertices[i].clone());
     }
   }
   /**

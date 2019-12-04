@@ -148,7 +148,7 @@ class Shape implements IProxy {
 
   public function set_parent(?frame:Frame2) {
     parent_frame = frame;
-    if (parent_frame != null) sync();
+    sync();
   }
   /**
    * Returns an AABB `Rect` representing the bounds of the `Shape`.

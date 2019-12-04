@@ -130,7 +130,7 @@ class Rect extends Shape implements IPooled {
       var pos = parent_frame.transformFrom(get_local_position());
       _x = pos.x;
       _y = pos.y;
-      _rotation = parent_frame.angleDegrees.degToRad() + local_rotation;
+      _rotation = parent_frame.angleDegrees + local_rotation;
     }
     else {
       _x = local_x;

@@ -74,7 +74,8 @@ class Circle extends Shape implements IPooled {
 
   override inline function sync() {
     if (parent_frame != null) {
-      var pos = parent_frame.transformFrom(get_local_position());
+      sync_pos.set(local_x, local_y);
+      var pos = parent_frame.transformFrom(sync_pos);
       _x = pos.x;
       _y = pos.y;
       _rotation = parent_frame.angleDegrees + local_rotation;

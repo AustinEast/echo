@@ -88,5 +88,7 @@ class Line implements IProxy implements IPooled {
 
   public inline function get_length() return start.distanceTo(end);
 
+  function toString() return 'Line: {start: $start, end: $end}';
+
   static function get_pool():IPool<Line> return _pool;
 }

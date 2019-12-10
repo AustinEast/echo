@@ -66,6 +66,7 @@ class Shape implements IProxy {
    * @param y
    */
   inline function new(x:Float = 0, y:Float = 0, rotation:Float = 0) {
+    sync_pos = new Vector2(0, 0);
     solid = true;
     local_x = _x = x;
     local_y = _y = y;
@@ -80,15 +81,15 @@ class Shape implements IProxy {
    *
    * If added to a `Body`, this value is treated as an offset to the Body's X position.
    */
-  public var x(get, never):Float;
+  public var x(get, set):Float;
   /**
    * The Shape's position on the Y axis.
    *
    * If added to a `Body`, this value is treated as an offset to the Body's Y position.
    */
-  public var y(get, never):Float;
+  public var y(get, set):Float;
 
-  public var rotation(get, never):Float;
+  public var rotation(get, set):Float;
 
   public var local_x(default, set):Float;
 
@@ -117,10 +118,16 @@ class Shape implements IProxy {
    * The Right Bounds of the Shape.
    */
   public var right(get, never):Float;
-
+  /**
+   * Flag to determine if the Shape has collided in the last `World` step. Used Internally for Debugging.
+   */
   public var collided:Bool;
 
   var parent_frame:Frame2;
+  /**
+   * A cached `Vector2` used to reduce allocations. Used Internally.
+   */
+  var sync_pos:Vector2;
 
   var _x:Float;
 
@@ -177,6 +184,15 @@ class Shape implements IProxy {
 
   function collide_polygon(p:Polygon):Null<CollisionData> return null;
 
+  function toString() {
+    var s = switch (type) {
+      case RECT: 'rect';
+      case CIRCLE: 'circle';
+      case POLYGON: 'polygon';
+    }
+    return 'Shape: {type: $s, x: $x, y: $y, rotation: $rotation}';
+  }
+
   // getters
   inline function get_x():Float return _x;
 
@@ -193,6 +209,29 @@ class Shape implements IProxy {
   function get_right():Float return x;
 
   // setters
+  inline function set_x(value:Float):Float {
+    if (parent_frame == null) return local_x = value;
+
+    var pos = sync_pos.set(value, y);
+    set_local_position(parent_frame.transformTo(pos));
+    return _x;
+  }
+
+  inline function set_y(value:Float):Float {
+    if (parent_frame == null) return local_y = value;
+
+    var pos = sync_pos.set(x, value);
+    set_local_position(parent_frame.transformTo(pos));
+    return _y;
+  }
+
+  inline function set_rotation(value:Float):Float {
+    if (parent_frame == null) return local_rotation = value;
+
+    local_rotation = value - parent_frame.angleDegrees;
+    return _rotation;
+  }
+
   inline function set_local_x(value:Float):Float {
     local_x = value;
 

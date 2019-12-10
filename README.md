@@ -81,6 +81,30 @@ Use Lines to perform Linecasts against other Lines, Bodies, and Shapes.
 
 Listeners keep track of collisions between Bodies - enacting callbacks and physics responses depending on their configurations.
 
+### Integration
+
+Echo has a couple of ways to help integrate itself into codebases through the `Body` class. 
+
+First, the `Body` class has two public fields named `on_move` and `on_rotate`. If these are set on a body, they'll be called any time the body moves or rotates:
+```
+var body = new echo.Body();
+body.on_move = (x,y) -> entity.position.set(x,y);
+body.on_rotate = (rotation) -> entity.rotation = rotation;
+```
+
+Second, a build macro is available to add custom fields to the `Body` class, such as an `Entity` class:
+
+in .hxml:
+```
+--macro echo.Macros.add_data("entity", "some.package.Entity")
+```
+
+in Main.hx
+```
+var body = new echo.Body();
+body.entity = new some.package.Entity();
+```
+
 ### Example
 ```haxe
 import echo.Echo;

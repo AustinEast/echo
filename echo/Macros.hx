@@ -13,7 +13,13 @@ class Macros {
     for (f in dataFields) fields.push(f);
     return fields;
   }
-
+  /**
+   * Build Macro to add extra fields to the body class. Inspired by [@Yanrishatum](https://github.com/Yanrishatum).
+   *
+   * Example: in build.hxml - `--macro echo.Macros.add_data("entity", "some.package.Entity")
+   * @param name
+   * @param type
+   */
   public static function add_data(name:String, type:String) {
     dataFields.push({
       name: name,

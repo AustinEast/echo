@@ -123,9 +123,13 @@ class Body implements IDisposable {
   public var collided:Bool;
 
   public var frame:Frame2;
-
+  /**
+   * If set, this method is called whenever the Body's X or Y changes.
+   */
   public var on_move:Null<Float->Float->Void>;
-
+  /**
+   * If set, this method is called whenever the Body's rotation changes.
+   */
   public var on_rotate:Null<Float->Void>;
 
   @:allow(echo.Physics.step)

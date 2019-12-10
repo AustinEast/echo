@@ -15,6 +15,7 @@ using echo.util.Ext;
  *
  * Bodies have position, velocity, mass, an optional collider shape, and many other properties that are used in a `World` simulation.
  */
+@:build(echo.Macros.build_body())
 class Body implements IDisposable {
   /**
    * Default Body Options
@@ -40,8 +41,10 @@ class Body implements IDisposable {
   public var shape(get, set):Null<Shape>;
   /**
    * The Body's array of `Shape` objects. If the array **isn't** empty, these `Shape` objects act as the Body's Collider, allowing it to be checked for Collisions.
+   *
+   * NOTE: If adding shapes directly to this Array, make sure to parent the Shape to the Body (ie `shape.set_parent(body);`).
    */
-  public var shapes:Array<Shape>;
+  public var shapes(default, null):Array<Shape>;
   /**
    * Flag to set how a Body is affected by Collisions.
    *
@@ -120,6 +123,10 @@ class Body implements IDisposable {
   public var collided:Bool;
 
   public var frame:Frame2;
+
+  public var on_move:Null<Float->Float->Void>;
+
+  public var on_rotate:Null<Float->Void>;
 
   @:allow(echo.Physics.step)
   public var last_x(default, null):Float;
@@ -313,7 +320,11 @@ class Body implements IDisposable {
     drag = null;
     data = null;
     cache = null;
+    on_move = null;
+    on_rotate = null;
   }
+
+  function toString() return 'Body: {id: $id, x: $x, y: $y, rotation: $rotation}';
 
   inline function get_shape() return shapes[0];
 
@@ -327,6 +338,8 @@ class Body implements IDisposable {
     }
     else refresh_cache();
 
+    if (on_move != null) on_move(x, y);
+
     return x;
   }
 
@@ -339,10 +352,17 @@ class Body implements IDisposable {
     }
     else refresh_cache();
 
+    if (on_move != null) on_move(x, y);
+
     return y;
   }
 
-  inline function set_shape(value:Shape) return shapes[0] = value;
+  inline function set_shape(value:Shape) {
+    if (shapes[0] != null) shapes[0].put();
+    shapes[0] = value;
+    shapes[0].set_parent(frame);
+    return shapes[0];
+  }
 
   inline function set_rotation(value:Float):Float {
     rotation = value;
@@ -352,6 +372,8 @@ class Body implements IDisposable {
       sync_shapes();
     }
     else refresh_cache();
+
+    if (on_rotate != null) on_rotate(rotation);
 
     return rotation;
   }

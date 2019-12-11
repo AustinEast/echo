@@ -94,7 +94,7 @@ body.on_rotate = (rotation) -> entity.rotation = rotation;
 
 Second, a build macro is available to add custom fields to the `Body` class, such as an `Entity` class:
 
-in .hxml:
+in build.hxml:
 ```
 --macro echo.Macros.add_data("entity", "some.package.Entity")
 ```

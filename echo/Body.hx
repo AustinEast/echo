@@ -42,7 +42,7 @@ class Body implements IDisposable {
   /**
    * The Body's array of `Shape` objects. If the array **isn't** empty, these `Shape` objects act as the Body's Collider, allowing it to be checked for Collisions.
    *
-   * NOTE: If adding shapes directly to this Array, make sure to parent the Shape to the Body (ie `shape.set_parent(body);`).
+   * NOTE: If adding shapes directly to this Array, make sure to parent the Shape to the Body (ie `shape.set_parent(body.frame);`).
    */
   public var shapes(default, null):Array<Shape>;
   /**

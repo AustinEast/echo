@@ -14,7 +14,7 @@ class StackingState extends BaseState {
       var b = new Body({
         x: Random.range(60, world.width - 60),
         y: Random.range(0, world.height / 2),
-        elasticity: 0.7,
+        elasticity: 0.3,
         shape: {
           type: RECT,
           width: Random.range(16, 48),

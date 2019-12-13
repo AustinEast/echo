@@ -66,6 +66,41 @@ class Echo {
     return listener;
   }
   /**
+   * Steps a `World` forward.
+   * @param world
+   * @param dt
+   */
+  public static function step(world:World, dt:Float) {
+    // Save World State to History
+    if (world.history != null) world.history.add([
+      for (b in world.members) {
+        id: b.id,
+        x: b.x,
+        y: b.y,
+        rotation: b.rotation,
+        velocity: b.velocity,
+        acceleration: b.acceleration,
+        rotational_velocity: b.rotational_velocity
+      }
+    ]);
+
+    // Apply Gravity
+    world.for_each(member -> {
+      member.acceleration.x += world.gravity.x * member.gravity_scale;
+      member.acceleration.y += world.gravity.y * member.gravity_scale;
+    });
+    // Step the World incrementally based on the number of iterations
+    var fdt = dt / world.iterations;
+    for (i in 0...world.iterations) {
+      Physics.step(world, fdt);
+      Collisions.query(world);
+      Physics.separate(world);
+      Collisions.notify(world);
+    }
+    // Reset acceleration
+    world.for_each(member -> member.acceleration.set(0, 0));
+  }
+  /**
    * Casts a Line Created from the supplied floats, returning the Intersection with the closest Body.
    * @param x The X position to start the cast.
    * @param y The Y position to start the cast.
@@ -197,41 +232,6 @@ class Echo {
     lb.put();
 
     return intersections;
-  }
-  /**
-   * Steps a `World` forward.
-   * @param world
-   * @param dt
-   */
-  public static function step(world:World, dt:Float) {
-    // Save World State to History
-    if (world.history != null) world.history.add([
-      for (b in world.members) {
-        id: b.id,
-        x: b.x,
-        y: b.y,
-        rotation: b.rotation,
-        velocity: b.velocity,
-        acceleration: b.acceleration,
-        rotational_velocity: b.rotational_velocity
-      }
-    ]);
-
-    // Apply Gravity
-    world.for_each(member -> {
-      member.acceleration.x += world.gravity.x * member.gravity_scale;
-      member.acceleration.y += world.gravity.y * member.gravity_scale;
-    });
-    // Step the World incrementally based on the number of iterations
-    var fdt = dt / world.iterations;
-    for (i in 0...world.iterations) {
-      Physics.step(world, fdt);
-      Collisions.query(world);
-      Physics.separate(world);
-      Collisions.notify(world);
-    }
-    // Reset acceleration
-    world.for_each(member -> member.acceleration.set(0, 0));
   }
   /**
    * Undo the World's last step

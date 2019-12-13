@@ -10,57 +10,58 @@ import echo.util.BodyOrBodies;
 /**
  * Data Structure used to listen for Collisions between Bodies.
  */
-typedef Listener = {
+@:structInit()
+class Listener {
   /**
    * The first Body or Array of Bodies the listener checks each step.
    */
-  var a:Either<Body, Array<Body>>;
+  public var a:Either<Body, Array<Body>>;
   /**
    * The second Body or Array of Bodies the listener checks each step.
    */
-  var b:Either<Body, Array<Body>>;
+  public var b:Either<Body, Array<Body>>;
   /**
    * Flag that determines if Collisions found by this listener should separate the Bodies. Defaults to `true`.
    */
-  var separate:Bool;
+  public var separate:Bool;
   /**
    * Store of the latest Collisions.
    */
-  var collisions:Array<Collision>;
+  public var collisions:Array<Collision>;
   /**
    * Store of the Collisions from the Prior Frame.
    */
-  var last_collisions:Array<Collision>;
+  public var last_collisions:Array<Collision>;
   /**
    * A callback function that is called on the first frame that a collision starts.
    */
-  var ?enter:Body->Body->Array<CollisionData>->Void;
+  @:optional public var enter:Body->Body->Array<CollisionData>->Void;
   /**
    * A callback function that is called on frames when two Bodies are continuing to collide.
    */
-  var ?stay:Body->Body->Array<CollisionData>->Void;
+  @:optional public var stay:Body->Body->Array<CollisionData>->Void;
   /**
    * A callback function that is called when a collision between two Bodies ends.
    */
-  var ?exit:Body->Body->Void;
+  @:optional public var exit:Body->Body->Void;
   /**
    * A callback function that allows extra logic to be run on a potential collision.
    *
    * If it returns true, the collision is valid. Otherwise the collision is discarded and no physics resolution/collision callbacks occur
    */
-  var ?condition:Body->Body->Array<CollisionData>->Bool;
+  @:optional public var condition:Body->Body->Array<CollisionData>->Bool;
   /**
    * Store of the latest quadtree query results
    */
-  var ?quadtree_results:Array<Collision>;
+  @:optional public var quadtree_results:Array<Collision>;
   /**
    * Percentage of correction along the collision normal to be applied to seperating bodies. Helps prevent objects sinking into each other.
    */
-  var percent_correction:Float;
+  public var percent_correction:Float;
   /**
    * Threshold determining how close two separating bodies must be before position correction occurs. Helps reduce jitter.
    */
-  var correction_threshold:Float;
+  public var correction_threshold:Float;
 }
 /**
  * Container used to store Listeners

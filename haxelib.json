@@ -5,8 +5,8 @@
     "description": "Simple Physics Library written in Haxe",
     "contributors": ["austineast"],
     "url": "https://austineast.dev/echo",
-    "releasenote": "body integration",
-    "version": "1.3.0",
+    "releasenote": "null body bounds bug fixed",
+    "version": "1.3.1",
     "dependencies": {
       "hxmath": ""
     }

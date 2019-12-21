@@ -28,7 +28,8 @@ class Collisions {
         }
       }
       if (b.active && b.is_dynamic()) {
-        b.cache.quadtree_data.bounds = b.bounds();
+        if (b.cache.quadtree_data.bounds == null) b.cache.quadtree_data.bounds = b.bounds();
+        else b.bounds(b.cache.quadtree_data.bounds);
         quadtree.insert(b.cache.quadtree_data);
       }
     });

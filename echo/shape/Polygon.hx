@@ -230,11 +230,11 @@ class Polygon extends Shape implements IPooled {
   }
 
   inline function transform_vertices():Void {
-    var pos = get_local_position();
+    sync_pos.set(local_x, local_y);
     vertices.resize(0);
-    local_frame.offset.set(pos.x, pos.y);
+    local_frame.offset.set(sync_pos.x, sync_pos.y);
     local_frame.angleDegrees = local_rotation;
-    if (parent_frame != null) local_frame = parent_frame.concat(local_frame);
+    if (parent_frame != null) local_frame.concatWith(parent_frame);
     for (i in 0...count) {
       if (local_vertices[i] == null) continue;
       vertices[i] = local_frame.transformFrom(local_vertices[i].clone());
@@ -245,11 +245,12 @@ class Polygon extends Shape implements IPooled {
    */
   inline function compute_normals():Void {
     for (i in 0...count) {
-      var face = vertices[(i + 1) % count].subtract(vertices[i]);
+      vertices[(i + 1) % count].copyTo(sync_pos);
+      sync_pos.subtractWith(vertices[i]);
 
       // Calculate normal with 2D cross product between vector and scalar
-      if (normals[i] == null) normals[i] = new Vector2(-face.y, face.x);
-      else normals[i].set(-face.y, face.x);
+      if (normals[i] == null) normals[i] = new Vector2(-sync_pos.y, sync_pos.x);
+      else normals[i].set(-sync_pos.y, sync_pos.x);
       normals[i].normalize();
     }
   }

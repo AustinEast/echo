@@ -44,7 +44,8 @@ class Debug {
       draw_qd(world.quadtree);
     }
     if (draw_bodies) world.for_each(member -> if (member.shapes.length != 0) {
-      for (shape in (member.is_dynamic() ? member.shapes : member.cache.shapes)) {
+      draw_circle(member.x, member.y, 1, quadtree_color);
+      for (shape in member.shapes) {
         var x = shape.x;
         var y = shape.y;
         switch (shape.type) {

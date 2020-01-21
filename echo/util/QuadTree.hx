@@ -60,9 +60,9 @@ class QuadTree extends Rect implements IPooled {
     else for (child in children) child.insert(data);
   }
 
-  public function remove(data:QuadTreeData) {
-    leaf ? for(d in contents) if (d.id == data.id) contents.remove(d) : for (child in children) child.remove(data);
-    shake();
+  public function remove(data:QuadTreeData, shake_tree:Bool = true) {
+    leaf ? contents.remove(data) : for (child in children) child.remove(data);
+    if (shake_tree) shake();
   }
 
   public function update(data:QuadTreeData) {
@@ -74,7 +74,8 @@ class QuadTree extends Rect implements IPooled {
     if (!overlaps(shape)) return;
     if (leaf) {
       for (data in contents) if (data.bounds.overlaps(shape)) result.push(data);
-    } else {
+    }
+    else {
       for (child in children) child.query(shape, result);
     }
   }
@@ -84,7 +85,7 @@ class QuadTree extends Rect implements IPooled {
     contents.resize(0);
   }
 
-  function shake() {
+  public function shake() {
     if (!leaf) {
       var len = count;
       if (len == 0) {
@@ -147,6 +148,8 @@ class QuadTree extends Rect implements IPooled {
     children.resize(0);
   }
 
+  var nodes_list = new List<QuadTree>();
+
   function get_count() {
     reset();
     // Initialize the count with this node's content's length
@@ -157,16 +160,15 @@ class QuadTree extends Rect implements IPooled {
     }
 
     // Create a list of nodes to process and push the current tree to it.
-    var nodes = new List<QuadTree>();
-    nodes.push(this);
+    nodes_list.push(this);
 
     // Process the nodes.
     // While there still nodes to process, grab the last node in the list.
     // If the node is a leaf, add all its contents to the count.
     // Else push this node's children to the end of the node list.
     // Finally, remove the node from the list.
-    while (nodes.length > 0) {
-      var node = nodes.first();
+    while (nodes_list.length > 0) {
+      var node = nodes_list.first();
       if (node.leaf) {
         for (data in node.contents) {
           if (!data.flag) {
@@ -175,10 +177,9 @@ class QuadTree extends Rect implements IPooled {
           }
         }
       }
-      else for (child in node.children) nodes.add(child);
-      nodes.pop();
+      else for (child in node.children) nodes_list.add(child);
+      nodes_list.pop();
     }
-    reset();
     return num;
   }
 

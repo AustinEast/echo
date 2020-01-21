@@ -43,6 +43,7 @@ class World implements IDisposable {
    */
   public var iterations:Int;
   public var history:Null<History<Array<BodyState>>>;
+  public var sleeping_bodies:Bool;
   var init:Bool;
 
   public function new(options:WorldOptions) {
@@ -57,7 +58,8 @@ class World implements IDisposable {
 
     listeners = new Listeners(options.listeners);
     iterations = options.iterations == null ? 5 : options.iterations;
-    if(options.history != null) history = new History(options.history);
+    if (options.history != null) history = new History(options.history);
+    sleeping_bodies = options.sleeping_bodies == null ? true : options.sleeping_bodies;
   }
 
   public inline function set_from_shape(s:Shape) {
@@ -75,14 +77,14 @@ class World implements IDisposable {
     if (body.world != null) body.remove();
     body.world = this;
     members.push(body);
-    body.cache.quadtree_data = {id: body.id, bounds: body.bounds(), flag: false};
-    body.is_static() ? static_quadtree.insert(body.cache.quadtree_data) : quadtree.insert(body.cache.quadtree_data);
+    body.quadtree_data = {id: body.id, bounds: body.bounds(), flag: false};
+    body.is_static() ? static_quadtree.insert(body.quadtree_data) : quadtree.insert(body.quadtree_data);
     return body;
   }
 
   public function remove(body:Body):Body {
-    quadtree.remove(body.cache.quadtree_data);
-    static_quadtree.remove(body.cache.quadtree_data);
+    quadtree.remove(body.quadtree_data);
+    static_quadtree.remove(body.quadtree_data);
     members.remove(body);
     body.world = null;
     return body;
@@ -121,6 +123,9 @@ class World implements IDisposable {
     history = null;
   }
 
+  /**
+   * Refreshes the World's Static Bodies and Quadtrees.
+   */
   public function refresh() {
     init = true;
     if (quadtree != null) quadtree.put();
@@ -132,8 +137,8 @@ class World implements IDisposable {
     static_quadtree.load(r);
     r.put();
     for_each_static((member)-> {
-      member.bounds(member.cache.quadtree_data.bounds);
-      static_quadtree.update(member.cache.quadtree_data);
+      member.bounds(member.quadtree_data.bounds);
+      static_quadtree.update(member.quadtree_data);
     });
   }
 

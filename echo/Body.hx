@@ -30,11 +30,11 @@ class Body implements IDisposable {
   /**
    * The Body's position on the X axis.
    */
-  public var x(default, set):Float;
+  public var x(get, set):Float;
   /**
    * The Body's position on the Y axis.
    */
-  public var y(default, set):Float;
+  public var y(get, set):Float;
   /**
    * The Body's first `Shape` object in the `shapes` array. If it **isn't** null, this `Shape` object act as the Body's Collider, allowing it to be checked for Collisions.
    */
@@ -62,7 +62,7 @@ class Body implements IDisposable {
   /**
    * Body's current rotational angle.
    */
-  public var rotation(default, set):Float;
+  public var rotation(get, set):Float;
   /**
    * Value to determine how much of a Body's `velocity` should be retained during collisions (or how much should the `Body` "bounce" in other words).
    */
@@ -108,6 +108,11 @@ class Body implements IDisposable {
    */
   public var active:Bool;
   /**
+   * Flag to check if the Body is in a sleeping state. A Body is awake if it has any acceleration, velocity, or has changed its position/rotation since the last step.
+   * If the Body's World has the `sleeping_bodies` optimization on, this flag determines if the Body will participate in a World's Physics calculations or Collision querys.
+   */
+  public var sleeping:Bool;
+  /**
    * The `World` that this body is attached to. It can only be a part of one `World` at a time.
    */
   @:allow(echo.World)
@@ -122,7 +127,8 @@ class Body implements IDisposable {
    */
   public var collided:Bool;
 
-  public var frame:Frame2;
+  public var frame(default, null):Frame2;
+  public var dirty:Bool;
   /**
    * If set, this method is called whenever the Body's X or Y changes.
    */
@@ -141,13 +147,7 @@ class Body implements IDisposable {
 
   @:dox(hide)
   @:allow(echo.World, echo.Collisions, echo.util.Debug)
-  var cache:{
-    x:Float,
-    y:Float,
-    rotation:Float,
-    shapes:Array<Shape>,
-    ?quadtree_data:QuadTreeData
-  };
+  var quadtree_data:QuadTreeData;
   /**
    * Creates a new Body.
    * @param options Optional values to configure the new Body
@@ -156,20 +156,13 @@ class Body implements IDisposable {
     this.id = ++ids;
     active = true;
     shapes = [];
-    cache = {
-      x: 0,
-      y: 0,
-      rotation: 0,
-      shapes: []
-    };
     frame = new Frame2(new Vector2(0, 0), 0);
-    x = 0;
-    y = 0;
     velocity = new Vector2(0, 0);
     acceleration = new Vector2(0, 0);
     max_velocity = new Vector2(0, 0);
     drag = new Vector2(0, 0);
     data = {};
+    sleeping = false;
     load_options(options);
   }
   /**
@@ -179,8 +172,6 @@ class Body implements IDisposable {
   public function load_options(?options:BodyOptions) {
     options = echo.util.JSON.copy_fields(options, defaults);
     clear_shapes();
-    if (options.shape != null) add_shape(options.shape);
-    if (options.shapes != null) for (shape in options.shapes) add_shape(shape);
     x = options.x;
     y = options.y;
     rotation = options.rotation;
@@ -193,10 +184,12 @@ class Body implements IDisposable {
     max_rotational_velocity = options.max_rotational_velocity;
     drag.set(options.drag_x, options.drag_y);
     gravity_scale = options.gravity_scale;
-    last_x = x;
-    last_y = y;
-    last_rotation = rotation;
-    if (mass.equals(0)) refresh_cache();
+    last_x = Math.NaN;
+    last_y = Math.NaN;
+    last_rotation = Math.NaN;
+    dirty = true;
+    if (options.shape != null) add_shape(options.shape);
+    if (options.shapes != null) for (shape in options.shapes) add_shape(shape);
   }
 
   public function clone():Body {
@@ -218,10 +211,10 @@ class Body implements IDisposable {
     b.last_rotation = last_rotation;
     b.shapes = shapes.map(s -> {
       var sc = s.clone();
-      sc.set_parent(frame);
+      sc.set_parent(b.frame);
       return sc;
     });
-    b.cache = cache;
+
     return b;
   }
 
@@ -229,22 +222,26 @@ class Body implements IDisposable {
     var s = Shape.get(options);
     s.set_parent(frame);
     shapes.push(s);
+    dirty = true;
     return s;
   }
 
   public function remove_shape(shape:Shape):Shape {
-    if (shapes.remove(shape)) shape.set_parent();
+    if (shapes.remove(shape)) {
+      shape.set_parent();
+      dirty = true;
+    }
     return shape;
   }
 
-  public inline function sync_shapes() for (shape in (is_dynamic() ? shapes : cache.shapes)) shape.sync();
+  public inline function sync_shapes() for (shape in shapes) shape.sync();
 
   public inline function clear_shapes() {
     for (shape in shapes) shape.put();
     shapes.resize(0);
   }
 
-  public function get_position():Vector2 return new Vector2(x, y);
+  public function get_position():Vector2 return frame.offset.clone();
 
   public function set_position(x:Float = 0, y:Float = 0) {
     this.x = x;
@@ -273,8 +270,8 @@ class Body implements IDisposable {
     var max_x = s.right;
     var max_y = s.bottom;
 
-    if (shapes.length > 1) for (i in 1...(is_dynamic() ? shapes.length : cache.shapes.length)) {
-      var shape = is_dynamic() ? shapes[i] : cache.shapes[i];
+    if (shapes.length > 1) for (i in 1...shapes.length) {
+      var shape = shapes[i];
       if (!include_solids && !shape.solid) continue;
       if (shape.left < min_x) min_x = shape.left;
       if (shape.top < min_y) min_y = shape.top;
@@ -285,9 +282,9 @@ class Body implements IDisposable {
     return rect == null ? Rect.get_from_min_max(min_x, min_y, max_x, max_y) : rect.set_from_min_max(min_x, min_y, max_x, max_y);
   }
 
-  public function remove():Body {
+  public inline function remove():Body {
     if (world != null) world.remove(cast this);
-    if (cache.quadtree_data != null && cache.quadtree_data.bounds != null) cache.quadtree_data.bounds.put();
+    if (quadtree_data != null && quadtree_data.bounds != null) quadtree_data.bounds.put();
     return this;
   }
 
@@ -295,23 +292,13 @@ class Body implements IDisposable {
 
   public inline function is_static() return mass <= 0;
 
-  public inline function refresh_cache() {
-    cache.x = x;
-    cache.y = y;
-    cache.rotation = rotation;
+  public inline function moved() return !x.equals(last_x, 0.001) || !y.equals(last_y, 0.001) || !rotation.equals(last_rotation, 0.001);
 
-    frame.offset.set(cache.x, cache.y);
-    frame.angleDegrees = cache.rotation;
-
-    sync_shapes();
-
-    cache.shapes = shapes.copy();
-
-    if (cache.quadtree_data != null) {
-      bounds(cache.quadtree_data.bounds);
-      if (world != null && is_static()) world.static_quadtree.update(cache.quadtree_data);
-    }
-  }
+  // || !velocity.x.equals(0, 0.001)
+  // || !velocity.y.equals(0, 0.001)
+  // || !rotational_velocity.equals(0, 0.001)
+  // || !acceleration.x.equals(0, 0.001)
+  // || !acceleration.y.equals(0, 0.001);
   /**
    * Disposes the Body. DO NOT use the Body after disposing it, as it could lead to null reference errors.
    */
@@ -323,70 +310,91 @@ class Body implements IDisposable {
     max_velocity = null;
     drag = null;
     data = null;
-    cache = null;
     on_move = null;
     on_rotate = null;
+    quadtree_data = null;
   }
 
   function toString() return 'Body: {id: $id, x: $x, y: $y, rotation: $rotation}';
+
+  inline function get_x() return frame.offset.x;
+
+  inline function get_y() return frame.offset.y;
+
+  inline function get_rotation() return frame.angleDegrees;
 
   inline function get_shape() return shapes[0];
 
   // setters
   inline function set_x(value:Float):Float {
-    x = value;
+    if (value != frame.offset.x) {
+      dirty = true;
 
-    if (is_dynamic()) {
       frame.offset.x = value;
       sync_shapes();
+
+      if (is_static() && world != null) {
+        bounds(quadtree_data.bounds);
+        world.static_quadtree.update(quadtree_data);
+      }
+
+      if (on_move != null) on_move(frame.offset.x, frame.offset.y);
     }
-    else refresh_cache();
 
-    if (on_move != null) on_move(x, y);
-
-    return x;
+    return frame.offset.x;
   }
 
   inline function set_y(value:Float):Float {
-    y = value;
+    if (value != frame.offset.y) {
+      dirty = true;
 
-    if (is_dynamic()) {
       frame.offset.y = value;
       sync_shapes();
+
+      if (is_static() && world != null) {
+        bounds(quadtree_data.bounds);
+        world.static_quadtree.update(quadtree_data);
+      }
+
+      if (on_move != null) on_move(frame.offset.x, frame.offset.y);
     }
-    else refresh_cache();
-
-    if (on_move != null) on_move(x, y);
-
-    return y;
+    return frame.offset.y;
   }
 
   inline function set_shape(value:Shape) {
     if (shapes[0] != null) shapes[0].put();
     shapes[0] = value;
     shapes[0].set_parent(frame);
+    dirty = true;
     return shapes[0];
   }
 
   inline function set_rotation(value:Float):Float {
-    rotation = value;
+    if (value != frame.angleDegrees) {
+      dirty = true;
 
-    if (is_dynamic()) {
       frame.angleDegrees = value;
       sync_shapes();
+
+      if (is_static() && world != null) {
+        bounds(quadtree_data.bounds);
+        world.static_quadtree.update(quadtree_data);
+      }
+
+      if (on_rotate != null) on_rotate(rotation);
     }
-    else refresh_cache();
 
-    if (on_rotate != null) on_rotate(rotation);
-
-    return rotation;
+    return frame.angleDegrees;
   }
 
   function set_mass(value:Float):Float {
     if (value < 0.0001) {
       value = 0;
       inverse_mass = 0;
-      refresh_cache();
+      if (world != null) {
+        bounds(quadtree_data.bounds);
+        world.static_quadtree.update(quadtree_data);
+      }
     }
     else inverse_mass = 1 / value;
     return mass = value;

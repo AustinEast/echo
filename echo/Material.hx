@@ -1,7 +1,9 @@
 package echo;
 
 import hxmath.math.Vector2;
-
+/**
+ * TODO - A Structure that describes the physical properties of a `Body`.
+ */
 class Material {
   /**
    * Value to determine how much of a Body's `velocity` should be retained during collisions (or how much should the `Body` "bounce" in other words).

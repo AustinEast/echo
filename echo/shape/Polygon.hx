@@ -34,9 +34,9 @@ class Polygon extends Shape implements IPooled {
 
   public var pooled:Bool;
 
-  var local_vertices:Array<Vector2>;
-
   var local_frame:Frame2;
+
+  var local_vertices:Array<Vector2>;
 
   public static inline function get(x:Float = 0, y:Float = 0, sides:Int = 3, radius:Float = 1, rotation:Float = 0):Polygon {
     if (sides < 3) throw 'Polygons require 3 sides as a minimum';
@@ -205,7 +205,7 @@ class Polygon extends Shape implements IPooled {
     return right;
   }
 
-  public inline function to_rect():Rect return Rect.get(x, y);
+  public inline function to_rect():Rect return bounds();
   /**
    * Sets the vertice at the desired index.
    * @param index
@@ -230,9 +230,8 @@ class Polygon extends Shape implements IPooled {
   }
 
   inline function transform_vertices():Void {
-    sync_pos.set(local_x, local_y);
     vertices.resize(0);
-    local_frame.offset.set(sync_pos.x, sync_pos.y);
+    local_frame.offset.set(local_x, local_y);
     local_frame.angleDegrees = local_rotation;
     if (parent_frame != null) local_frame.concatWith(parent_frame);
     for (i in 0...count) {

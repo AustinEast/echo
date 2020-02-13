@@ -45,6 +45,8 @@ class Body implements IDisposable {
    * NOTE: If adding shapes directly to this Array, make sure to parent the Shape to the Body (ie `shape.set_parent(body.frame);`).
    */
   public var shapes(default, null):Array<Shape>;
+
+  public var children(default, null):Array<Body>;
   /**
    * Flag to set how a Body is affected by Collisions.
    *
@@ -107,11 +109,12 @@ class Body implements IDisposable {
    * Flag to set if the Body is active and will participate in a World's Physics calculations or Collision querys.
    */
   public var active:Bool;
+
   /**
    * Flag to check if the Body is in a sleeping state. A Body is awake if it has any acceleration, velocity, or has changed its position/rotation since the last step.
    * If the Body's World has the `sleeping_bodies` optimization on, this flag determines if the Body will participate in a World's Physics calculations or Collision querys.
    */
-  public var sleeping:Bool;
+  // public var sleeping:Bool;
   /**
    * The `World` that this body is attached to. It can only be a part of one `World` at a time.
    */
@@ -126,8 +129,14 @@ class Body implements IDisposable {
    * Used for debug drawing.
    */
   public var collided:Bool;
-
+  /**
+   * Structure to help perform matrix calculations for the Body's position and rotation.
+   */
   public var frame(default, null):Frame2;
+  /**
+   * Flag to check if the Body has changed its position, rotation, or shape colliders.
+   * Used for Collision optimization.
+   */
   public var dirty:Bool;
   /**
    * If set, this method is called whenever the Body's X or Y changes.
@@ -148,6 +157,7 @@ class Body implements IDisposable {
   @:dox(hide)
   @:allow(echo.World, echo.Collisions, echo.util.Debug)
   var quadtree_data:QuadTreeData;
+  var parent_frame:Frame2;
   /**
    * Creates a new Body.
    * @param options Optional values to configure the new Body
@@ -156,13 +166,13 @@ class Body implements IDisposable {
     this.id = ++ids;
     active = true;
     shapes = [];
+    children = [];
     frame = new Frame2(new Vector2(0, 0), 0);
     velocity = new Vector2(0, 0);
     acceleration = new Vector2(0, 0);
     max_velocity = new Vector2(0, 0);
     drag = new Vector2(0, 0);
     data = {};
-    sleeping = false;
     load_options(options);
   }
   /**
@@ -188,8 +198,8 @@ class Body implements IDisposable {
     last_y = Math.NaN;
     last_rotation = Math.NaN;
     dirty = true;
-    if (options.shape != null) add_shape(options.shape);
-    if (options.shapes != null) for (shape in options.shapes) add_shape(shape);
+    if (options.shape != null) create_shape(options.shape);
+    if (options.shapes != null) for (shape in options.shapes) create_shape(shape);
   }
 
   public function clone():Body {
@@ -218,29 +228,68 @@ class Body implements IDisposable {
     return b;
   }
 
-  public function add_shape(options:ShapeOptions):Shape {
+  public inline function sync() {
+    // TODO - add "Local" x, y, and rot
+  }
+  /**
+   * Adds a new `Shape` to the Body based on the `ShapeOptions` passed in.
+   * @param options
+   * @param position The position in the Body's `shapes` array the Shape will be added to. If set to -1, the Shape is pushed to the end.
+   * @return The newly created `Shape`.
+   */
+  public inline function create_shape(options:ShapeOptions, position:Int = -1):Shape {
     var s = Shape.get(options);
-    s.set_parent(frame);
-    shapes.push(s);
-    dirty = true;
-    return s;
+    return add_shape(s, position);
+  }
+  /**
+   * Adds a `Shape` to the Body.
+   * @param shape
+   * @param position The position in the Body's `shapes` array the Shape will be added to. If set to -1, the Shape is pushed to the end.
+   * @return The added `Shape`.
+   */
+  public inline function add_shape(shape:Shape, position:Int = -1):Shape {
+    if (shapes.indexOf(shape) == -1) {
+      if (position > -1) shapes[position] = shape;
+      else shapes.push(shape);
+      shape.set_parent(frame);
+      dirty = true;
+    }
+    return shape;
   }
 
-  public function remove_shape(shape:Shape):Shape {
+  public inline function remove_shape(shape:Shape):Shape {
     if (shapes.remove(shape)) {
       shape.set_parent();
       dirty = true;
     }
     return shape;
   }
+  /**
+   * Syncs the transforms of the Body's shapes. Generally this does not need to be called manually.
+   */
+  public inline function sync_shapes():Void if (shapes.length > 0) for (shape in shapes) shape.sync();
 
-  public inline function sync_shapes() for (shape in shapes) shape.sync();
-
+  public inline function add_child(child:Body) {
+    if (children.indexOf(child) == -1) {
+      child.parent_frame = frame;
+      child.sync();
+    }
+  }
+  /**
+   * Syncs the transforms of the Body's shapes. Generally this does not need to be called manually.
+   */
+  public inline function sync_children():Void if (children.length > 0) for (child in children) child.sync();
+  /**
+   * Clears all Shapes from the Body, releasing them to their respective pools.
+   */
   public inline function clear_shapes() {
     for (shape in shapes) shape.put();
     shapes.resize(0);
   }
-
+  /**
+   * Gets the Body's position as a new `Vector2`.
+   * @return Vector2
+   */
   public function get_position():Vector2 return frame.offset.clone();
 
   public function set_position(x:Float = 0, y:Float = 0) {
@@ -258,10 +307,10 @@ class Body implements IDisposable {
   }
   /**
    * If a Body has shapes, it will return an AABB `Rect` representing the bounds of its shapes relative to the Body's Position. If the Body does not have any shapes, this will return `null'.
-   * @param rect Optional `Rect` to set the values to. If the Body does not have any shapes, this will not be set.
+   * @param rect Optional `Rect` to set the values to. If the Body does not have any shapes, the Rect will not be set.
    * @return Null<Rect>
    */
-  public function bounds(?rect:Rect, include_solids = true):Null<Rect> {
+  public function bounds(?rect:Rect):Null<Rect> {
     if (shapes.length == 0) return null;
 
     var s = shapes[0];
@@ -272,7 +321,6 @@ class Body implements IDisposable {
 
     if (shapes.length > 1) for (i in 1...shapes.length) {
       var shape = shapes[i];
-      if (!include_solids && !shape.solid) continue;
       if (shape.left < min_x) min_x = shape.left;
       if (shape.top < min_y) min_y = shape.top;
       if (shape.right > max_x) max_x = shape.right;
@@ -293,12 +341,6 @@ class Body implements IDisposable {
   public inline function is_static() return mass <= 0;
 
   public inline function moved() return !x.equals(last_x, 0.001) || !y.equals(last_y, 0.001) || !rotation.equals(last_rotation, 0.001);
-
-  // || !velocity.x.equals(0, 0.001)
-  // || !velocity.y.equals(0, 0.001)
-  // || !rotational_velocity.equals(0, 0.001)
-  // || !acceleration.x.equals(0, 0.001)
-  // || !acceleration.y.equals(0, 0.001);
   /**
    * Disposes the Body. DO NOT use the Body after disposing it, as it could lead to null reference errors.
    */
@@ -330,8 +372,9 @@ class Body implements IDisposable {
     if (value != frame.offset.x) {
       dirty = true;
 
-      frame.offset.x = value;
+      frame.offset = frame.offset.set(value, y);
       sync_shapes();
+      sync_children();
 
       if (is_static() && world != null) {
         bounds(quadtree_data.bounds);
@@ -348,8 +391,9 @@ class Body implements IDisposable {
     if (value != frame.offset.y) {
       dirty = true;
 
-      frame.offset.y = value;
+      frame.offset = frame.offset.set(x, value);
       sync_shapes();
+      sync_children();
 
       if (is_static() && world != null) {
         bounds(quadtree_data.bounds);
@@ -375,6 +419,7 @@ class Body implements IDisposable {
 
       frame.angleDegrees = value;
       sync_shapes();
+      sync_children();
 
       if (is_static() && world != null) {
         bounds(quadtree_data.bounds);

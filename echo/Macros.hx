@@ -1,20 +1,20 @@
 package echo;
 
+#if macro
 import haxe.macro.Expr;
 import haxe.macro.Context;
 
 class Macros {
-  #if macro
-  static var dataFields:Array<Field> = []; // add fields here
+  static var dataFields:Array<Field> = [];
 
   static function build_body() {
-    if (dataFields.length == 0) return null; // No change, more optimal than returning array of fields.
+    if (dataFields.length == 0) return null;
     var fields = Context.getBuildFields();
     for (f in dataFields) fields.push(f);
     return fields;
   }
   /**
-   * Build Macro to add extra fields to the body class. Inspired by [@Yanrishatum](https://github.com/Yanrishatum).
+   * Build Macro to add extra fields to the Body class. Inspired by [@Yanrishatum](https://github.com/Yanrishatum).
    *
    * Example: in build.hxml - `--macro echo.Macros.add_data("entity", "some.package.Entity")
    * @param name
@@ -28,5 +28,5 @@ class Macros {
       pos: Context.currentPos()
     });
   }
-  #end
 }
+#end

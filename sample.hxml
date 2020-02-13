@@ -8,5 +8,9 @@
 -lib ghostlib
 # copy assets
 --macro ghost.Assets.copyProjectAssets()
+# use Heaps math structures with hxmath
+# -D HXMATH_USE_HEAPS_STRUCTURES
+-dce full
+# -debug
 # output
 -js bin/sample.js

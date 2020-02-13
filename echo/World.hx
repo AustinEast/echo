@@ -43,7 +43,6 @@ class World implements IDisposable {
    */
   public var iterations:Int;
   public var history:Null<History<Array<BodyState>>>;
-  public var sleeping_bodies:Bool;
   var init:Bool;
 
   public function new(options:WorldOptions) {
@@ -59,7 +58,6 @@ class World implements IDisposable {
     listeners = new Listeners(options.listeners);
     iterations = options.iterations == null ? 5 : options.iterations;
     if (options.history != null) history = new History(options.history);
-    sleeping_bodies = options.sleeping_bodies == null ? true : options.sleeping_bodies;
   }
 
   public inline function set_from_shape(s:Shape) {

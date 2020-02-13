@@ -16,8 +16,6 @@ class Collisions {
   public static function query(world:World, ?listeners:Listeners) {
     // Populate the Quadtree
     var quadtree = listeners == null ? world.quadtree : QuadTree.get();
-    // quadtree.clear();
-    // quadtree.set(world.x + (world.width * 0.5), world.y + (world.height * 0.5), world.width, world.height);
     world.for_each(b -> {
       b.collided = false;
       for (shape in b.shapes) {
@@ -44,7 +42,6 @@ class Collisions {
         case Left(ba):
           switch (listener.b) {
             case Left(bb):
-              if (world.sleeping_bodies && ba.sleeping) continue;
               var col = body_and_body(ba, bb);
               if (col != null) listener.quadtree_results.push(col);
             case Right(ab):
@@ -142,7 +139,7 @@ class Collisions {
   static var sqr:Array<QuadTreeData> = [];
 
   static function body_and_bodies(body:Body, bodies:Array<Body>, world:World, results:Array<Collision>, quadtree:QuadTree) {
-    if (body.shapes.length == 0 || !body.active || body.is_static() || (world.sleeping_bodies && body.sleeping)) return;
+    if (body.shapes.length == 0 || !body.active || body.is_static()) return;
     var bounds = body.bounds();
     qr.resize(0);
     sqr.resize(0);

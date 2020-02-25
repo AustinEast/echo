@@ -244,7 +244,7 @@ class Body implements IDisposable {
     shapes.resize(0);
   }
 
-  public function get_position():Vector2 return new Vector2(x, y);
+  public function get_position(?vec2:Vector2):Vector2 return vec2 == null ? new Vector2(x, y) : vec2.set(x, y);
 
   public function set_position(x:Float = 0, y:Float = 0) {
     this.x = x;
@@ -284,15 +284,24 @@ class Body implements IDisposable {
 
     return rect == null ? Rect.get_from_min_max(min_x, min_y, max_x, max_y) : rect.set_from_min_max(min_x, min_y, max_x, max_y);
   }
-
+  /**
+   * If the Body is attached to a World, it is removed.
+   * @return The detached Body.
+   */
   public function remove():Body {
     if (world != null) world.remove(cast this);
     if (cache.quadtree_data != null && cache.quadtree_data.bounds != null) cache.quadtree_data.bounds.put();
     return this;
   }
-
+  /**
+   * Checks if the Body is Dynamic (if it's mass is greater than 0).
+   * @return  body.mass > 0
+   */
   public inline function is_dynamic() return mass > 0;
-
+  /**
+   * Checks if the Body is Static (if it's mass is equal to 0).
+   * @return  body.mass == 0
+   */
   public inline function is_static() return mass <= 0;
 
   public inline function refresh_cache() {
@@ -384,12 +393,14 @@ class Body implements IDisposable {
 
   function set_mass(value:Float):Float {
     if (value < 0.0001) {
-      value = 0;
-      inverse_mass = 0;
+      mass = inverse_mass = 0;
       refresh_cache();
     }
-    else inverse_mass = 1 / value;
-    return mass = value;
+    else {
+      mass = value;
+      inverse_mass = 1 / mass;
+    }
+    return mass;
   }
 
   static function get_defaults():BodyOptions return {

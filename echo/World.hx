@@ -72,6 +72,7 @@ class World implements IDisposable {
   }
 
   public function add(body:Body):Body {
+    if (body.world == this) return body;
     if (body.world != null) body.remove();
     body.world = this;
     members.push(body);

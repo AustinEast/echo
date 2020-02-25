@@ -150,3 +150,45 @@ class HeapsDebug extends Debug {
   override public inline function clear() canvas.clear();
 }
 #end
+
+#if openfl
+class OpenFLDebug extends Debug {
+  public var canvas:openfl.display.Sprite;
+
+  public function new() {
+    shape_color = 0x005b6ee1;
+    shape_fill_color = 0x00cbdbfc;
+    shape_collided_color = 0x00d95763;
+    quadtree_color = 0x00847e87;
+    quadtree_fill_color = 0x009badb7;
+    intersection_color = 0x00cbdbfc;
+    intersection_overlap_color = 0x00d95763;
+
+    canvas = new openfl.display.Sprite();
+  }
+
+  public function get_sprite() return canvas;
+
+  override public inline function draw_line(from_x:Float, from_y:Float, to_x:Float, to_y:Float, color:Int, alpha:Float = 1.) {
+    canvas.graphics.lineStyle(1, color, alpha);
+    canvas.graphics.moveTo(from_x, from_y);
+    canvas.graphics.lineTo(to_x, to_y);
+  }
+  
+  override public inline function draw_rect(x:Float, y:Float, width:Float, height:Float, color:Int, ?stroke:Int, alpha:Float = 1.) {
+    canvas.graphics.beginFill(color, alpha);
+    stroke != null ? canvas.graphics.lineStyle(1, stroke, 1) : canvas.graphics.lineStyle();
+    canvas.graphics.drawRect(x, y, width, height);
+    canvas.graphics.endFill();
+  }
+  
+  override public inline function draw_circle(x:Float, y:Float, radius:Float, color:Int, ?stroke:Int, alpha:Float = 1.) {
+    canvas.graphics.beginFill(color, alpha);
+    stroke != null ? canvas.graphics.lineStyle(1, stroke, 1) : canvas.graphics.lineStyle();
+    canvas.graphics.drawCircle(x, y, radius);
+    canvas.graphics.endFill();
+  }
+  
+  override public inline function clear() canvas.graphics.clear();
+}
+#end

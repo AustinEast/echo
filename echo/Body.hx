@@ -283,6 +283,7 @@ class Body implements IDisposable {
       else shapes.push(shape);
       shape.set_parent(frame);
       dirty = true;
+      update_static_bounds();
     }
     return shape;
   }
@@ -291,6 +292,7 @@ class Body implements IDisposable {
     if (shapes.remove(shape)) {
       shape.set_parent();
       dirty = true;
+      update_static_bounds();
     }
     return shape;
   }
@@ -306,8 +308,7 @@ class Body implements IDisposable {
     shapes.resize(0);
   }
   /**
-   * Gets the Body's position as a new `Vector2`.
-   * @return Vector2
+   * Gets the Body's position as a new `Vector2` (or sets the `Vector2`, if passed in).
    */
   public function get_position(?vec2:Vector2):Vector2 return vec2 == null ? frame.offset.clone() : vec2.set(frame.offset.x, frame.offset.y);
 
@@ -367,7 +368,18 @@ class Body implements IDisposable {
    * @return  body.mass == 0
    */
   public inline function is_static() return mass <= 0;
-
+  /**
+   * If the Body is Static, update it's Quadtree Bounds.
+   */
+  public inline function update_static_bounds() {
+    if (is_static() && world != null) {
+      bounds(quadtree_data.bounds);
+      world.static_quadtree.update(quadtree_data);
+    }
+  }
+  /**
+   * Returns true if the Body has moved since the last `Physics.step()`.
+   */
   public inline function moved() return !x.equals(last_x, 0.001) || !y.equals(last_y, 0.001) || !rotation.equals(last_rotation, 0.001);
   /**
    * Disposes the Body. DO NOT use the Body after disposing it, as it could lead to null reference errors.
@@ -376,6 +388,7 @@ class Body implements IDisposable {
     remove();
     for (shape in shapes) shape.put();
     shapes = null;
+    // TODO - dispose (or remove?) children Bodies
     velocity = null;
     max_velocity = null;
     drag = null;
@@ -405,10 +418,7 @@ class Body implements IDisposable {
       // TODO - Child Body transforms
       // sync_children();
 
-      if (is_static() && world != null) {
-        bounds(quadtree_data.bounds);
-        world.static_quadtree.update(quadtree_data);
-      }
+      update_static_bounds();
 
       if (on_move != null) on_move(frame.offset.x, frame.offset.y);
     }
@@ -425,10 +435,7 @@ class Body implements IDisposable {
       // TODO - Child Body transforms
       // sync_children();
 
-      if (is_static() && world != null) {
-        bounds(quadtree_data.bounds);
-        world.static_quadtree.update(quadtree_data);
-      }
+      update_static_bounds();
 
       if (on_move != null) on_move(frame.offset.x, frame.offset.y);
     }
@@ -440,6 +447,7 @@ class Body implements IDisposable {
     shapes[0] = value;
     shapes[0].set_parent(frame);
     dirty = true;
+    update_static_bounds();
     return shapes[0];
   }
 
@@ -452,10 +460,7 @@ class Body implements IDisposable {
       // TODO - Child Body transforms
       // sync_children();
 
-      if (is_static() && world != null) {
-        bounds(quadtree_data.bounds);
-        world.static_quadtree.update(quadtree_data);
-      }
+      update_static_bounds();
 
       if (on_rotate != null) on_rotate(rotation);
     }
@@ -466,12 +471,13 @@ class Body implements IDisposable {
   inline function set_mass(value:Float):Float {
     if (value < 0.0001) {
       mass = inverse_mass = 0;
-      if (world != null) {
-        bounds(quadtree_data.bounds);
-        world.static_quadtree.update(quadtree_data);
-      }
+      update_static_bounds();
     }
     else {
+      // If the Body was previously Static, remove it from the static quadtree
+      if (is_static() && world != null) {
+        world.static_quadtree.remove(quadtree_data);
+      }
       mass = value;
       inverse_mass = 1 / mass;
     }

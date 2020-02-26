@@ -45,8 +45,11 @@ class Body implements IDisposable {
    * NOTE: If adding shapes directly to this Array, make sure to parent the Shape to the Body (ie `shape.set_parent(body.frame);`).
    */
   public var shapes(default, null):Array<Shape>;
-
-  public var children(default, null):Array<Body>;
+  /**
+   * TODO - Child Body transforms
+   */
+  @:dox(hide)
+  private var children(default, null):Array<Body>;
   /**
    * Flag to set how a Body is affected by Collisions.
    *
@@ -109,12 +112,14 @@ class Body implements IDisposable {
    * Flag to set if the Body is active and will participate in a World's Physics calculations or Collision querys.
    */
   public var active:Bool;
-
   /**
+   * TODO - sleeping support
+   *
    * Flag to check if the Body is in a sleeping state. A Body is awake if it has any acceleration, velocity, or has changed its position/rotation since the last step.
    * If the Body's World has the `sleeping_bodies` optimization on, this flag determines if the Body will participate in a World's Physics calculations or Collision querys.
    */
-  // public var sleeping:Bool;
+  @:dox(hide)
+  private var sleeping:Bool;
   /**
    * The `World` that this body is attached to. It can only be a part of one `World` at a time.
    */
@@ -157,6 +162,8 @@ class Body implements IDisposable {
   @:dox(hide)
   @:allow(echo.World, echo.Collisions, echo.util.Debug)
   var quadtree_data:QuadTreeData;
+  @:dox(hide)
+  @:noCompletion
   var parent_frame:Frame2;
   /**
    * Creates a new Body.
@@ -166,7 +173,8 @@ class Body implements IDisposable {
     this.id = ++ids;
     active = true;
     shapes = [];
-    children = [];
+    // TODO - Child Body transforms
+    // children = [];
     frame = new Frame2(new Vector2(0, 0), 0);
     velocity = new Vector2(0, 0);
     acceleration = new Vector2(0, 0);
@@ -227,10 +235,32 @@ class Body implements IDisposable {
 
     return b;
   }
-
-  public inline function sync() {
+  /**
+   * TODO - Child Body transforms
+   */
+  @:dox(hide)
+  @:noCompletion
+  private inline function sync() {
     // TODO - add "Local" x, y, and rot
   }
+  /**
+   * TODO - Child Body transforms
+   */
+  @:dox(hide)
+  @:noCompletion
+  private inline function add_child(child:Body) {
+    if (children.indexOf(child) == -1) {
+      child.parent_frame = frame;
+      child.sync();
+    }
+  }
+  /**
+   * TODO - Child Body transforms
+   * Syncs the transforms of the Body's shapes. Generally this does not need to be called manually.
+   */
+  @:dox(hide)
+  @:noCompletion
+  private inline function sync_children():Void if (children.length > 0) for (child in children) child.sync();
   /**
    * Adds a new `Shape` to the Body based on the `ShapeOptions` passed in.
    * @param options
@@ -268,17 +298,6 @@ class Body implements IDisposable {
    * Syncs the transforms of the Body's shapes. Generally this does not need to be called manually.
    */
   public inline function sync_shapes():Void if (shapes.length > 0) for (shape in shapes) shape.sync();
-
-  public inline function add_child(child:Body) {
-    if (children.indexOf(child) == -1) {
-      child.parent_frame = frame;
-      child.sync();
-    }
-  }
-  /**
-   * Syncs the transforms of the Body's shapes. Generally this does not need to be called manually.
-   */
-  public inline function sync_children():Void if (children.length > 0) for (child in children) child.sync();
   /**
    * Clears all Shapes from the Body, releasing them to their respective pools.
    */
@@ -383,7 +402,8 @@ class Body implements IDisposable {
 
       frame.offset = frame.offset.set(value, y);
       sync_shapes();
-      sync_children();
+      // TODO - Child Body transforms
+      // sync_children();
 
       if (is_static() && world != null) {
         bounds(quadtree_data.bounds);
@@ -402,7 +422,8 @@ class Body implements IDisposable {
 
       frame.offset = frame.offset.set(x, value);
       sync_shapes();
-      sync_children();
+      // TODO - Child Body transforms
+      // sync_children();
 
       if (is_static() && world != null) {
         bounds(quadtree_data.bounds);
@@ -428,7 +449,8 @@ class Body implements IDisposable {
 
       frame.angleDegrees = value;
       sync_shapes();
-      sync_children();
+      // TODO - Child Body transforms
+      // sync_children();
 
       if (is_static() && world != null) {
         bounds(quadtree_data.bounds);

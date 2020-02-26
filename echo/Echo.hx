@@ -16,6 +16,9 @@ import echo.util.BodyOrBodies;
  * Echo holds helpful utility methods to help streamline the creation and management of Physics Simulations.
  */
 class Echo {
+  /**
+   * Cache'd `Listeners` collection to help with memory management.
+   */
   static var listeners:Listeners = new Listeners();
   /**
    * Shortcut for creating a new `World`
@@ -252,7 +255,7 @@ class Echo {
             }
           }
         }
-        world.refresh();
+        world.reset_quadtrees();
       }
     }
     return world;
@@ -279,7 +282,7 @@ class Echo {
           }
         }
       }
-      world.refresh();
+      world.reset_quadtrees();
     }
     return world;
   }

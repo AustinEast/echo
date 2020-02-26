@@ -12,6 +12,7 @@ import echo.util.BodyOrBodies;
  */
 @:structInit()
 class Listener {
+  public static var defaults(get, null):ListenerOptions;
   /**
    * The first Body or Array of Bodies the listener checks each step.
    */
@@ -62,29 +63,31 @@ class Listener {
    * Threshold determining how close two separating bodies must be before position correction occurs. Helps reduce jitter.
    */
   public var correction_threshold:Float;
+
+  static function get_defaults():ListenerOptions return {
+    separate: true,
+    percent_correction: 0.9,
+    correction_threshold: 0.013
+  }
 }
 /**
  * Container used to store Listeners
- *
- * TODO: Turn into an iterable
  */
 class Listeners implements IDisposable {
-  public static var listener_defaults(get, null):ListenerOptions;
-
   public var members:Array<Listener>;
 
   public function new(?members:Array<Listener>) {
     this.members = members == null ? [] : members;
   }
   /**
-   * Add a new Listener to listen for collisions
-   * @param a The first `Body` or Array of Bodies to collide against
-   * @param b The second `Body` or Array of Bodies to collide against
-   * @param options Options to define the Listener's behavior
-   * @return Listener
+   * Add a new Listener to the collection.
+   * @param a The first `Body` or Array of Bodies to collide against.
+   * @param b The second `Body` or Array of Bodies to collide against.
+   * @param options Options to define the Listener's behavior.
+   * @return The new Listener.
    */
   public function add(a:BodyOrBodies, b:BodyOrBodies, ?options:ListenerOptions):Listener {
-    options = echo.util.JSON.copy_fields(options, listener_defaults);
+    options = echo.util.JSON.copy_fields(options, Listener.defaults);
     var listener:Listener = {
       a: a,
       b: b,
@@ -103,26 +106,26 @@ class Listeners implements IDisposable {
     return listener;
   }
   /**
-   * Removes a Listener from the Container
-   * @param listener Listener to remove
-   * @return Listener
+   * Removes a Listener from the Container.
+   * @param listener Listener to remove.
+   * @return The removed Listener.
    */
   public function remove(listener:Listener):Listener {
     members.remove(listener);
     return listener;
   }
-
+  /**
+   * Clears the collection of all Listeners.
+   */
   public function clear() {
-    members = [];
+    members.resize(0);
   }
-
+  /**
+   * Disposes of the collection. Do not use once disposed.
+   */
   public function dispose() {
     members = null;
   }
 
-  static function get_listener_defaults():ListenerOptions return {
-    separate: true,
-    percent_correction: 0.9,
-    correction_threshold: 0.013
-  }
+  public inline function iterator():Iterator<Listener> return members.iterator();
 }

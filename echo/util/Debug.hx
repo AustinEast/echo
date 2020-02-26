@@ -4,11 +4,11 @@ import echo.data.Data;
 import hxmath.math.Vector2;
 import echo.shape.*;
 
-using hxmath.math.MathUtil;
 using echo.util.Ext;
 
 class Debug {
   public var draw_bodies:Bool = true;
+  public var draw_body_centers:Bool = false;
   public var draw_bounds:Bool = false;
   public var draw_shape_bounds:Bool = false;
   public var draw_quadtree:Bool = true;
@@ -44,7 +44,8 @@ class Debug {
       draw_qd(world.quadtree);
     }
     if (draw_bodies) world.for_each(member -> if (member.shapes.length != 0) {
-      for (shape in (member.is_dynamic() ? member.shapes : member.cache.shapes)) {
+      if (draw_body_centers) draw_rect(member.x - 1, member.y - 1, 1, 1, quadtree_color);
+      for (shape in member.shapes) {
         var x = shape.x;
         var y = shape.y;
         switch (shape.type) {

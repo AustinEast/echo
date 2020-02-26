@@ -122,6 +122,12 @@ typedef WorldOptions = {
    * The number of states to preserve in the World's history.
    */
   var ?history:Int;
+
+  /**
+   * Flag to set whether the World will provide optimizations for Bodies that have come to rest.
+   * This can help performance quite a bit, but may introduce inaccuracies in the physics simulation.
+   */
+  // var ?sleeping_bodies:Bool;
 }
 
 typedef ListenerOptions = {

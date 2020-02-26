@@ -16,6 +16,9 @@ import echo.util.BodyOrBodies;
  * Echo holds helpful utility methods to help streamline the creation and management of Physics Simulations.
  */
 class Echo {
+  /**
+   * Cache'd `Listeners` collection to help with memory management.
+   */
   static var listeners:Listeners = new Listeners();
   /**
    * Shortcut for creating a new `World`
@@ -50,20 +53,17 @@ class Echo {
    * @param b The second `Body` or Array of Bodies to collide against
    * @param options Options to define the Collision Check's behavior
    */
-  public static function check(world:World, ?a:BodyOrBodies, ?b:BodyOrBodies, ?options:ListenerOptions):Listener {
-    var listener:Listener;
-
+  public static function check(world:World, ?a:BodyOrBodies, ?b:BodyOrBodies, ?options:ListenerOptions) {
     listeners.clear();
 
-    if (a == null) listener = b == null ? listeners.add(world.members, world.members, options) : listeners.add(b, b, options);
-    else if (b == null) listener = listeners.add(a, a, options);
-    else listener = listeners.add(a, b, options);
+    if (a == null && b == null) listeners.add(world.members, world.members, options);
+    else if (a == null) listeners.add(b, b, options);
+    else if (b == null) listeners.add(a, a, options);
+    else listeners.add(a, b, options);
 
     Collisions.query(world, listeners);
     Physics.separate(world, listeners);
     Collisions.notify(world, listeners);
-
-    return listener;
   }
   /**
    * Steps a `World` forward.
@@ -252,7 +252,7 @@ class Echo {
             }
           }
         }
-        world.refresh();
+        world.reset_quadtrees();
       }
     }
     return world;
@@ -279,7 +279,7 @@ class Echo {
           }
         }
       }
-      world.refresh();
+      world.reset_quadtrees();
     }
     return world;
   }

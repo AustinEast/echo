@@ -33,7 +33,13 @@ class World implements IDisposable {
    * The amount of acceleration applied to each `Body` member every Step.
    */
   public var gravity(default, null):Vector2;
+  /**
+   * The World's QuadTree for dynamic Bodies. Generally doesn't need to be touched.
+   */
   public var quadtree:QuadTree;
+  /**
+   * The World's QuadTree for static Bodies. Generally doesn't need to be touched.
+   */
   public var static_quadtree:QuadTree;
   public var listeners:Listeners;
   public var members:Array<Body>;
@@ -53,11 +59,11 @@ class World implements IDisposable {
     x = options.x == null ? 0 : options.x;
     y = options.y == null ? 0 : options.y;
     gravity = new Vector2(options.gravity_x == null ? 0 : options.gravity_x, options.gravity_y == null ? 0 : options.gravity_y);
-    refresh();
+    reset_quadtrees();
 
     listeners = new Listeners(options.listeners);
     iterations = options.iterations == null ? 5 : options.iterations;
-    if(options.history != null) history = new History(options.history);
+    if (options.history != null) history = new History(options.history);
   }
 
   public inline function set_from_shape(s:Shape) {
@@ -76,37 +82,52 @@ class World implements IDisposable {
     if (body.world != null) body.remove();
     body.world = this;
     members.push(body);
-    body.cache.quadtree_data = {id: body.id, bounds: body.bounds(), flag: false};
-    body.is_static() ? static_quadtree.insert(body.cache.quadtree_data) : quadtree.insert(body.cache.quadtree_data);
+    body.quadtree_data = {id: body.id, bounds: body.bounds(), flag: false};
+    body.is_static() ? static_quadtree.insert(body.quadtree_data) : quadtree.insert(body.quadtree_data);
     return body;
   }
 
   public function remove(body:Body):Body {
-    quadtree.remove(body.cache.quadtree_data);
-    static_quadtree.remove(body.cache.quadtree_data);
+    quadtree.remove(body.quadtree_data);
+    static_quadtree.remove(body.quadtree_data);
     members.remove(body);
     body.world = null;
     return body;
   }
 
   public inline function iterator():Iterator<Body> return members.iterator();
-
+  /**
+   * Returns a new Array containing every dynamic `Body` in the World.
+   */
   public inline function dynamics():Array<Body> return members.filter(b -> return b.is_dynamic());
-
+  /**
+   * Returns a new Array containing every static `Body` in the World.
+   */
   public inline function statics():Array<Body> return members.filter(b -> return b.is_static());
-
+  /**
+   * Runs a function on every `Body` in the World
+   * @param f Function to perform on each `Body`.
+   * @param recursive Currently not supported.
+   */
   public inline function for_each(f:Body->Void, recursive:Bool = true) for (b in members) f(cast b);
-
+  /**
+   * Runs a function on every dynamic `Body` in the World
+   * @param f Function to perform on each dynamic `Body`.
+   * @param recursive Currently not supported.
+   */
   public inline function for_each_dynamic(f:Body->Void, recursive:Bool = true) for (b in members) if (b.is_dynamic()) f(cast b);
-
+  /**
+   * Runs a function on every static `Body` in the World
+   * @param f Function to perform on each static `Body`.
+   * @param recursive Currently not supported.
+   */
   public inline function for_each_static(f:Body->Void, recursive:Bool = true) for (b in members) if (b.is_static()) f(cast b);
-
   /**
    * Clears the World's members and listeners.
    */
   public function clear() {
     members.resize(0);
-    refresh();
+    reset_quadtrees();
     listeners.clear();
   }
   /**
@@ -121,8 +142,10 @@ class World implements IDisposable {
     listeners = null;
     history = null;
   }
-
-  public function refresh() {
+  /**
+   * Resets the World's dynamic and static Quadtrees.
+   */
+  public function reset_quadtrees() {
     init = true;
     if (quadtree != null) quadtree.put();
     quadtree = QuadTree.get();
@@ -132,9 +155,13 @@ class World implements IDisposable {
     quadtree.load(r);
     static_quadtree.load(r);
     r.put();
-    for_each_static((member)-> {
-      member.bounds(member.cache.quadtree_data.bounds);
-      static_quadtree.update(member.cache.quadtree_data);
+    for_each((member)-> {
+      if (member.is_dynamic()) {
+        member.dirty = true;
+      } else {
+        member.bounds(member.quadtree_data.bounds);
+        static_quadtree.update(member.quadtree_data);
+      }
     });
   }
 
@@ -142,25 +169,25 @@ class World implements IDisposable {
 
   inline function set_x(value:Float) {
     x = value;
-    if (init) refresh();
+    if (init) reset_quadtrees();
     return x;
   }
 
   inline function set_y(value:Float) {
     y = value;
-    if (init) refresh();
+    if (init) reset_quadtrees();
     return y;
   }
 
   inline function set_width(value:Float) {
     width = value;
-    if (init) refresh();
+    if (init) reset_quadtrees();
     return height;
   }
 
   inline function set_height(value:Float) {
     height = value;
-    if (init) refresh();
+    if (init) reset_quadtrees();
     return height;
   }
 }

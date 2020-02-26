@@ -212,7 +212,7 @@ class Shape implements IProxy {
   inline function set_x(value:Float):Float {
     if (parent_frame == null) return local_x = value;
 
-    var pos = sync_pos.set(value, y);
+    var pos = new Vector2(value, y);
     set_local_position(parent_frame.transformTo(pos));
     return _x;
   }
@@ -220,7 +220,7 @@ class Shape implements IProxy {
   inline function set_y(value:Float):Float {
     if (parent_frame == null) return local_y = value;
 
-    var pos = sync_pos.set(x, value);
+    var pos = new Vector2(x, value);
     set_local_position(parent_frame.transformTo(pos));
     return _y;
   }

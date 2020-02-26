@@ -11,11 +11,9 @@ using Lambda;
  */
 class Collisions {
   /**
-   * Queries a World's Listeners for Collisions
+   * Updates the World's dynamic QuadTree with any Bodies that have moved.
    */
-  public static function query(world:World, ?listeners:Listeners) {
-    // Populate the Quadtree
-    var quadtree = listeners == null ? world.quadtree : QuadTree.get();
+  public static function update_quadtree(world:World) {
     world.for_each(b -> {
       b.collided = false;
       for (shape in b.shapes) {
@@ -28,11 +26,18 @@ class Collisions {
       if (b.active && b.is_dynamic() && b.dirty) {
         if (b.quadtree_data.bounds == null) b.quadtree_data.bounds = b.bounds();
         else b.bounds(b.quadtree_data.bounds);
-        quadtree.update(b.quadtree_data);
+        world.quadtree.update(b.quadtree_data);
       }
       b.dirty = false;
     });
-
+  }
+  /**
+   * Queries a World's Listeners for Collisions.
+   * @param world The World to query.
+   * @param listeners Optional collection of listeners to query. If this is set, the World's listeners will not be queried.
+   */
+  public static function query(world:World, ?listeners:Listeners) {
+    update_quadtree(world);
     // Process the Listeners
     var members = listeners == null ? world.listeners.members : listeners.members;
     for (listener in members) {
@@ -45,14 +50,14 @@ class Collisions {
               var col = body_and_body(ba, bb);
               if (col != null) listener.quadtree_results.push(col);
             case Right(ab):
-              body_and_bodies(ba, ab, world, listener.quadtree_results, quadtree);
+              body_and_bodies(ba, ab, world, listener.quadtree_results, world.quadtree);
           }
         case Right(aa):
           switch (listener.b) {
             case Left(bb):
-              body_and_bodies(bb, aa, world, listener.quadtree_results, quadtree);
+              body_and_bodies(bb, aa, world, listener.quadtree_results, world.quadtree);
             case Right(ab):
-              bodies_and_bodies(aa, ab, world, listener.quadtree_results, quadtree);
+              bodies_and_bodies(aa, ab, world, listener.quadtree_results, world.quadtree);
           }
       }
       // Narrow Phase
@@ -101,7 +106,6 @@ class Collisions {
         listener.collisions.push(result);
       }
     }
-    if (listeners != null) quadtree.put();
   }
   /**
    * Enacts the Callbacks defined in a World's Listeners

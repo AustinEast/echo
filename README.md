@@ -34,18 +34,18 @@ haxelib git echo https://github.com/AustinEast/echo.git
 ```
 
 Then include the library in your project's `.hxml`:
-```
+```hxml
 -lib echo
 ```
 For OpenFL users, add this into your `Project.xml`:
 
-```
+```xml
 <haxelib name="echo" />
 ```
 
 For Kha users (who don't use haxelib), clone echo and [hxmath](https://github.com/tbrosman/hxmath) to `Libraries` folder in your project root, and then add the following to your `khafile.js`:
 
-```
+```js
 project.addLibrary('echo');
 project.addLibrary('hxmath');
 ```
@@ -86,7 +86,7 @@ Listeners keep track of collisions between Bodies - enacting callbacks and physi
 Echo has a couple of ways to help integrate itself into codebases through the `Body` class. 
 
 First, the `Body` class has two public fields named `on_move` and `on_rotate`. If these are set on a body, they'll be called any time the body moves or rotates:
-```
+```haxe
 var body = new echo.Body();
 body.on_move = (x,y) -> entity.position.set(x,y);
 body.on_rotate = (rotation) -> entity.rotation = rotation;
@@ -95,12 +95,12 @@ body.on_rotate = (rotation) -> entity.rotation = rotation;
 Second, a build macro is available to add custom fields to the `Body` class, such as an `Entity` class:
 
 in build.hxml:
-```
+```hxml
 --macro echo.Macros.add_data("entity", "some.package.Entity")
 ```
 
 in Main.hx
-```
+```haxe
 var body = new echo.Body();
 body.entity = new some.package.Entity();
 ```

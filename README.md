@@ -18,6 +18,7 @@ Check out the [API 📖](https://austineast.dev/echo/api/)!
 * SAT-powered collision detection
 * Quadtree for broadphase collision querying
 * Collision listeners to provide collision callbacks
+* Traversable Physics State History with built-in Undo/Redo functionality
 * Extendable debug drawing
 
 ## Getting Started

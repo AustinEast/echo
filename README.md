@@ -164,3 +164,11 @@ class Main {
   }
 }
 ```
+
+## Future
+* Linecast updates 
+  * Provide normals in Linecast results
+  * Allow querying World's Quadtree when Linecasting
+* Sleeping Body optimations
+* Allow parenting of Body transforms
+* Allow Concave Polygons (through Convex Decomposition)

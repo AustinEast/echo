@@ -106,7 +106,7 @@ var body = new echo.Body();
 body.entity = new some.package.Entity();
 ```
 
-### Example
+## Example
 ```haxe
 import echo.Echo;
 

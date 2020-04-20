@@ -18,7 +18,7 @@ Check out the [API 📖](https://austineast.dev/echo/api/)!
 * SAT-powered collision detection
 * Quadtree for broadphase collision querying
 * Collision listeners to provide collision callbacks
-* Traversable Physics State History with built-in Undo/Redo functionality
+* Physics State History Management with Built-in Undo/Redo functionality
 * Extendable debug drawing
 
 ## Getting Started
@@ -165,10 +165,13 @@ class Main {
 }
 ```
 
-## Future
+## Roadmap
+### Sooner
 * Linecast updates 
   * Provide normals in Linecast results
   * Allow querying World's Quadtree when Linecasting
-* Sleeping Body optimations
 * Allow parenting of Body transforms
+### Later
 * Allow Concave Polygons (through Convex Decomposition)
+* Sleeping Body optimations
+* Constraints

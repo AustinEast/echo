@@ -7,4 +7,4 @@
 -xml bin/echo.xml
 
 --next
--cmd haxelib run dox -i bin -o bin/api --title "Echo API" -D website "http://austineast.dev/echo" -in echo -in hxmath
+-cmd haxelib run dox -i bin -o bin/api --title "Echo API" -D website "http://austineast.dev/echo" -in echo -in hxmath --toplevel-package echo

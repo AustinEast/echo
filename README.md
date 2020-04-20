@@ -154,9 +154,9 @@ class Main {
       exit: (a, b) -> trace("Collision Exited"), // This callback is called when a collision between the two Bodies ends
     });
 
-    // Set up a Timer to act as an update loop
+    // Set up a Timer to act as an update loop (at 60fps)
     new haxe.Timer(16).run = () -> {
-      // Step the World's Physics Simulation forward
+      // Step the World's Physics Simulation forward (at 60fps)
       world.step(16 / 1000);
       // Log the World State in the Console
       echo.util.Debug.log(world);

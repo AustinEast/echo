@@ -29,4 +29,9 @@ class Ext {
     normal.normalizeTo(len);
     return normal;
   }
+  
+  public static function dispose_bodies(arr:Array<Body>):Array<Body> {
+    for (body in arr) body.dispose();
+    return arr;
+  }
 }

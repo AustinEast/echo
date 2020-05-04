@@ -5,12 +5,19 @@ import haxe.macro.Expr;
 import haxe.macro.Context;
 
 class Macros {
-  static var dataFields:Array<Field> = [];
+  static var dataFields:Map<String, String> = [];
 
   static function build_body() {
-    if (dataFields.length == 0) return null;
+    if (Lambda.count(dataFields) == 0) return null;
     var fields = Context.getBuildFields();
-    for (f in dataFields) fields.push(f);
+    for (kv in dataFields.keyValueIterator()) {
+      fields.push({
+        name: kv.key,
+        access: [Access.APublic],
+        kind: FieldType.FVar(Context.toComplexType(Context.getType(kv.value))),
+        pos: Context.currentPos()
+      });
+    }
     return fields;
   }
   /**
@@ -21,12 +28,7 @@ class Macros {
    * @param type
    */
   public static function add_data(name:String, type:String) {
-    dataFields.push({
-      name: name,
-      access: [Access.APublic],
-      kind: FieldType.FVar(Context.toComplexType(Context.getType(type))),
-      pos: Context.currentPos()
-    });
+    dataFields[name] = type;
   }
 }
 #end

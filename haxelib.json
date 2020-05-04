@@ -3,7 +3,7 @@
     "license": "MIT",
     "tags": ["physics", "collisions"],
     "description": "Simple Physics Library written in Haxe",
-    "contributors": ["austineast", "01010111"],
+    "contributors": ["austineast"],
     "url": "https://austineast.dev/echo",
     "releasenote": "add_data macro fix",
     "version": "1.4.1",

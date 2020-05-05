@@ -81,7 +81,7 @@ class Body implements IDisposable {
    */
   public var acceleration:Vector2;
   /**
-   * The units/second that a `Body` will rotate. Currently is not Implemented.
+   * The units/second that a `Body` will rotate.
    */
   public var rotational_velocity:Float;
   /**

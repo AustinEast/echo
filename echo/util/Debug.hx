@@ -12,6 +12,8 @@ class Debug {
   public var draw_bounds:Bool = false;
   public var draw_shape_bounds:Bool = false;
   public var draw_quadtree:Bool = true;
+  public var shape_outline_width:Float = 1;
+  public var shape_fill_alpha:Float = 0;
   public var shape_color:Int;
   public var shape_fill_color:Int;
   public var shape_collided_color:Int;
@@ -53,7 +55,7 @@ class Debug {
             var r:Rect = cast shape;
             if (r.transformed_rect != null && !r.rotation.equals(0)) {
               draw_polygon(r.transformed_rect.count, r.transformed_rect.vertices, shape_fill_color,
-                r.transformed_rect.collided ? shape_collided_color : shape_color, 0);
+                r.transformed_rect.collided ? shape_collided_color : shape_color, shape_fill_alpha);
               if (draw_shape_bounds) {
                 var b = r.transformed_rect.bounds();
                 draw_rect(b.x - b.ex, b.y - b.ey, b.width, b.height, shape_fill_color, r.transformed_rect.collided ? shape_collided_color : shape_color, 0);
@@ -64,7 +66,7 @@ class Debug {
           case CIRCLE:
             var c:Circle = cast shape;
 
-            draw_circle(x, y, c.radius, shape_fill_color, shape.collided ? shape_collided_color : shape_color, 0);
+            draw_circle(x, y, c.radius, shape_fill_color, shape.collided ? shape_collided_color : shape_color, shape_fill_alpha);
             if (draw_shape_bounds) {
               var b = c.bounds();
               draw_rect(b.x - b.ex, b.y - b.ey, b.width, b.height, shape_fill_color, shape.collided ? shape_collided_color : shape_color, 0);
@@ -73,7 +75,7 @@ class Debug {
           case POLYGON:
             var p:Polygon = cast shape;
 
-            draw_polygon(p.count, p.vertices, shape_fill_color, shape.collided ? shape_collided_color : shape_color, 0);
+            draw_polygon(p.count, p.vertices, shape_fill_color, shape.collided ? shape_collided_color : shape_color, shape_fill_alpha);
             if (draw_shape_bounds) {
               var b = p.bounds();
               draw_rect(b.x - b.ex, b.y - b.ey, b.width, b.height, shape_fill_color, shape.collided ? shape_collided_color : shape_color, 0);
@@ -128,23 +130,31 @@ class HeapsDebug extends Debug {
   }
 
   override public inline function draw_line(from_x:Float, from_y:Float, to_x:Float, to_y:Float, color:Int, alpha:Float = 1.) {
-    canvas.lineStyle(1, color, alpha);
+    canvas.lineStyle(shape_outline_width, color, alpha);
     canvas.moveTo(from_x, from_y);
     canvas.lineTo(to_x, to_y);
   }
 
   override public inline function draw_rect(x:Float, y:Float, width:Float, height:Float, color:Int, ?stroke:Int, alpha:Float = 1.) {
     canvas.beginFill(color, alpha);
-    stroke != null ? canvas.lineStyle(1, stroke, 1) : canvas.lineStyle();
+    stroke != null ? canvas.lineStyle(shape_outline_width, stroke, 1) : canvas.lineStyle();
     canvas.drawRect(x, y, width, height);
     canvas.endFill();
   }
 
   override public inline function draw_circle(x:Float, y:Float, radius:Float, color:Int, ?stroke:Int, alpha:Float = 1.) {
     canvas.beginFill(color, alpha);
-    stroke != null ? canvas.lineStyle(1, stroke, 1) : canvas.lineStyle();
+    stroke != null ? canvas.lineStyle(shape_outline_width, stroke, 1) : canvas.lineStyle();
     canvas.drawCircle(x, y, radius);
     canvas.endFill();
+  }
+
+  override public function draw_polygon(count:Int, vertices:Array<Vector2>, color:Int, ?stroke:Int, alpha:Float = 1) {
+    if (count < 2) return;
+    canvas.beginFill(color, alpha);
+    stroke != null ? canvas.lineStyle(shape_outline_width, stroke, 1) : canvas.lineStyle();
+    canvas.moveTo(vertices[count - 1].x, vertices[count - 1].y);
+    for (i in 0...count) canvas.lineTo(vertices[i].x, vertices[i].y);
   }
 
   override public inline function clear() canvas.clear();
@@ -174,21 +184,21 @@ class OpenFLDebug extends Debug {
     canvas.graphics.moveTo(from_x, from_y);
     canvas.graphics.lineTo(to_x, to_y);
   }
-  
+
   override public inline function draw_rect(x:Float, y:Float, width:Float, height:Float, color:Int, ?stroke:Int, alpha:Float = 1.) {
     canvas.graphics.beginFill(color, alpha);
     stroke != null ? canvas.graphics.lineStyle(1, stroke, 1) : canvas.graphics.lineStyle();
     canvas.graphics.drawRect(x, y, width, height);
     canvas.graphics.endFill();
   }
-  
+
   override public inline function draw_circle(x:Float, y:Float, radius:Float, color:Int, ?stroke:Int, alpha:Float = 1.) {
     canvas.graphics.beginFill(color, alpha);
     stroke != null ? canvas.graphics.lineStyle(1, stroke, 1) : canvas.graphics.lineStyle();
     canvas.graphics.drawCircle(x, y, radius);
     canvas.graphics.endFill();
   }
-  
+
   override public inline function clear() canvas.graphics.clear();
 }
 #end

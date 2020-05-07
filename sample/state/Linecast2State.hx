@@ -46,5 +46,6 @@ class Linecast2State extends BaseState {
       if (result != null) Main.instance.debug.draw_intersection(result, false);
       else Main.instance.debug.draw_line(line.start.x, line.start.y, line.end.x, line.end.y, Main.instance.debug.intersection_color);
     }
+    line.put();
   }
 }

@@ -192,24 +192,32 @@ class IntersectionData implements IPooled {
    * The length of the line that has overlapped the shape.
    */
   public var overlap:Float;
+  /**
+   * The normal vector (direction) of the Line's penetration into the Shape.
+   */
+  public var normal:Vector2;
 
   public var pooled:Bool;
 
-  public static inline function get(distance:Float, overlap:Float, x:Float, y:Float):IntersectionData {
+  public static inline function get(distance:Float, overlap:Float, x:Float, y:Float, normal_x:Float, normal_y:Float):IntersectionData {
     var i = _pool.get();
     i.line = null;
     i.shape = null;
-    i.set(distance, overlap, x, y);
+    i.set(distance, overlap, x, y, normal_x, normal_y);
     i.pooled = false;
     return i;
   }
 
-  inline function new() hit = new Vector2(0, 0);
+  inline function new() {
+    hit = new Vector2(0, 0);
+    normal = new Vector2(0, 0);
+  }
 
-  public inline function set(distance:Float, overlap:Float, x:Float, y:Float) {
+  public inline function set(distance:Float, overlap:Float, x:Float, y:Float, normal_x:Float, normal_y:Float) {
     this.distance = distance;
     this.overlap = overlap;
     hit.set(x, y);
+    normal.set(normal_x, normal_y);
   }
 
   public function put() {

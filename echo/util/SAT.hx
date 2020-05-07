@@ -59,8 +59,8 @@ class SAT {
     var hit = line1.start + ua * (line1.end - line1.start);
     var distance = line1.start.distanceTo(hit);
     var overlap = line1.length - distance;
-
-    return IntersectionData.get(distance, overlap, hit.x, hit.y);
+    var normal = line2.side(line1.start);
+    return IntersectionData.get(distance, overlap, hit.x, hit.y, normal.x, normal.y);
   }
 
   public static function line_interects_rect(l:Line, r:Rect):Null<IntersectionData> {
@@ -117,7 +117,7 @@ class SAT {
       var distance = l.start.distanceTo(hit);
       var overlap = l.length - distance;
 
-      var i = IntersectionData.get(distance, overlap, hit.x, hit.y);
+      var i = IntersectionData.get(distance, overlap, hit.x, hit.y, 0, 0);
       i.line = l;
       i.shape = c;
       return i;
@@ -128,7 +128,7 @@ class SAT {
       var distance = l.start.distanceTo(hit);
       var overlap = l.length - distance;
 
-      var i = IntersectionData.get(distance, overlap, hit.x, hit.y);
+      var i = IntersectionData.get(distance, overlap, hit.x, hit.y, 0, 0);
       i.line = l;
       i.shape = c;
       return i;

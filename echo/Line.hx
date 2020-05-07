@@ -6,6 +6,8 @@ import echo.util.Pool;
 import echo.util.Proxy;
 import hxmath.math.Vector2;
 
+using hxmath.math.MathUtil;
+
 @:using(echo.Echo)
 class Line implements IProxy implements IPooled {
   public static var pool(get, never):IPool<Line>;
@@ -23,6 +25,7 @@ class Line implements IProxy implements IPooled {
   public var end:Vector2;
   @:alias(start.distanceTo(end))
   public var length(get, never):Float;
+  public var radians(get, never):Float;
   public var pooled:Bool;
 
   public static inline function get(x:Float = 0, y:Float = 0, dx:Float = 1, dy:Float = 1):Line {
@@ -54,7 +57,7 @@ class Line implements IProxy implements IPooled {
     return this;
   }
 
-  public inline function set_from_vector(start:Vector2, angle:Float, length:Float) {
+  public function set_from_vector(start:Vector2, angle:Float, length:Float) {
     angle = MathUtil.degToRad(angle);
     var end = new Vector2(start.x + (length * Math.cos(angle)), start.y + (length * Math.sin(angle)));
     return set(start.x, start.y, end.x, end.y);
@@ -71,7 +74,7 @@ class Line implements IProxy implements IPooled {
     }
   }
 
-  public inline function contains(v:Vector2):Bool {
+  public function contains(v:Vector2):Bool {
     // Find the slope
     var m = (dy - y) / (dx - y);
     var b = y - m * x;
@@ -85,8 +88,28 @@ class Line implements IProxy implements IPooled {
   public inline function point_along_ratio(ratio:Float):Vector2 {
     return start - ratio * (start - end);
   }
+  /**
+   * Gets the normal on the side of the line the point is.
+   */
+  public function side(point:Vector2, ?set:Vector2) {
+    var rad = (dx - x) * (point.y - y) - (dy - y) * (point.x - x);
+    var dir = start - end;
+
+    if (set != null) {
+      set.set(-dir.y, rad > 0 ? -dir.x : dir.x);
+      return set.normalize();
+    }
+
+    var normal = new Vector2(-dir.y, rad > 0 ? -dir.x : dir.x);
+    return normal.normalize();
+  }
 
   public inline function get_length() return start.distanceTo(end);
+
+  public inline function get_radians() return Math.atan2(dy - y, dx - x);
+
+  // TODO - public inline function set_length()
+  // TODO - public inline function set_radians()
 
   function toString() return 'Line: {start: $start, end: $end}';
 

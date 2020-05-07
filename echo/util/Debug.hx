@@ -5,6 +5,7 @@ import hxmath.math.Vector2;
 import echo.shape.*;
 
 using echo.util.Ext;
+using hxmath.math.MathUtil;
 
 class Debug {
   public var draw_bodies:Bool = true;
@@ -89,13 +90,18 @@ class Debug {
     });
   }
 
-  public function draw_intersection(intersection:Intersection, draw_overlap:Bool = true) {
+  public function draw_intersection(intersection:Intersection, draw_overlap:Bool = true, draw_normal:Bool = true) {
     if (intersection == null) return;
     var closest = intersection.closest;
     if (closest == null) return;
 
     draw_line(closest.line.start.x, closest.line.start.y, closest.hit.x, closest.hit.y, intersection_color);
     if (draw_overlap) draw_line(closest.hit.x, closest.hit.y, closest.line.end.x, closest.line.end.y, intersection_overlap_color);
+    if (draw_normal) {
+      var normal = Line.get_from_vector(closest.hit, closest.normal.angle.radToDeg(), 10);
+      draw_line(normal.x, normal.y, normal.dx, normal.dy, intersection_overlap_color);
+      normal.put();
+    }
   }
 
   public function draw_polygon(count:Int, vertices:Array<Vector2>, color:Int, ?stroke:Int, alpha:Float = 1) {
@@ -174,21 +180,21 @@ class OpenFLDebug extends Debug {
     canvas.graphics.moveTo(from_x, from_y);
     canvas.graphics.lineTo(to_x, to_y);
   }
-  
+
   override public inline function draw_rect(x:Float, y:Float, width:Float, height:Float, color:Int, ?stroke:Int, alpha:Float = 1.) {
     canvas.graphics.beginFill(color, alpha);
     stroke != null ? canvas.graphics.lineStyle(1, stroke, 1) : canvas.graphics.lineStyle();
     canvas.graphics.drawRect(x, y, width, height);
     canvas.graphics.endFill();
   }
-  
+
   override public inline function draw_circle(x:Float, y:Float, radius:Float, color:Int, ?stroke:Int, alpha:Float = 1.) {
     canvas.graphics.beginFill(color, alpha);
     stroke != null ? canvas.graphics.lineStyle(1, stroke, 1) : canvas.graphics.lineStyle();
     canvas.graphics.drawCircle(x, y, radius);
     canvas.graphics.endFill();
   }
-  
+
   override public inline function clear() canvas.graphics.clear();
 }
 #end

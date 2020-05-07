@@ -169,6 +169,7 @@ class Main {
 ### Sooner
 * Linecast updates 
   * Provide normals in Linecast results
+  * Endless length Line support
   * Allow querying World's Quadtree when Linecasting
 * Allow parenting of Body transforms
 ### Later

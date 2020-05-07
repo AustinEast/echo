@@ -77,29 +77,45 @@ class Body implements IDisposable {
    */
   public var velocity:Vector2;
   /**
-   * A measure of how fast a `Body` will change it's velocity. Can be thought of the sum of all external forces on an object (such as a World's gravity) during a step.
+   * A measure of how fast a `Body` will change it's velocity.
+   *
+   * Can be thought of the sum of all external forces on an object during a step.
    */
   public var acceleration:Vector2;
   /**
-   * The units/second that a `Body` will rotate. Currently is not Implemented.
+   * The units/second that a `Body` will rotate.
    */
   public var rotational_velocity:Float;
   /**
-   * The maximum velocity range that a `Body` can have.
+   * The maximum values a Body's velocity's x and y components can be. If set to 0, the Body has no restrictions on how fast it can move.
    *
-   * If set to 0, the Body has no restrictions on how fast it can move.
+   * Note: this is calculated separately from a Body's `max_velocity_length`, so be careful when applying both.
    */
   public var max_velocity:Vector2;
   /**
-   * The maximum rotational velocity range that a `Body` can have. Currently not Implemented.
+   * The maximum velocity that a `Body` can have along the velocity's length. If set to 0, the Body has no restrictions on how fast it can move.
+   *
+   * Note: this is calculated separately from a Body's `max_velocity`, so be careful when applying both.
+   */
+  public var max_velocity_length:Float;
+  /**
+   * The maximum rotational velocity range that a `Body` can have.
    *
    * If set to 0, the Body has no restrictions on how fast it can rotate.
    */
   public var max_rotational_velocity:Float;
   /**
-   * A measure of how fast a Body will move its velocity towards 0 when there is no acceleration.
+   * A measure of how fast a Body will move its velocity's x and y components towards 0, when there is no acceleration.
+   *
+   * Note: this is calculated separately from a Body's `drag_length`, so be careful when applying both.
    */
   public var drag:Vector2;
+  /**
+   * A measure of how fast a Body will move its velocity towards 0 along the velocity's length, when there is no acceleration.
+   *
+   * Note: this is calculated separately from a Body's `drag`, so be careful when applying both.
+   */
+  public var drag_length:Float;
   /**
    * Percentage value that represents how much a World's gravity affects the Body.
    */
@@ -112,6 +128,8 @@ class Body implements IDisposable {
    * Flag to set if the Body is active and will participate in a World's Physics calculations or Collision querys.
    */
   public var active:Bool;
+
+  public var disposed(default, null):Bool;
   /**
    * TODO - sleeping support
    *
@@ -181,6 +199,7 @@ class Body implements IDisposable {
     max_velocity = new Vector2(0, 0);
     drag = new Vector2(0, 0);
     data = {};
+    disposed = false;
     load_options(options);
   }
   /**
@@ -199,8 +218,10 @@ class Body implements IDisposable {
     velocity.set(options.velocity_x, options.velocity_y);
     rotational_velocity = options.rotational_velocity;
     max_velocity.set(options.max_velocity_x, options.max_velocity_y);
+    max_velocity_length = options.max_velocity_length;
     max_rotational_velocity = options.max_rotational_velocity;
     drag.set(options.drag_x, options.drag_y);
+    drag_length = options.drag_length;
     gravity_scale = options.gravity_scale;
     last_x = Math.NaN;
     last_y = Math.NaN;
@@ -221,8 +242,10 @@ class Body implements IDisposable {
     b.velocity.set(velocity.x, velocity.y);
     b.rotational_velocity = rotational_velocity;
     b.max_velocity.set(max_velocity.x, max_velocity.y);
+    b.max_velocity_length = max_velocity_length;
     b.max_rotational_velocity = max_rotational_velocity;
     b.drag.set(drag.x, drag.y);
+    b.drag_length = drag_length;
     b.gravity_scale = gravity_scale;
     b.last_x = last_x;
     b.last_y = last_y;
@@ -385,6 +408,7 @@ class Body implements IDisposable {
    * Disposes the Body. DO NOT use the Body after disposing it, as it could lead to null reference errors.
    */
   public function dispose() {
+    disposed = true;
     remove();
     for (shape in shapes) shape.put();
     shapes = null;
@@ -496,9 +520,11 @@ class Body implements IDisposable {
     rotational_velocity: 0,
     max_velocity_x: 0,
     max_velocity_y: 0,
+    max_velocity_length: 0,
     max_rotational_velocity: 10000,
     drag_x: 0,
     drag_y: 0,
+    drag_length: 0,
     gravity_scale: 1
   }
 }

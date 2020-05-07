@@ -15,6 +15,14 @@ typedef BodyOptions = {
    */
   var ?shapes:Array<ShapeOptions>;
   /**
+   * A Shape instance that the Body will use as a collider
+   */
+  var ?shape_instance:Shape;
+  /**
+   * An array of Shape instances that the Body will use as colliders
+   */
+  var ?shape_instances:Array<Shape>;
+  /**
    * Flag to set how a Body is affected by Collisions.
    *
    * If set to true, the Body will still Collide and move through the world, but it will not be moved by external collision forces.
@@ -57,17 +65,23 @@ typedef BodyOptions = {
    */
   var ?rotational_velocity:Float;
   /**
-   * The maximum velocity range that a `Body` can have on the X axis.
+   * The maximum velocity range that a `Body` can have on the X axis. If set to 0, the Body has no restrictions on how fast it can move.
    *
-   * If set to 0, the Body has no restrictions on how fast it can move.
+   * Note: this is calculated separately from a Body's `max_velocity_length`, so be careful when applying both.
    */
   var ?max_velocity_x:Float;
   /**
-   * The maximum velocity range that a `Body` can have on the Y axis.
+   * The maximum velocity range that a `Body` can have on the Y axis. If set to 0, the Body has no restrictions on how fast it can move.
    *
-   * If set to 0, the Body has no restrictions on how fast it can move.
+   * Note: this is calculated separately from a Body's `max_velocity_length`, so be careful when applying both.
    */
   var ?max_velocity_y:Float;
+  /**
+   * The maximum velocity that a `Body` can have along the velocity's length. If set to 0, the Body has no restrictions on how fast it can move.
+   *
+   * Note: this is calculated separately from a Body's `max_velocity_x` or 'max_velocity_y', so be careful when applying both.
+   */
+  var ?max_velocity_length:Float;
   /**
    * The maximum rotational velocity range that a `Body` can have. Currently not Implemented.
    *
@@ -76,13 +90,25 @@ typedef BodyOptions = {
   var ?max_rotational_velocity:Float;
   /**
    * A measure of how fast a Body will move its velocity towards 0 on the X axis when there is no acceleration.
+   *
+   * Note: this is calculated separately from a Body's `drag_length`, so be careful when applying both.
    */
   var ?drag_x:Float;
   /**
    * A measure of how fast a Body will move its velocity towards 0 on the Y axis when there is no acceleration.
+   *
+   * Note: this is calculated separately from a Body's `drag_length`, so be careful when applying both.
    */
   var ?drag_y:Float;
-
+  /**
+   * A measure of how fast a Body will move its velocity towards 0 along the velocity's length, when there is no acceleration.
+   *
+   * Note: this is calculated separately from a Body's `drag`, so be careful when applying both.
+   */
+  var ?drag_length:Float;
+  /**
+   * Percentage value that represents how much a World's gravity affects the Body.
+   */
   var ?gravity_scale:Float;
 }
 

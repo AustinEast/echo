@@ -1,5 +1,6 @@
 package echo;
 
+import hxmath.math.Vector2;
 import echo.data.Data;
 import echo.Listener;
 
@@ -9,6 +10,7 @@ using echo.util.Ext;
  * Class containing methods for performing Physics simulations on a World
  */
 class Physics {
+  static final zero = Vector2.zero;
   /**
    * Applies movement forces to a World's Bodies
    * @param world World to step forward
@@ -16,18 +18,30 @@ class Physics {
    */
   public static function step(world:World, dt:Float) {
     world.for_each_dynamic((member) -> {
-      if (member.active) {
+      if (!member.disposed && member.active) {
         member.last_x = member.x;
         member.last_y = member.y;
         member.last_rotation = member.rotation;
         // Compute Velocity
-        member.velocity.x = compute_velocity(member.velocity.x, member.acceleration.x, member.drag.x, member.max_velocity.x, dt);
-        member.velocity.y = compute_velocity(member.velocity.y, member.acceleration.y, member.drag.y, member.max_velocity.y, dt);
+        member.velocity.x = compute_velocity(member.velocity.x, member.acceleration.x + world.gravity.x * member.gravity_scale, member.drag.x,
+          member.max_velocity.x, dt);
+        member.velocity.y = compute_velocity(member.velocity.y, member.acceleration.y + world.gravity.y * member.gravity_scale, member.drag.y,
+          member.max_velocity.y, dt);
+        // Apply the Body's mass_velocity_length and drag_length
+        if (member.drag_length > 0 && member.acceleration == zero && member.velocity != zero) {
+          trace('before: ${member.velocity.length}');
+          member.velocity.normalizeTo(member.velocity.length - member.drag_length * dt);
+          trace('after: ${member.velocity.length}');
+        }
+        if (member.max_velocity_length > 0 && member.velocity.length > member.max_velocity_length) {
+          member.velocity.normalizeTo(member.max_velocity_length);
+        }
         // Apply Velocity
         member.x += member.velocity.x * member.inverse_mass * dt;
         member.y += member.velocity.y * member.inverse_mass * dt;
         // Apply Rotations
         member.rotation += member.rotational_velocity * dt;
+        if (member.max_rotational_velocity > 0) member.rotation = member.rotation.clamp(-member.max_rotational_velocity, member.max_rotational_velocity);
       }
     });
   }
@@ -52,7 +66,7 @@ class Physics {
    */
   public static function resolve(a:Body, b:Body, cd:CollisionData, correction_threshold:Float = 0.013, percent_correction:Float = 0.9) {
     // Do not resolve if either objects arent solid
-    if (!cd.sa.solid || !cd.sb.solid || !a.active || !b.active || a.is_static() && b.is_static()) return;
+    if (!cd.sa.solid || !cd.sb.solid || !a.active || !b.active || a.disposed || b.disposed || a.is_static() && b.is_static()) return;
     // Calculate relative velocity
     var rvx = a.velocity.x - b.velocity.x;
     var rvy = a.velocity.y - b.velocity.y;

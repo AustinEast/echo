@@ -84,11 +84,6 @@ class Echo {
       }
     ]);
 
-    // Apply Gravity
-    world.for_each(member -> {
-      member.acceleration.x += world.gravity.x * member.gravity_scale;
-      member.acceleration.y += world.gravity.y * member.gravity_scale;
-    });
     // Step the World incrementally based on the number of iterations
     var fdt = dt / world.iterations;
     for (i in 0...world.iterations) {

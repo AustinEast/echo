@@ -60,6 +60,7 @@ class StaticState extends BaseState {
       if (world.count < body_count + static_count) dynamics.push(world.add(new Body({
         x: (world.width * 0.5) + Random.range(-world.width * 0.3, world.width * 0.3),
         y: (world.height * 0.5) + Random.range(-world.height * 0.3, world.height * 0.3),
+        max_velocity_length: 300,
         elasticity: 1,
         shape: {
           type: Random.chance() ? RECT : CIRCLE,

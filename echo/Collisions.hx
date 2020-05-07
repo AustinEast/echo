@@ -15,20 +15,22 @@ class Collisions {
    */
   public static function update_quadtree(world:World) {
     world.for_each(b -> {
-      b.collided = false;
-      for (shape in b.shapes) {
-        shape.collided = false;
-        if (shape.type == RECT) {
-          var r:echo.shape.Rect = cast shape;
-          if (r.transformed_rect != null) r.transformed_rect.collided = false;
+      if (!b.disposed) {
+        b.collided = false;
+        for (shape in b.shapes) {
+          shape.collided = false;
+          if (shape.type == RECT) {
+            var r:echo.shape.Rect = cast shape;
+            if (r.transformed_rect != null) r.transformed_rect.collided = false;
+          }
         }
+        if (b.active && b.is_dynamic() && b.dirty) {
+          if (b.quadtree_data.bounds == null) b.quadtree_data.bounds = b.bounds();
+          else b.bounds(b.quadtree_data.bounds);
+          world.quadtree.update(b.quadtree_data);
+        }
+        b.dirty = false;
       }
-      if (b.active && b.is_dynamic() && b.dirty) {
-        if (b.quadtree_data.bounds == null) b.quadtree_data.bounds = b.bounds();
-        else b.bounds(b.quadtree_data.bounds);
-        world.quadtree.update(b.quadtree_data);
-      }
-      b.dirty = false;
     });
   }
   /**
@@ -65,6 +67,11 @@ class Collisions {
       listener.last_collisions = listener.collisions.copy();
       listener.collisions.resize(0);
       for (result in listener.quadtree_results) {
+        // Filter out disposed bodies
+        if (result.a.disposed || result.b.disposed) {
+          result.put();
+          continue;
+        }
         // Filter out self collisions
         if (result.a.id == result.b.id) {
           result.put();
@@ -97,9 +104,11 @@ class Collisions {
           continue;
         }
         // Check if the collision passes the listener's condition if it has one
-        if (listener.condition != null && !listener.condition(result.a, result.b, result.data)) {
-          result.put();
-          continue;
+        if (listener.condition != null) {
+          if (!listener.condition(result.a, result.b, result.data) || result.a.disposed || result.b.disposed) {
+            result.put();
+            continue;
+          }
         }
         for (data in result.data) data.sa.collided = data.sb.collided = true;
         result.a.collided = result.b.collided = true;
@@ -115,18 +124,20 @@ class Collisions {
     for (listener in members) {
       if (listener.enter != null || listener.stay != null) {
         for (c in listener.collisions) {
-          if (listener.enter != null
-            && listener.last_collisions.find((f) -> return f.a == c.a && f.b == c.b || f.a == c.b && f.b == c.a) == null) {
-            listener.enter(c.a, c.b, c.data);
-          }
-          else if (listener.stay != null) {
-            listener.stay(c.a, c.b, c.data);
+          if (!c.a.disposed && !c.b.disposed) {
+            if (listener.enter != null
+              && listener.last_collisions.find((f) -> return f.a == c.a && f.b == c.b || f.a == c.b && f.b == c.a) == null) {
+              listener.enter(c.a, c.b, c.data);
+            }
+            else if (listener.stay != null) {
+              listener.stay(c.a, c.b, c.data);
+            }
           }
         }
       }
       if (listener.exit != null) {
         for (lc in listener.last_collisions) {
-          if (listener.collisions.find((f) -> return f.a == lc.a && f.b == lc.b || f.a == lc.b && f.b == lc.a) == null) {
+          if (!lc.a.disposed && !lc.b.disposed && listener.collisions.find((f) -> return f.a == lc.a && f.b == lc.b || f.a == lc.b && f.b == lc.a) == null) {
             listener.exit(lc.a, lc.b);
           }
         }
@@ -136,20 +147,21 @@ class Collisions {
 
   static function bodies_and_bodies(a:Array<Body>, b:Array<Body>, world:World, results:Array<Collision>, quadtree:QuadTree) {
     if (a.length == 0 || b.length == 0) return;
-    for (body in a) if (body.active && body.is_dynamic()) body_and_bodies(body, b, world, results, quadtree);
+    for (body in a) if (!body.disposed && body.active && body.is_dynamic()) body_and_bodies(body, b, world, results, quadtree);
   }
 
   static var qr:Array<QuadTreeData> = [];
   static var sqr:Array<QuadTreeData> = [];
 
   static function body_and_bodies(body:Body, bodies:Array<Body>, world:World, results:Array<Collision>, quadtree:QuadTree) {
-    if (body.shapes.length == 0 || !body.active || body.is_static()) return;
+    if (!body.disposed && body.shapes.length == 0 || !body.active || body.is_static()) return;
     var bounds = body.bounds();
     qr.resize(0);
     sqr.resize(0);
     quadtree.query(bounds, qr);
     world.static_quadtree.query(bounds, sqr);
     for (member in bodies) {
+      if (member.disposed) continue;
       for (result in (member.is_dynamic() ? qr : sqr)) {
         if (result.id == member.id) results.push(Collision.get(body, member));
       }
@@ -158,7 +170,7 @@ class Collisions {
   }
 
   static function body_and_body(a:Body, b:Body):Null<Collision> {
-    if (a.shapes.length == 0 || b.shapes.length == 0 || !a.active || !b.active || a == b || a.is_static() && b.is_static()) return null;
+    if (a.disposed || b.disposed || a.shapes.length == 0 || b.shapes.length == 0 || !a.active || !b.active || a == b || a.is_static() && b.is_static()) return null;
     var ab = a.bounds();
     var bb = b.bounds();
     var col = ab.collides(bb);

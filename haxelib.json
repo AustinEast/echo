@@ -1,13 +1,13 @@
 {
-    "name": "echo",
-    "license": "MIT",
-    "tags": ["physics", "collisions"],
-    "description": "Simple Physics Library written in Haxe",
-    "contributors": ["austineast"],
-    "url": "https://austineast.dev/echo",
-    "releasenote": "linecast normals and other goodies",
-    "version": "1.5.0",
-    "dependencies": {
-      "hxmath": ""
-    }
+  "name": "echo",
+  "license": "MIT",
+  "tags": ["physics", "collisions"],
+  "description": "Simple Physics Library written in Haxe",
+  "contributors": ["austineast"],
+  "url": "https://austineast.dev/echo",
+  "releasenote": "linecast normals and other goodies",
+  "version": "1.5.0",
+  "dependencies": {
+    "hxmath": ""
   }
+}

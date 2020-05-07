@@ -94,13 +94,10 @@ class Line implements IProxy implements IPooled {
   public function side(point:Vector2, ?set:Vector2) {
     var rad = (dx - x) * (point.y - y) - (dy - y) * (point.x - x);
     var dir = start - end;
+    var normal = set == null ? new Vector2(0, 0) : set;
 
-    if (set != null) {
-      set.set(-dir.y, rad > 0 ? -dir.x : dir.x);
-      return set.normalize();
-    }
-
-    var normal = new Vector2(-dir.y, rad > 0 ? -dir.x : dir.x);
+    if (rad > 0) normal.set(dir.y, -dir.x);
+    else normal.set(-dir.y, dir.x);
     return normal.normalize();
   }
 

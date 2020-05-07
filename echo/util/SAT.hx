@@ -11,6 +11,8 @@ using echo.util.Ext;
  * Class containing methods to perform collision checks using the Separating Axis Thereom
  */
 class SAT {
+  static final norm = new Vector2(0, 0);
+
   public static inline function point_in_rect(p:Vector2, r:Rect):Bool {
     if (r.transformed_rect != null && !r.rotation.equals(0)) return p.point_in_polygon(r.transformed_rect);
     return r.left <= p.x && r.right >= p.x && r.top <= p.x && r.bottom >= p.y;
@@ -59,8 +61,9 @@ class SAT {
     var hit = line1.start + ua * (line1.end - line1.start);
     var distance = line1.start.distanceTo(hit);
     var overlap = line1.length - distance;
-    var normal = line2.side(line1.start);
-    return IntersectionData.get(distance, overlap, hit.x, hit.y, normal.x, normal.y);
+    var l2l = line2.length * (d < 0 ? 1 : -1);
+    norm.set((line2.dy - line2.y) / l2l, -(line2.dx - line2.x) / l2l);
+    return IntersectionData.get(distance, overlap, hit.x, hit.y, norm.x, norm.y);
   }
 
   public static function line_interects_rect(l:Line, r:Rect):Null<IntersectionData> {
@@ -116,8 +119,9 @@ class SAT {
       var hit = l.point_along_ratio(t1);
       var distance = l.start.distanceTo(hit);
       var overlap = l.length - distance;
+      norm.set(hit.x - c.x, hit.y - c.y).divideWith(c.radius);
 
-      var i = IntersectionData.get(distance, overlap, hit.x, hit.y, 0, 0);
+      var i = IntersectionData.get(distance, overlap, hit.x, hit.y, norm.x, norm.y);
       i.line = l;
       i.shape = c;
       return i;
@@ -127,8 +131,9 @@ class SAT {
       var hit = l.point_along_ratio(t2);
       var distance = l.start.distanceTo(hit);
       var overlap = l.length - distance;
+      norm.set(hit.x - c.x, hit.y - c.y).applyNegate().divideWith(c.radius);
 
-      var i = IntersectionData.get(distance, overlap, hit.x, hit.y, 0, 0);
+      var i = IntersectionData.get(distance, overlap, hit.x, hit.y, norm.x, norm.y);
       i.line = l;
       i.shape = c;
       return i;

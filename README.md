@@ -168,7 +168,6 @@ class Main {
 ## Roadmap
 ### Sooner
 * Linecast updates 
-  * Provide normals in Linecast results
   * Endless length Line support
   * Allow querying World's Quadtree when Linecasting
 * Allow parenting of Body transforms
@@ -176,3 +175,4 @@ class Main {
 * Allow Concave Polygons (through Convex Decomposition)
 * Sleeping Body optimations
 * Constraints
+* Compiler Flag to turn off a majority of inlined functions (worse performance, but MUCH smaller filesize)

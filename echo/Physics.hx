@@ -40,8 +40,8 @@ class Physics {
         member.x += member.velocity.x * member.inverse_mass * dt;
         member.y += member.velocity.y * member.inverse_mass * dt;
         // Apply Rotations
+        if (member.max_rotational_velocity > 0) member.rotational_velocity = member.rotational_velocity.clamp(-member.max_rotational_velocity, member.max_rotational_velocity);
         member.rotation += member.rotational_velocity * dt;
-        if (member.max_rotational_velocity > 0) member.rotation = member.rotation.clamp(-member.max_rotational_velocity, member.max_rotational_velocity);
       }
     });
   }

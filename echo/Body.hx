@@ -117,6 +117,10 @@ class Body implements IDisposable {
    */
   public var drag_length:Float;
   /**
+   * A measure of how fast a Body will move its `rotational_velocity` towards 0.
+   */
+  public var rotational_drag:Float;
+  /**
    * Percentage value that represents how much a World's gravity affects the Body.
    */
   public var gravity_scale:Float;

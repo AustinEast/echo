@@ -5,8 +5,8 @@
   "description": "Simple Physics Library written in Haxe",
   "contributors": ["austineast"],
   "url": "https://austineast.dev/echo",
-  "releasenote": "fix max rotational velocity",
-  "version": "1.5.1",
+  "releasenote": "add rotational drag",
+  "version": "1.5.2",
   "dependencies": {
     "hxmath": ""
   }

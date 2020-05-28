@@ -33,9 +33,7 @@ class Physics {
         member.velocity.y = compute_velocity(member.velocity.y, accel_y, member.drag.y, member.max_velocity.y, dt);
         // Apply the Body's mass_velocity_length and drag_length
         if (member.drag_length > 0 && member.acceleration == zero && member.velocity != zero) {
-          trace('before: ${member.velocity.length}');
           member.velocity.normalizeTo(member.velocity.length - member.drag_length * dt);
-          trace('after: ${member.velocity.length}');
         }
         if (member.max_velocity_length > 0 && member.velocity.length > member.max_velocity_length) {
           member.velocity.normalizeTo(member.max_velocity_length);
@@ -44,8 +42,20 @@ class Physics {
         member.x += member.velocity.x * member.inverse_mass * dt;
         member.y += member.velocity.y * member.inverse_mass * dt;
         // Apply Rotations
+        if (member.max_rotational_velocity > 0) member.rotational_velocity = member.rotational_velocity.clamp(-member.max_rotational_velocity,
+          member.max_rotational_velocity);
+        // Apply Drag to Rotations
+        if (member.rotational_drag > 0) {
+          if (member.rotational_velocity > 0) {
+            member.rotational_velocity -= member.rotational_drag * dt;
+            if (member.rotational_velocity < 0) member.rotational_velocity = 0; // drag should never make us rotate in the opposite direction
+          }
+          else {
+            member.rotational_velocity += member.rotational_drag * dt;
+            if (member.rotational_velocity > 0) member.rotational_velocity = 0; // drag should never make us rotate in the opposite direction
+          }
+        }
         member.rotation += member.rotational_velocity * dt;
-        if (member.max_rotational_velocity > 0) member.rotation = member.rotation.clamp(-member.max_rotational_velocity, member.max_rotational_velocity);
       }
     });
   }

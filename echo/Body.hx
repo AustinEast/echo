@@ -117,6 +117,10 @@ class Body implements IDisposable {
    */
   public var drag_length:Float;
   /**
+   * A measure of how fast a Body will move its `rotational_velocity` towards 0.
+   */
+  public var rotational_drag:Float;
+  /**
    * Percentage value that represents how much a World's gravity affects the Body.
    */
   public var gravity_scale:Float;
@@ -222,6 +226,7 @@ class Body implements IDisposable {
     max_rotational_velocity = options.max_rotational_velocity;
     drag.set(options.drag_x, options.drag_y);
     drag_length = options.drag_length;
+    rotational_drag = options.rotational_drag;
     gravity_scale = options.gravity_scale;
     last_x = Math.NaN;
     last_y = Math.NaN;
@@ -246,6 +251,7 @@ class Body implements IDisposable {
     b.max_rotational_velocity = max_rotational_velocity;
     b.drag.set(drag.x, drag.y);
     b.drag_length = drag_length;
+    b.rotational_drag = rotational_drag;
     b.gravity_scale = gravity_scale;
     b.last_x = last_x;
     b.last_y = last_y;
@@ -525,6 +531,7 @@ class Body implements IDisposable {
     drag_x: 0,
     drag_y: 0,
     drag_length: 0,
+    rotational_drag: 0,
     gravity_scale: 1
   }
 }

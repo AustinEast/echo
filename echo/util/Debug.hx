@@ -59,7 +59,7 @@ class Debug {
                 r.transformed_rect.collided ? shape_collided_color : shape_color, shape_fill_alpha);
               if (draw_shape_bounds) {
                 var b = r.transformed_rect.bounds();
-                draw_rect(b.x - b.ex, b.y - b.ey, b.width, b.height, shape_fill_color, r.transformed_rect.collided ? shape_collided_color : shape_color, 0);
+                draw_rect(b.min_x, b.min_y, b.width, b.height, shape_fill_color, r.transformed_rect.collided ? shape_collided_color : shape_color, 0);
                 b.put();
               }
             }
@@ -70,7 +70,7 @@ class Debug {
             draw_circle(x, y, c.radius, shape_fill_color, shape.collided ? shape_collided_color : shape_color, shape_fill_alpha);
             if (draw_shape_bounds) {
               var b = c.bounds();
-              draw_rect(b.x - b.ex, b.y - b.ey, b.width, b.height, shape_fill_color, shape.collided ? shape_collided_color : shape_color, 0);
+              draw_rect(b.min_x, b.min_y, b.width, b.height, shape_fill_color, shape.collided ? shape_collided_color : shape_color, 0);
               b.put();
             }
           case POLYGON:
@@ -79,14 +79,14 @@ class Debug {
             draw_polygon(p.count, p.vertices, shape_fill_color, shape.collided ? shape_collided_color : shape_color, shape_fill_alpha);
             if (draw_shape_bounds) {
               var b = p.bounds();
-              draw_rect(b.x - b.ex, b.y - b.ey, b.width, b.height, shape_fill_color, shape.collided ? shape_collided_color : shape_color, 0);
+              draw_rect(b.min_x, b.min_y, b.width, b.height, shape_fill_color, shape.collided ? shape_collided_color : shape_color, 0);
               b.put();
             }
         }
       }
       if (draw_bounds) {
         var b = member.bounds();
-        draw_rect(b.x - b.ex, b.y - b.ey, b.width, b.height, shape_fill_color, shape_color, 0);
+        draw_rect(b.min_x, b.min_y, b.width, b.height, shape_fill_color, shape_color, 0);
         b.put();
       }
     });
@@ -114,7 +114,7 @@ class Debug {
   }
 
   function draw_qd(tree:QuadTree) for (child in tree.children) {
-    draw_rect(child.left, child.top, child.width, child.height, quadtree_fill_color, quadtree_color, 0.1);
+    draw_rect(child.min_x, child.min_y, child.width, child.height, quadtree_fill_color, quadtree_color, 0.1);
     draw_qd(child);
   }
 }

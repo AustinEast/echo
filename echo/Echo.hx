@@ -1,5 +1,7 @@
 package echo;
 
+import echo.util.AABB;
+import echo.shape.Circle;
 import haxe.ds.Either;
 import echo.data.Data;
 import hxmath.math.Vector2;
@@ -9,7 +11,10 @@ import echo.Collisions;
 import echo.World;
 import echo.data.Options;
 import echo.shape.Rect;
+import echo.shape.Polygon;
 import echo.util.BodyOrBodies;
+
+using echo.util.Ext;
 
 @:expose
 /**
@@ -145,7 +150,7 @@ class Echo {
    */
   public static inline function linecast(line:Line, test:BodyOrBodies):Null<Intersection> {
     var closest:Null<Intersection> = null;
-    var lb = Rect.get_from_min_max(Math.min(line.start.x, line.end.x), Math.min(line.start.y, line.end.y), Math.max(line.start.x, line.end.x),
+    var lb = AABB.get_from_min_max(Math.min(line.start.x, line.end.x), Math.min(line.start.y, line.end.y), Math.max(line.start.x, line.end.x),
       Math.max(line.start.y, line.end.y));
     switch (cast test : Either<Body, Array<Body>>) {
       case Left(body):
@@ -191,7 +196,7 @@ class Echo {
    */
   public static inline function linecast_all(line:Line, test:BodyOrBodies):Array<Intersection> {
     var intersections:Array<Intersection> = [];
-    var lb = Rect.get_from_min_max(Math.min(line.start.x, line.end.x), Math.min(line.start.y, line.end.y), Math.max(line.start.x, line.end.x),
+    var lb = AABB.get_from_min_max(Math.min(line.start.x, line.end.x), Math.min(line.start.y, line.end.y), Math.max(line.start.x, line.end.x),
       Math.max(line.start.y, line.end.y));
     switch (cast test : Either<Body, Array<Body>>) {
       case Left(body):
@@ -227,6 +232,101 @@ class Echo {
     lb.put();
 
     return intersections;
+  }
+  /**
+   * Performs a number of linecasts to construct a visibility polygon.
+   * @param position Center position of visibility polygon.
+   * @param range The polygon maximum range.
+   * @param test An Array of Bodies to build visibility against.
+   * @param resolution Resolution of outer circle. Higher resolution creates more segments for maximum range polygon areas.
+   * @return Array<Vector2> Polygon points of the resulting polygon.
+   */
+  public static inline function visibility(position:Vector2, range:Float, test:Array<Body>, resolution:Float = 1):Array<Vector2> {
+    var ray = Line.get(position.x, position.y);
+    var totalBounds = AABB.get(position.x, position.y, range * 2, range * 2);
+    var vertices:Array<Vector2> = [];
+    // var segments = Math.ceil(Math.abs(range * 3.14 * 2 / 4))
+    for (body in test) {
+      if (body == null || body.shapes.length == 0) continue;
+      var bb = body.bounds();
+      if (totalBounds.overlaps(bb)) {
+        for (shape in body.shapes) {
+          function testRay(vx:Float, vy:Float) {
+            var angle = Math.atan2(vy - position.y, vx - position.x);
+            ray.dx = position.x + Math.cos(angle) * range;
+            ray.dy = position.y + Math.sin(angle) * range;
+            var result = linecast(ray, test);
+            if (result != null && result.body == body) {
+              var closest = result.closest;
+              vertices.push(closest.hit.clone());
+              Main.instance.debug.draw_circle(vx, vy, 3, 0xff0000);
+              var dist = closest.distance;
+              result.put();
+              // This vertex is closest to the ray, insert vertex
+              ray.dx = position.x + Math.cos(angle + 0.001) * range;
+              ray.dy = position.y + Math.sin(angle + 0.001) * range;
+              result = linecast(ray, test);
+              if (result != null) {
+                closest = result.closest;
+                if (closest.shape != shape) {
+                  // Hit something else further away: Add vertex
+                  vertices.push(closest.hit.clone());
+                  result.put();
+                }
+              }
+              else {
+                vertices.push(ray.end.clone());
+              }
+
+              ray.dx = position.x + Math.cos(angle - 0.001) * range;
+              ray.dy = position.y + Math.sin(angle - 0.001) * range;
+              result = linecast(ray, test);
+              if (result != null) {
+                closest = result.closest;
+                if (closest.shape != shape) {
+                  // Hit something else further away: Add vertex
+                  vertices.push(closest.hit.clone());
+                }
+              }
+              else {
+                vertices.push(ray.end.clone());
+              }
+            }
+            else {
+              // Technically should not happen, but linecast check has precision issues.
+              Main.instance.debug.draw_circle(vx, vy, 3, 0xff0000);
+              vertices.push(new Vector2(vx, vy));
+            }
+            if (result != null && !result.pooled) result.put();
+          }
+          switch (shape.type) {
+            case RECT:
+              var rect:Rect = cast shape;
+              if (rect.transformed_rect != null) {
+                for (vert in rect.transformed_rect.vertices) testRay(vert.x, vert.y);
+              }
+              else {
+                testRay(rect.left, rect.top);
+                testRay(rect.right, rect.top);
+                testRay(rect.right, rect.bottom);
+                testRay(rect.left, rect.bottom);
+              }
+            case POLYGON:
+              var poly:Polygon = cast shape;
+              for (vert in poly.vertices) {
+                testRay(vert.x, vert.y);
+              }
+            case CIRCLE: // TODO
+          }
+        }
+      }
+      bb.put();
+    }
+    totalBounds.put();
+    ray.put();
+
+    vertices.sort((a, b) -> (a - position).angle > (b - position).angle ? 1 : -1);
+    return vertices;
   }
   /**
    * Undo the World's last step

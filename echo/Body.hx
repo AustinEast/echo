@@ -1,5 +1,6 @@
 package echo;
 
+import echo.util.AABB;
 import hxmath.frames.Frame2;
 import hxmath.math.Vector2;
 import echo.util.Disposable;
@@ -359,7 +360,7 @@ class Body implements IDisposable {
    * @param rect Optional `Rect` to set the values to. If the Body does not have any shapes, the Rect will not be set.
    * @return Null<Rect>
    */
-  public function bounds(?rect:Rect):Null<Rect> {
+  public function bounds(?rect:AABB):Null<AABB> {
     if (shapes.length == 0) return null;
 
     var s = shapes[0];
@@ -376,7 +377,7 @@ class Body implements IDisposable {
       if (shape.bottom > max_y) max_y = shape.bottom;
     }
 
-    return rect == null ? Rect.get_from_min_max(min_x, min_y, max_x, max_y) : rect.set_from_min_max(min_x, min_y, max_x, max_y);
+    return rect == null ? AABB.get_from_min_max(min_x, min_y, max_x, max_y) : rect.set_from_min_max(min_x, min_y, max_x, max_y);
   }
   /**
    * If the Body is attached to a World, it is removed.

@@ -1,5 +1,6 @@
 package echo;
 
+import echo.util.AABB;
 import hxmath.frames.Frame2;
 import echo.util.Proxy;
 import echo.shape.*;
@@ -162,7 +163,7 @@ class Shape implements IProxy {
    * @param rect Optional `Rect` to set the values to.
    * @return Rect
    */
-  public function bounds(?rect:Rect):Rect return rect == null ? Rect.get(x, y, 0, 0) : rect.set(x, y, 0, 0);
+  public function bounds(?rect:AABB):AABB return rect == null ? AABB.get(x, y, 0, 0) : rect.set(x, y, 0, 0);
   /**
    * Clones the Shape into a new Shape
    * @return Shape return new Shape(x, y)

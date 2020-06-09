@@ -1,5 +1,6 @@
 package echo.shape;
 
+import echo.util.AABB;
 import hxmath.frames.Frame2;
 import echo.shape.*;
 import echo.util.Pool;
@@ -97,9 +98,18 @@ class Rect extends Shape implements IPooled {
     return this;
   }
 
-  override inline function bounds(?rect:Rect):Rect {
+  public function to_aabb(put_self:Bool = false):AABB {
+    if (put_self) {
+      var r = bounds();
+      put();
+      return r;
+    }
+    return bounds();
+  }
+
+  override inline function bounds(?rect:AABB):AABB {
     if (transformed_rect != null) return transformed_rect.bounds(rect);
-    return (rect == null) ? Rect.get(x, y, width, height) : rect.set(x, y, width, height);
+    return (rect == null) ? AABB.get(x, y, width, height) : rect.set(x, y, width, height);
   }
 
   override inline function clone():Rect return Rect.get(local_x, local_y, width, height, local_rotation);

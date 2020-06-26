@@ -32,7 +32,7 @@ class QuadTree extends AABB implements IPooled {
    */
   public var count(get, null):Int;
   /**
-   * A QuadTree is regarded as a `leaf` if it has any QuadTree children (ie `quadtree.children.length > 0`).
+   * A QuadTree is regarded as a `leaf` if it has **no** QuadTree children (ie `quadtree.children.length == 0`).
    */
   public var leaf(get, null):Bool;
   /**
@@ -44,9 +44,9 @@ class QuadTree extends AABB implements IPooled {
    */
   var nodes_list = new List<QuadTree>();
 
-  function new(?rect:AABB, depth:Int = 0) {
+  function new(?aabb:AABB, depth:Int = 0) {
     super();
-    if (rect != null) load(rect);
+    if (aabb != null) load(aabb);
     this.depth = depth;
     children = [];
     contents = [];
@@ -103,24 +103,26 @@ class QuadTree extends AABB implements IPooled {
     insert(data);
   }
   /**
-   * Queries the QuadTree for any `QuadTreeData` that overlaps the `Shape`.
-   * @param shape The `Shape` to query.
+   * Queries the QuadTree for any `QuadTreeData` that overlaps the `AABB`.
+   * @param aabb The `AABB` to query.
    * @param result An Array containing all `QuadTreeData` that collides with the shape.
    */
-  public function query(shape:AABB, result:Array<QuadTreeData>) {
-    if (!overlaps(shape)) {
+  public function query(aabb:AABB, result:Array<QuadTreeData>) {
+    if (!overlaps(aabb)) {
       return;
     }
     if (leaf) {
-      for (data in contents) if (data.bounds.overlaps(shape)) result.push(data);
+      for (data in contents) if (data.bounds.overlaps(aabb)) result.push(data);
     }
     else {
-      for (child in children) child.query(shape, result);
+      for (child in children) child.query(aabb, result);
     }
   }
   /**
-   * If the QuadTree is a branch (_not_ a `leaf`), tsih lliw
-   * @param recursive
+   * If the QuadTree is a branch (_not_ a `leaf`), this will check if the amount of data from all the child Quadtrees can fit in the Quadtree without exceeding it's `max_contents`.
+   * If all the data can fit, the Quadtree branch will "shake" its child Quadtrees, absorbing all the data and clearing the children (putting all the child Quadtrees back in the pool).
+   *
+   * Note - This works recursively.
    */
   public function shake() {
     if (!leaf) {
@@ -132,14 +134,13 @@ class QuadTree extends AABB implements IPooled {
         nodes_list.clear();
         nodes_list.push(this);
         while (nodes_list.length > 0) {
-          var node = nodes_list.last();
-          if (node.leaf) {
+          var node = nodes_list.pop();
+          if (node != this && node.leaf) {
             for (data in node.contents) {
               if (contents.indexOf(data) == -1) contents.push(data);
             }
           }
           else for (child in node.children) nodes_list.add(child);
-          nodes_list.pop();
         }
         clear_children();
       }

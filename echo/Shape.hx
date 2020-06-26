@@ -78,13 +78,13 @@ class Shape implements IProxy {
    */
   public var type:ShapeType;
   /**
-   * The Shape's position on the X axis.
+   * The Shape's position on the X axis. For Rects, Circles, and simple Polygons, this position is based on the center of the Shape.
    *
    * If added to a `Body`, this value is treated as an offset to the Body's X position.
    */
   public var x(get, set):Float;
   /**
-   * The Shape's position on the Y axis.
+   * The Shape's position on the Y axis. For Rects, Circles, and simple Polygons, this position is based on the center of the Shape.
    *
    * If added to a `Body`, this value is treated as an offset to the Body's Y position.
    */
@@ -131,9 +131,7 @@ class Shape implements IProxy {
   var sync_pos:Vector2;
 
   var _x:Float;
-
   var _y:Float;
-
   var _rotation:Float;
 
   public function put() {
@@ -159,11 +157,11 @@ class Shape implements IProxy {
     sync();
   }
   /**
-   * Returns an AABB `Rect` representing the bounds of the `Shape`.
-   * @param rect Optional `Rect` to set the values to.
-   * @return Rect
+   * Returns an `AABB` representing the bounds of the `Shape`.
+   * @param aabb Optional `AABB` to set the values to.
+   * @return AABB
    */
-  public function bounds(?rect:AABB):AABB return rect == null ? AABB.get(x, y, 0, 0) : rect.set(x, y, 0, 0);
+  public function bounds(?aabb:AABB):AABB return aabb == null ? AABB.get(x, y, 0, 0) : aabb.set(x, y, 0, 0);
   /**
    * Clones the Shape into a new Shape
    * @return Shape return new Shape(x, y)

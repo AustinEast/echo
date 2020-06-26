@@ -113,7 +113,7 @@ class Polygon extends Shape implements IPooled {
 
   public inline function load(polygon:Polygon):Polygon return set(polygon.x, polygon.y, polygon.rotation, polygon.local_vertices);
 
-  override inline function bounds(?rect:AABB):AABB {
+  override inline function bounds(?aabb:AABB):AABB {
     var left = vertices[0].x;
     var top = vertices[0].y;
     var right = vertices[0].x;
@@ -126,7 +126,7 @@ class Polygon extends Shape implements IPooled {
       if (vertices[i].y > bottom) bottom = vertices[i].y;
     }
 
-    return rect == null ? AABB.get_from_min_max(left, top, right, bottom) : rect.set_from_min_max(left, top, right, bottom);
+    return aabb == null ? AABB.get_from_min_max(left, top, right, bottom) : aabb.set_from_min_max(left, top, right, bottom);
   }
 
   override function clone():Polygon return Polygon.get_from_vertices(x, y, rotation, local_vertices);

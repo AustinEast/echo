@@ -356,11 +356,11 @@ class Body implements IDisposable {
     acceleration.y += y;
   }
   /**
-   * If a Body has shapes, it will return an AABB `Rect` representing the bounds of its shapes relative to the Body's Position. If the Body does not have any shapes, this will return `null'.
-   * @param rect Optional `Rect` to set the values to. If the Body does not have any shapes, the Rect will not be set.
-   * @return Null<Rect>
+   * If a Body has shapes, it will return an `AABB` representing the bounds of the Body's shapes relative to its position. If the Body does not have any shapes, this will return `null'.
+   * @param aabb Optional `AABB` to set the values to. If the Body does not have any shapes, the AABB will not be set.
+   * @return Null<AABB>
    */
-  public function bounds(?rect:AABB):Null<AABB> {
+  public function bounds(?aabb:AABB):Null<AABB> {
     if (shapes.length == 0) return null;
 
     var s = shapes[0];
@@ -377,7 +377,7 @@ class Body implements IDisposable {
       if (shape.bottom > max_y) max_y = shape.bottom;
     }
 
-    return rect == null ? AABB.get_from_min_max(min_x, min_y, max_x, max_y) : rect.set_from_min_max(min_x, min_y, max_x, max_y);
+    return aabb == null ? AABB.get_from_min_max(min_x, min_y, max_x, max_y) : aabb.set_from_min_max(min_x, min_y, max_x, max_y);
   }
   /**
    * If the Body is attached to a World, it is removed.

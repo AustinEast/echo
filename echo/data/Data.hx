@@ -231,8 +231,6 @@ class IntersectionData implements IPooled {
   static function get_pool():IPool<IntersectionData> return _pool;
 }
 
-// TODO - convert to @:structInit class
-
 @:structInit
 class QuadTreeData {
   /**

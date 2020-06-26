@@ -69,10 +69,16 @@ A `Body` is an Object representing a Physical Body in a `World`. A `Body` has a 
 
 #### Shapes
 
-A Body's collider is represented by different Shapes. Available Shapes:
+A Body's collider is represented by different Shapes. Without a `Shape` to define it's form, a `Body` can be thought of a just a point in the `World` that cant collide with anything.
+
+Available Shapes:
 * Rectangle
 * Circle
 * Polygon (Convex Only)
+
+When a Shape is added to a Body, it's transform (x, y, rotation) becomes relative to its parent Body. In this case, a Shape's local transform can still be accessed through `shape.local_x`, `shape.local_y`, and `shape.local_rotation`.
+
+It's important to note that all Shapes (including Rectangles) have their origins centered.
 
 #### Lines
 
@@ -80,7 +86,7 @@ Use Lines to perform Linecasts against other Lines, Bodies, and Shapes.
 
 #### Listeners
 
-Listeners keep track of collisions between Bodies - enacting callbacks and physics responses depending on their configurations.
+Listeners keep track of collisions between Bodies - enacting callbacks and physics responses depending on their configurations. Once you add a `Listener` to a `World`, it will automatically update itself as the `World` is stepped forward.
 
 ### Integration
 

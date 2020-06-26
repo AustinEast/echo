@@ -100,16 +100,16 @@ class Rect extends Shape implements IPooled {
 
   public function to_aabb(put_self:Bool = false):AABB {
     if (put_self) {
-      var r = bounds();
+      var aabb = bounds();
       put();
-      return r;
+      return aabb;
     }
     return bounds();
   }
 
-  override inline function bounds(?rect:AABB):AABB {
-    if (transformed_rect != null) return transformed_rect.bounds(rect);
-    return (rect == null) ? AABB.get(x, y, width, height) : rect.set(x, y, width, height);
+  override inline function bounds(?aabb:AABB):AABB {
+    if (transformed_rect != null) return transformed_rect.bounds(aabb);
+    return (aabb == null) ? AABB.get(x, y, width, height) : aabb.set(x, y, width, height);
   }
 
   override inline function clone():Rect return Rect.get(local_x, local_y, width, height, local_rotation);

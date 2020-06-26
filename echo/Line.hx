@@ -120,8 +120,6 @@ class Line implements IProxy implements IPooled {
     return r;
   }
 
-  // TODO - public inline function set_length()
-
   function toString() return 'Line: {start: $start, end: $end}';
 
   static function get_pool():IPool<Line> return _pool;

@@ -80,9 +80,11 @@ class Collisions {
         // Filter out duplicate pairs
         var flag = false;
         for (collision in listener.collisions) {
-          if (flag) continue;
-          if (collision.a.id == result.a.id && collision.b.id == result.b.id) flag = true;
-          if (collision.b.id == result.a.id && collision.a.id == result.b.id) flag = true;
+          if ((collision.a.id == result.a.id && collision.b.id == result.b.id)
+            || (collision.b.id == result.a.id && collision.a.id == result.b.id)) {
+            flag = true;
+            break;
+          }
         }
         if (flag) {
           result.put();
@@ -137,7 +139,9 @@ class Collisions {
       }
       if (listener.exit != null) {
         for (lc in listener.last_collisions) {
-          if (!lc.a.disposed && !lc.b.disposed && listener.collisions.find((f) -> return f.a == lc.a && f.b == lc.b || f.a == lc.b && f.b == lc.a) == null) {
+          if (!lc.a.disposed
+            && !lc.b.disposed
+            && listener.collisions.find((f) -> return f.a == lc.a && f.b == lc.b || f.a == lc.b && f.b == lc.a) == null) {
             listener.exit(lc.a, lc.b);
           }
         }
@@ -170,9 +174,10 @@ class Collisions {
   }
 
   static function body_and_body(a:Body, b:Body):Null<Collision> {
-    if (a.disposed || b.disposed || a.shapes.length == 0 || b.shapes.length == 0 || !a.active || !b.active || a == b || a.is_static() && b.is_static()) return null;
-    var ab = a.bounds();
-    var bb = b.bounds();
+    if (a.disposed || b.disposed || a.shapes.length == 0 || b.shapes.length == 0 || !a.active || !b.active || a == b || a.is_static() && b.is_static()) return
+      null;
+    var ab = a.bounds().to_rect(true);
+    var bb = b.bounds().to_rect(true);
     var col = ab.collides(bb);
     ab.put();
     bb.put();

@@ -8,7 +8,7 @@ import echo.data.Data;
 /**
  * Simple QuadTree implementation to assist with broad-phase 2D collisions.
  */
-class QuadTree extends Rect implements IPooled {
+class QuadTree extends AABB implements IPooled {
   public static var pool(get, never):IPool<QuadTree>;
   static var _pool = new Pool<QuadTree>(QuadTree);
   /**
@@ -44,7 +44,7 @@ class QuadTree extends Rect implements IPooled {
    */
   var nodes_list = new List<QuadTree>();
 
-  function new(?rect:Rect, depth:Int = 0) {
+  function new(?rect:AABB, depth:Int = 0) {
     super();
     if (rect != null) load(rect);
     this.depth = depth;
@@ -107,8 +107,10 @@ class QuadTree extends Rect implements IPooled {
    * @param shape The `Shape` to query.
    * @param result An Array containing all `QuadTreeData` that collides with the shape.
    */
-  public function query(shape:Shape, result:Array<QuadTreeData>) {
-    if (!overlaps(shape)) return;
+  public function query(shape:AABB, result:Array<QuadTreeData>) {
+    if (!overlaps(shape)) {
+      return;
+    }
     if (leaf) {
       for (data in contents) if (data.bounds.overlaps(shape)) result.push(data);
     }
@@ -149,20 +151,20 @@ class QuadTree extends Rect implements IPooled {
   function split() {
     if (depth + 1 >= max_depth) return;
 
-    var xw = ex * 0.5;
-    var xh = ey * 0.5;
+    var xw = width * 0.5;
+    var xh = height * 0.5;
 
     for (i in 0...4) {
       var child = get();
       switch (i) {
         case 0:
-          child.set(x - xw, y - xh, ex, ey);
+          child.set_from_min_max(min_x, min_y, min_x + xw, min_y + xh);
         case 1:
-          child.set(x + xw, y - xh, ex, ey);
+          child.set_from_min_max(min_x + xw, min_y, max_x, min_y + xh);
         case 2:
-          child.set(x - xw, y + xh, ex, ey);
+          child.set_from_min_max(min_x, min_y + xh, min_x + xw, max_y);
         case 3:
-          child.set(x + xw, y + xh, ex, ey);
+          child.set_from_min_max(min_x + xw, min_y + xh, max_x, max_y);
       }
       child.depth = depth + 1;
       child.max_depth = max_depth;

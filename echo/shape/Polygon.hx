@@ -1,5 +1,6 @@
 package echo.shape;
 
+import echo.util.AABB;
 import hxmath.math.MathUtil;
 import hxmath.frames.Frame2;
 import echo.data.Data;
@@ -112,7 +113,7 @@ class Polygon extends Shape implements IPooled {
 
   public inline function load(polygon:Polygon):Polygon return set(polygon.x, polygon.y, polygon.rotation, polygon.local_vertices);
 
-  override inline function bounds(?rect:Rect):Rect {
+  override inline function bounds(?rect:AABB):AABB {
     var left = vertices[0].x;
     var top = vertices[0].y;
     var right = vertices[0].x;
@@ -125,7 +126,7 @@ class Polygon extends Shape implements IPooled {
       if (vertices[i].y > bottom) bottom = vertices[i].y;
     }
 
-    return rect == null ? Rect.get_from_min_max(left, top, right, bottom) : rect.set_from_min_max(left, top, right, bottom);
+    return rect == null ? AABB.get_from_min_max(left, top, right, bottom) : rect.set_from_min_max(left, top, right, bottom);
   }
 
   override function clone():Polygon return Polygon.get_from_vertices(x, y, rotation, local_vertices);
@@ -205,7 +206,8 @@ class Polygon extends Shape implements IPooled {
     return right;
   }
 
-  public inline function to_rect():Rect return bounds();
+  // todo - Skip AABB
+  public inline function to_rect():Rect return bounds().to_rect(true);
   /**
    * Sets the vertice at the desired index.
    * @param index

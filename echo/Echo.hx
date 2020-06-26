@@ -1,5 +1,7 @@
 package echo;
 
+import echo.util.AABB;
+import echo.shape.Circle;
 import haxe.ds.Either;
 import echo.data.Data;
 import hxmath.math.Vector2;
@@ -9,7 +11,10 @@ import echo.Collisions;
 import echo.World;
 import echo.data.Options;
 import echo.shape.Rect;
+import echo.shape.Polygon;
 import echo.util.BodyOrBodies;
+
+using echo.util.Ext;
 
 @:expose
 /**
@@ -145,7 +150,7 @@ class Echo {
    */
   public static inline function linecast(line:Line, test:BodyOrBodies):Null<Intersection> {
     var closest:Null<Intersection> = null;
-    var lb = Rect.get_from_min_max(Math.min(line.start.x, line.end.x), Math.min(line.start.y, line.end.y), Math.max(line.start.x, line.end.x),
+    var lb = AABB.get_from_min_max(Math.min(line.start.x, line.end.x), Math.min(line.start.y, line.end.y), Math.max(line.start.x, line.end.x),
       Math.max(line.start.y, line.end.y));
     switch (cast test : Either<Body, Array<Body>>) {
       case Left(body):
@@ -191,7 +196,7 @@ class Echo {
    */
   public static inline function linecast_all(line:Line, test:BodyOrBodies):Array<Intersection> {
     var intersections:Array<Intersection> = [];
-    var lb = Rect.get_from_min_max(Math.min(line.start.x, line.end.x), Math.min(line.start.y, line.end.y), Math.max(line.start.x, line.end.x),
+    var lb = AABB.get_from_min_max(Math.min(line.start.x, line.end.x), Math.min(line.start.y, line.end.y), Math.max(line.start.x, line.end.x),
       Math.max(line.start.y, line.end.y));
     switch (cast test : Either<Body, Array<Body>>) {
       case Left(body):

@@ -151,10 +151,9 @@ class World implements IDisposable {
     quadtree = QuadTree.get();
     if (static_quadtree != null) static_quadtree.put();
     static_quadtree = QuadTree.get();
-    var r = center();
+    var r = center().to_aabb(true);
     quadtree.load(r);
     static_quadtree.load(r);
-    r.put();
     for_each((member)-> {
       if (member.is_dynamic()) {
         member.dirty = true;

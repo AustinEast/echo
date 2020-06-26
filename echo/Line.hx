@@ -105,8 +105,22 @@ class Line implements IProxy implements IPooled {
 
   public inline function get_radians() return Math.atan2(dy - y, dx - x);
 
+  public function set_length(l:Float):Float {
+    var old = length;
+    if (old > 0) l /= old;
+    dx = x + (dx - x) * l;
+    dy = y + (dy - y) * l;
+    return l;
+  }
+
+  public function set_radians(r:Float):Float {
+    var len = length;
+    dx = x + Math.cos(r) * len;
+    dy = y + Math.sin(r) * len;
+    return r;
+  }
+
   // TODO - public inline function set_length()
-  // TODO - public inline function set_radians()
 
   function toString() return 'Line: {start: $start, end: $end}';
 

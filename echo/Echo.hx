@@ -97,8 +97,6 @@ class Echo {
       Physics.separate(world);
       Collisions.notify(world);
     }
-    // Reset acceleration
-    world.for_each(member -> member.acceleration.set(0, 0));
   }
   /**
    * Casts a Line Created from the supplied floats, returning the Intersection with the closest Body.

@@ -112,7 +112,13 @@ var body = new echo.Body();
 body.entity = new some.package.Entity();
 ```
 
-## Example
+## Examples
+
+### Engine/Framework Examples
+
+For an example of integrating echo with the Heaps engine, check out [this sample](https://github.com/AustinEast/echo-heaps).
+
+### Basic Example
 ```haxe
 import echo.Echo;
 

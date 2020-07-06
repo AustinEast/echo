@@ -5,8 +5,8 @@
   "description": "Simple Physics Library written in Haxe",
   "contributors": ["austineast"],
   "url": "https://austineast.dev/echo",
-  "releasenote": "make kinematic bodies ignore gravity again",
-  "version": "1.5.3",
+  "releasenote": "aabb and other optimizations (thanks @Yanrishatum!)",
+  "version": "2.0.0",
   "dependencies": {
     "hxmath": ""
   }

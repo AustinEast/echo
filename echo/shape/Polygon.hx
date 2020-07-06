@@ -38,7 +38,15 @@ class Polygon extends Shape implements IPooled {
   var local_frame:Frame2;
 
   var local_vertices:Array<Vector2>;
-
+  /**
+   * Gets a Polygon from the pool, or creates a new one if none are available. Call `put()` on the Polygon to place it back in the pool.
+   * @param x
+   * @param y
+   * @param sides
+   * @param radius
+   * @param rotation
+   * @return Polygon
+   */
   public static inline function get(x:Float = 0, y:Float = 0, sides:Int = 3, radius:Float = 1, rotation:Float = 0):Polygon {
     if (sides < 3) throw 'Polygons require 3 sides as a minimum';
 
@@ -58,14 +66,25 @@ class Polygon extends Shape implements IPooled {
     polygon.pooled = false;
     return polygon;
   }
-
+  /**
+   * Gets a Polygon from the pool, or creates a new one if none are available. Call `put()` on the Polygon to place it back in the pool.
+   * @param x
+   * @param y
+   * @param rotation
+   * @param vertices
+   * @return Polygon
+   */
   public static inline function get_from_vertices(x:Float = 0, y:Float = 0, rotation:Float = 0, ?vertices:Array<Vector2>):Polygon {
     var polygon = _pool.get();
     polygon.set(x, y, vertices);
     polygon.pooled = false;
     return polygon;
   }
-
+  /**
+   * Gets a Polygon from the pool, or creates a new one if none are available. Call `put()` on the Polygon to place it back in the pool.
+   * @param rect
+   * @return Polygon return _pool.get().set_from_rect(rect)
+   */
   public static inline function get_from_rect(rect:Rect):Polygon return _pool.get().set_from_rect(rect);
 
   // TODO

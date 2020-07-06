@@ -42,14 +42,31 @@ class Rect extends Shape implements IPooled {
   public var pooled:Bool;
 
   public var transformed_rect(default, null):Null<Polygon>;
-
+  /**
+   * Gets a Rect from the pool, or creates a new one if none are available. Call `put()` on the Rect to place it back in the pool.
+   *
+   * Note - The X and Y positions represent the center of the Rect. To set the Rect from its Top-Left origin, `Rect.get_from_min_max()` is available.
+   * @param x The centered X position of the Rect.
+   * @param y The centered Y position of the Rect.
+   * @param width The width of the Rect.
+   * @param height The height of the Rect.
+   * @param rotation The rotation of the Rect.
+   * @return Rect
+   */
   public static inline function get(x:Float = 0, y:Float = 0, width:Float = 1, height:Float = 0, rotation:Float = 0):Rect {
     var rect = _pool.get();
     rect.set(x, y, width, height, rotation);
     rect.pooled = false;
     return rect;
   }
-
+  /**
+   * Gets a Rect from the pool, or creates a new one if none are available. Call `put()` on the Rect to place it back in the pool.
+   * @param min_x
+   * @param min_y
+   * @param max_x
+   * @param max_y
+   * @return Rect
+   */
   public static inline function get_from_min_max(min_x:Float, min_y:Float, max_x:Float, max_y:Float):Rect {
     var rect = _pool.get();
     rect.set_from_min_max(min_x, min_y, max_x, max_y);
@@ -105,6 +122,15 @@ class Rect extends Shape implements IPooled {
       return aabb;
     }
     return bounds();
+  }
+
+  public function to_polygon(put_self:Bool = false):Polygon {
+    if (put_self) {
+      var polygon = Polygon.get_from_rect(this);
+      put();
+      return polygon;
+    }
+    return Polygon.get_from_rect(this);
   }
 
   override inline function bounds(?aabb:AABB):AABB {

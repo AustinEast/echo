@@ -16,7 +16,14 @@ class Circle extends Shape implements IPooled {
   public var radius:Float;
   public var diameter(get, set):Float;
   public var pooled:Bool;
-
+  /**
+   * Gets a Cirlce from the pool, or creates a new one if none are available. Call `put()` on the Cirlce to place it back in the pool.
+   * @param x
+   * @param y
+   * @param radius
+   * @param rotation
+   * @return Circle
+   */
   public static inline function get(x:Float = 0, y:Float = 0, radius:Float = 1, rotation:Float = 0):Circle {
     var circle = _pool.get();
     circle.set(x, y, radius, rotation);

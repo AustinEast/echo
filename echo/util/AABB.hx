@@ -16,19 +16,36 @@ class AABB implements IPooled {
   public var height(get, never):Float;
 
   public var pooled:Bool;
-
+  /**
+   * Gets an AABB from the pool, or creates a new one if none are available. Call `put()` on the AABB to place it back in the pool.
+   *
+   * Note - The X and Y positions represent the center of the AABB. To set the AABB from its Top-Left origin, `AABB.get_from_min_max()` is available.
+   * @param x The centered X position of the AABB.
+   * @param y The centered Y position of the AABB.
+   * @param width The width of the AABB.
+   * @param height The height of the AABB.
+   * @param rotation The rotation of the AABB.
+   * @return AABB
+   */
   public static inline function get(x:Float = 0, y:Float = 0, width:Float = 1, height:Float = 0):AABB {
-    var rect = _pool.get();
-    rect.set(x, y, width, height);
-    rect.pooled = false;
-    return rect;
+    var aabb = _pool.get();
+    aabb.set(x, y, width, height);
+    aabb.pooled = false;
+    return aabb;
   }
-
+  /**
+   * Gets an AABB from the pool, or creates a new one if none are available. Call `put()` on the AABB to place it back in the pool.
+   * @param min_x
+   * @param min_y
+   * @param max_x
+   * @param max_y
+   * @return AABB
+   */
   public static inline function get_from_min_max(min_x:Float, min_y:Float, max_x:Float, max_y:Float):AABB {
-    var rect = _pool.get();
-    rect.set_from_min_max(min_x, min_y, max_x, max_y);
-    rect.pooled = false;
-    return rect;
+    var aabb = _pool.get();
+    aabb.set_from_min_max(min_x, min_y, max_x, max_y);
+    aabb.pooled = false;
+    return aabb;
   }
 
   inline function new() {
@@ -65,11 +82,11 @@ class AABB implements IPooled {
     return this.min_x < other.max_x && this.max_x >= other.min_x && this.min_y < other.max_y && this.max_y >= other.min_y;
   }
 
-  public inline function load(rect:AABB) {
-    this.min_x = rect.min_x;
-    this.max_x = rect.max_x;
-    this.min_y = rect.min_y;
-    this.max_y = rect.max_y;
+  public inline function load(aabb:AABB) {
+    this.min_x = aabb.min_x;
+    this.max_x = aabb.max_x;
+    this.min_y = aabb.min_y;
+    this.max_y = aabb.max_y;
   }
 
   public function put() {

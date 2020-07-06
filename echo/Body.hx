@@ -37,6 +37,16 @@ class Body implements IDisposable {
    */
   public var y(get, set):Float;
   /**
+   * Body's current rotational angle.
+   */
+  public var rotation(get, set):Float;
+
+  public var local_x(default, set):Float;
+
+  public var local_y(default, set):Float;
+
+  public var local_rotation(default, set):Float;
+  /**
    * The Body's first `Shape` object in the `shapes` array. If it **isn't** null, this `Shape` object act as the Body's Collider, allowing it to be checked for Collisions.
    */
   public var shape(get, set):Null<Shape>;
@@ -65,10 +75,6 @@ class Body implements IDisposable {
    * If a Body's mass is set to `0`, it becomes static - unmovable by forces and collisions.
    */
   public var mass(default, set):Float;
-  /**
-   * Body's current rotational angle.
-   */
-  public var rotation(get, set):Float;
   /**
    * Value to determine how much of a Body's `velocity` should be retained during collisions (or how much should the `Body` "bounce" in other words).
    */
@@ -182,11 +188,12 @@ class Body implements IDisposable {
   @:allow(echo.Physics.step)
   public var last_rotation(default, null):Float;
 
-  @:dox(hide)
+  var _x:Float;
+  var _y:Float;
+  var _rotation:Float;
+
   @:allow(echo.World, echo.Collisions, echo.util.Debug)
   var quadtree_data:QuadTreeData;
-  @:dox(hide)
-  @:noCompletion
   var parent_frame:Frame2;
   /**
    * Creates a new Body.
@@ -473,15 +480,6 @@ class Body implements IDisposable {
     return frame.offset.y;
   }
 
-  inline function set_shape(value:Shape) {
-    if (shapes[0] != null) shapes[0].put();
-    shapes[0] = value;
-    shapes[0].set_parent(frame);
-    dirty = true;
-    update_static_bounds();
-    return shapes[0];
-  }
-
   inline function set_rotation(value:Float):Float {
     if (value != frame.angleDegrees) {
       dirty = true;
@@ -497,6 +495,42 @@ class Body implements IDisposable {
     }
 
     return frame.angleDegrees;
+  }
+
+  inline function set_local_x(value:Float):Float {
+    local_x = value;
+
+    if (parent_frame != null) sync();
+    else _x = local_x;
+
+    return local_x;
+  }
+
+  inline function set_local_y(value:Float):Float {
+    local_y = value;
+
+    if (parent_frame != null) sync();
+    else _y = local_y;
+
+    return local_y;
+  }
+
+  inline function set_local_rotation(value:Float):Float {
+    local_rotation = value;
+
+    if (parent_frame != null) sync();
+    else _rotation = local_rotation;
+
+    return local_rotation;
+  }
+
+  inline function set_shape(value:Shape) {
+    if (shapes[0] != null) shapes[0].put();
+    shapes[0] = value;
+    shapes[0].set_parent(frame);
+    dirty = true;
+    update_static_bounds();
+    return shapes[0];
   }
 
   inline function set_mass(value:Float):Float {

@@ -1,0 +1,3 @@
+-debug
+build.hxml
+-cmd hl --profile 1000 bin/sample.hl

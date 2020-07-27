@@ -134,7 +134,7 @@ class Rect extends Shape implements IPooled {
   }
 
   override inline function bounds(?aabb:AABB):AABB {
-    if (transformed_rect != null) return transformed_rect.bounds(aabb);
+    if (transformed_rect != null && rotation != 0) return transformed_rect.bounds(aabb);
     return (aabb == null) ? AABB.get(x, y, width, height) : aabb.set(x, y, width, height);
   }
 
@@ -175,8 +175,16 @@ class Rect extends Shape implements IPooled {
       _rotation = local_rotation;
     }
 
-    if (transformed_rect == null && !rotation.equals(0)) transformed_rect = Polygon.get_from_rect(this);
+    if (transformed_rect == null && rotation != 0) {
+      transformed_rect = Polygon.get_from_rect(this);
+      transformed_rect.set_parent(parent_frame);
+    }
     else if (transformed_rect != null) transformed_rect.set_from_rect(this);
+  }
+
+  override function set_parent(?frame:Frame2) {
+    super.set_parent(frame);
+    if (transformed_rect != null) transformed_rect.set_parent(frame);
   }
 
   // getters

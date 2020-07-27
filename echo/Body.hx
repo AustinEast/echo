@@ -181,6 +181,10 @@ class Body implements IDisposable {
   public var last_y(default, null):Float;
   @:allow(echo.Physics.step)
   public var last_rotation(default, null):Float;
+  /**
+   *
+   */
+  public var sync_locked(default, null):Bool;
 
   @:dox(hide)
   @:allow(echo.World, echo.Collisions, echo.util.Debug)
@@ -204,6 +208,7 @@ class Body implements IDisposable {
     max_velocity = new Vector2(0, 0);
     drag = new Vector2(0, 0);
     data = {};
+    sync_locked = false;
     disposed = false;
     load_options(options);
   }
@@ -272,6 +277,18 @@ class Body implements IDisposable {
   @:noCompletion
   private inline function sync() {
     // TODO - add "Local" x, y, and rot
+  }
+
+  public inline function lock_sync() {
+    sync_locked = true;
+  }
+
+  public inline function unlock_sync() {
+    sync_locked = false;
+    if (dirty) {
+      sync_shapes();
+      update_static_bounds();
+    }
   }
   /**
    * TODO - Child Body transforms
@@ -363,21 +380,19 @@ class Body implements IDisposable {
   public function bounds(?aabb:AABB):Null<AABB> {
     if (shapes.length == 0) return null;
 
-    var s = shapes[0];
-    var min_x = s.left;
-    var min_y = s.top;
-    var max_x = s.right;
-    var max_y = s.bottom;
+    var b1 = shapes[0].bounds();
 
     if (shapes.length > 1) for (i in 1...shapes.length) {
-      var shape = shapes[i];
-      if (shape.left < min_x) min_x = shape.left;
-      if (shape.top < min_y) min_y = shape.top;
-      if (shape.right > max_x) max_x = shape.right;
-      if (shape.bottom > max_y) max_y = shape.bottom;
+      var b2 = shapes[i].bounds();
+      b1.add(b2);
+      b2.put();
     }
 
-    return aabb == null ? AABB.get_from_min_max(min_x, min_y, max_x, max_y) : aabb.set_from_min_max(min_x, min_y, max_x, max_y);
+    if (aabb == null) aabb = AABB.get();
+    aabb.load(b1);
+    b1.put();
+
+    return aabb;
   }
   /**
    * If the Body is attached to a World, it is removed.
@@ -442,15 +457,15 @@ class Body implements IDisposable {
   // setters
   inline function set_x(value:Float):Float {
     if (value != frame.offset.x) {
+      frame.offset = frame.offset.set(value, y);
       dirty = true;
 
-      frame.offset = frame.offset.set(value, y);
-      sync_shapes();
-      // TODO - Child Body transforms
-      // sync_children();
-
-      update_static_bounds();
-
+      if (!sync_locked) {
+        sync_shapes();
+        // TODO - Child Body transforms
+        // sync_children();
+        update_static_bounds();
+      }
       if (on_move != null) on_move(frame.offset.x, frame.offset.y);
     }
 
@@ -459,14 +474,15 @@ class Body implements IDisposable {
 
   inline function set_y(value:Float):Float {
     if (value != frame.offset.y) {
+      frame.offset = frame.offset.set(x, value);
       dirty = true;
 
-      frame.offset = frame.offset.set(x, value);
-      sync_shapes();
-      // TODO - Child Body transforms
-      // sync_children();
-
-      update_static_bounds();
+      if (!sync_locked) {
+        sync_shapes();
+        // TODO - Child Body transforms
+        // sync_children();
+        update_static_bounds();
+      }
 
       if (on_move != null) on_move(frame.offset.x, frame.offset.y);
     }
@@ -484,14 +500,15 @@ class Body implements IDisposable {
 
   inline function set_rotation(value:Float):Float {
     if (value != frame.angleDegrees) {
+      frame.angleDegrees = value;
       dirty = true;
 
-      frame.angleDegrees = value;
-      sync_shapes();
-      // TODO - Child Body transforms
-      // sync_children();
-
-      update_static_bounds();
+      if (!sync_locked) {
+        sync_shapes();
+        // TODO - Child Body transforms
+        // sync_children();
+        update_static_bounds();
+      }
 
       if (on_rotate != null) on_rotate(rotation);
     }

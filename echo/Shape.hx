@@ -69,6 +69,7 @@ class Shape implements IProxy {
   inline function new(x:Float = 0, y:Float = 0, rotation:Float = 0) {
     sync_pos = new Vector2(0, 0);
     solid = true;
+    sync_locked = false;
     local_x = _x = x;
     local_y = _y = y;
     local_rotation = _rotation = rotation;
@@ -124,7 +125,9 @@ class Shape implements IProxy {
    */
   public var collided:Bool;
 
-  var parent_frame:Frame2;
+  public var sync_locked(default, null):Bool;
+
+  public var parent_frame(default, null):Frame2;
   /**
    * A cached `Vector2` used to reduce allocations. Used Internally.
    */
@@ -147,13 +150,25 @@ class Shape implements IProxy {
   public inline function get_local_position():Vector2 return new Vector2(local_x, local_y);
 
   public inline function set_local_position(value:Vector2):Vector2 {
+    lock_sync();
     local_x = value.x;
     local_y = value.y;
+    unlock_sync();
     return value;
   }
 
   public function set_parent(?frame:Frame2) {
+    if (parent_frame == frame) return;
     parent_frame = frame;
+    sync();
+  }
+
+  public function lock_sync() {
+    sync_locked = true;
+  }
+
+  public function unlock_sync() {
+    sync_locked = false;
     sync();
   }
   /**
@@ -234,7 +249,9 @@ class Shape implements IProxy {
   inline function set_local_x(value:Float):Float {
     local_x = value;
 
-    if (parent_frame != null) sync();
+    if (parent_frame != null) {
+      if (!sync_locked) sync();
+    }
     else _x = local_x;
 
     return local_x;
@@ -243,7 +260,9 @@ class Shape implements IProxy {
   inline function set_local_y(value:Float):Float {
     local_y = value;
 
-    if (parent_frame != null) sync();
+    if (parent_frame != null) {
+      if (!sync_locked) sync();
+    }
     else _y = local_y;
 
     return local_y;
@@ -252,7 +271,9 @@ class Shape implements IProxy {
   inline function set_local_rotation(value:Float):Float {
     local_rotation = value;
 
-    if (parent_frame != null) sync();
+    if (parent_frame != null) {
+      if (!sync_locked) sync();
+    }
     else _rotation = local_rotation;
 
     return local_rotation;

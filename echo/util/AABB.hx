@@ -88,6 +88,16 @@ class AABB implements IPooled {
     this.min_y = aabb.min_y;
     this.max_y = aabb.max_y;
   }
+  /**
+   * Adds the bounds of an AABB into this AABB.
+   * @param aabb
+   */
+  public inline function add(aabb:AABB) {
+    if (min_x > aabb.min_x) min_x = aabb.min_x;
+    if (min_y > aabb.min_y) min_y = aabb.min_y;
+    if (max_x < aabb.max_x) max_x = aabb.max_x;
+    if (max_y < aabb.max_y) max_y = aabb.max_y;
+  }
 
   public function put() {
     if (!pooled) {

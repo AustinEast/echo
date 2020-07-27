@@ -1,3 +1,5 @@
 -debug
+-D hl-profile
+-D hl-ver=1.11.0
 build.hxml
--cmd hl --profile 1000 bin/sample.hl
+-cmd hl --profile 10000 bin/sample.hl

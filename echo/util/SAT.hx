@@ -366,6 +366,7 @@ class SAT {
     if (r.transformed_rect != null) return polygon_and_polygon(r.transformed_rect, p, flip);
 
     var tr = Polygon.get_from_rect(r);
+    tr.set_parent(r.parent_frame);
     var col = polygon_and_polygon(tr, p, flip);
 
     if (col == null) return null;
@@ -434,7 +435,7 @@ class SAT {
 
     // Find the normal axis for each point and project
     for (i in 0...p.count) {
-      normal = p.normals[i].clone();
+      normal.set(p.normals[i].x, p.normals[i].y);
 
       // Project the polygon
       min1 = normal * p.vertices[0];
@@ -498,10 +499,11 @@ class SAT {
     var max2:Float = 0;
     var closest:Float = 0x3FFFFFFF;
     var col:Null<CollisionData> = null;
+    var normal = new Vector2(0, 0);
 
     // loop to begin projection
     for (i in 0...polygon1.count) {
-      var normal = polygon1.normals[i].clone();
+      normal.set(polygon1.normals[i].x, polygon1.normals[i].y);
 
       // project polygon1
       max1 = min1 = normal * polygon1.vertices[0];

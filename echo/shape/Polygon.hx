@@ -24,20 +24,22 @@ class Polygon extends Shape implements IPooled {
    * This Array represents a cache'd value, so changes to this Array will be overwritten.
    * Use `set_vertice()` or `set_vertices()` to edit this Polygon's vertices.
    */
-  public var vertices(default, null):Array<Vector2>;
+  public var vertices(get, null):Array<Vector2> = [];
   /**
    * The Polygon's computed normals.
    *
    * This Array represents a cache'd value, so changes to this Array will be overwritten.
    * Use `set_vertice()` or `set_vertices()` to edit this Polygon's normals.
    */
-  public var normals(default, null):Array<Vector2>;
+  public var normals(get, null):Array<Vector2> = [];
 
   public var pooled:Bool;
 
   var local_frame:Frame2;
 
   var local_vertices:Array<Vector2>;
+
+  var dirty:Bool;
   /**
    * Gets a Polygon from the pool, or creates a new one if none are available. Call `put()` on the Polygon to place it back in the pool.
    * @param x
@@ -64,6 +66,7 @@ class Polygon extends Shape implements IPooled {
 
     polygon.set(x, y, rotation, verts);
     polygon.pooled = false;
+    polygon.dirty = true;
     return polygon;
   }
   /**
@@ -78,6 +81,7 @@ class Polygon extends Shape implements IPooled {
     var polygon = _pool.get();
     polygon.set(x, y, vertices);
     polygon.pooled = false;
+    polygon.dirty = true;
     return polygon;
   }
   /**
@@ -85,7 +89,13 @@ class Polygon extends Shape implements IPooled {
    * @param rect
    * @return Polygon return _pool.get().set_from_rect(rect)
    */
-  public static inline function get_from_rect(rect:Rect):Polygon return _pool.get().set_from_rect(rect);
+  public static inline function get_from_rect(rect:Rect):Polygon return {
+    var polygon = _pool.get();
+    polygon.set_from_rect(rect);
+    polygon.pooled = false;
+    polygon.dirty = true;
+    return polygon;
+  }
 
   // TODO
   // public static inline function get_from_circle(c:Circle, sub_divisions:Int = 6) {}
@@ -107,17 +117,17 @@ class Polygon extends Shape implements IPooled {
   }
 
   public inline function set_from_rect(rect:Rect):Polygon {
-    set_parent();
     count = 4;
     for (i in 0...count) if (local_vertices[i] == null) local_vertices[i] = new Vector2(0, 0);
     local_vertices[0].set(-rect.ex, -rect.ey);
     local_vertices[1].set(rect.ex, -rect.ey);
     local_vertices[2].set(rect.ex, rect.ey);
     local_vertices[3].set(-rect.ex, rect.ey);
+    lock_sync();
     local_x = rect.local_x;
     local_y = rect.local_y;
     local_rotation = rect.local_rotation;
-    set_parent(rect.parent_frame);
+    unlock_sync();
     return this;
   }
 
@@ -171,7 +181,7 @@ class Polygon extends Shape implements IPooled {
 
   override inline function collide_polygon(p:Polygon):Null<CollisionData> return p.polygon_and_polygon(this, true);
 
-  override inline function sync() {
+  override function sync() {
     if (parent_frame != null) {
       sync_pos.set(local_x, local_y);
       var pos = parent_frame.transformFrom(sync_pos);
@@ -185,8 +195,7 @@ class Polygon extends Shape implements IPooled {
       _rotation = local_rotation;
     }
 
-    transform_vertices();
-    compute_normals();
+    dirty = true;
   }
 
   override inline function get_top():Float {
@@ -237,8 +246,7 @@ class Polygon extends Shape implements IPooled {
     if (local_vertices[index] == null) local_vertices[index] = new Vector2(x, y);
     else local_vertices[index].set(x, y);
 
-    transform_vertices();
-    compute_normals();
+    dirty = true;
   }
 
   public inline function set_vertices(?vertices:Array<Vector2>, ?count:Int):Void {
@@ -246,8 +254,7 @@ class Polygon extends Shape implements IPooled {
     this.count = (count != null && count >= 0) ? count : local_vertices.length;
     if (count > local_vertices.length) for (i in local_vertices.length...count) local_vertices[i] = new Vector2(0, 0);
 
-    transform_vertices();
-    compute_normals();
+    dirty = true;
   }
 
   inline function transform_vertices():Void {
@@ -277,6 +284,26 @@ class Polygon extends Shape implements IPooled {
 
   // getters
   static function get_pool():IPool<Polygon> return _pool;
+
+  inline function get_vertices():Array<Vector2> {
+    if (dirty) {
+      dirty = false;
+      transform_vertices();
+      compute_normals();
+    }
+
+    return vertices;
+  }
+
+  inline function get_normals():Array<Vector2> {
+    if (dirty) {
+      dirty = false;
+      transform_vertices();
+      compute_normals();
+    }
+
+    return normals;
+  }
 
   // setters
 }

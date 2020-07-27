@@ -95,10 +95,16 @@ class Collisions {
 
         for (sa in ssa) {
           var ssb = result.b.shapes;
+          var b1 = sa.bounds();
           for (sb in ssb) {
-            var col = sa.collides(sb);
-            if (col != null) result.data.push(col);
+            var b2 = sb.bounds();
+            if (b1.overlaps(b2)) {
+              var col = sa.collides(sb);
+              if (col != null) result.data.push(col);
+            }
+            b2.put();
           }
+          b1.put();
         }
         // If there was no collision, continue
         if (result.data.length == 0) {
@@ -167,7 +173,7 @@ class Collisions {
     for (member in bodies) {
       if (member.disposed) continue;
       for (result in (member.is_dynamic() ? qr : sqr)) {
-        if (result.id == member.id) results.push(Collision.get(body, member));
+        if (result.id == member.id && bounds.overlaps(result.bounds)) results.push(Collision.get(body, member));
       }
     }
     bounds.put();
@@ -176,11 +182,11 @@ class Collisions {
   static function body_and_body(a:Body, b:Body):Null<Collision> {
     if (a.disposed || b.disposed || a.shapes.length == 0 || b.shapes.length == 0 || !a.active || !b.active || a == b || a.is_static() && b.is_static()) return
       null;
-    var ab = a.bounds().to_rect(true);
-    var bb = b.bounds().to_rect(true);
-    var col = ab.collides(bb);
+    var ab = a.bounds();
+    var bb = b.bounds();
+    var col = ab.overlaps(bb);
     ab.put();
     bb.put();
-    return col == null ? null : Collision.get(a, b);
+    return col ? Collision.get(a, b) : null;
   }
 }

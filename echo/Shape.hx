@@ -2,7 +2,6 @@ package echo;
 
 import echo.util.AABB;
 import hxmath.frames.Frame2;
-import echo.util.Proxy;
 import echo.shape.*;
 import echo.data.Data;
 import echo.data.Options;
@@ -11,7 +10,7 @@ import hxmath.math.Vector2;
 /**
  * Base Shape Class. Acts as a Body's collider. Check out `echo.shapes` for all available shapes
  */
-class Shape implements IProxy {
+class Shape {
   /**
    * Default Shape Options
    */
@@ -127,7 +126,7 @@ class Shape implements IProxy {
 
   public var sync_locked(default, null):Bool;
 
-  public var parent_frame(default, null):Frame2;
+  var parent_frame(default, null):Frame2;
   /**
    * A cached `Vector2` used to reduce allocations. Used Internally.
    */
@@ -141,7 +140,7 @@ class Shape implements IProxy {
     parent_frame = null;
   }
 
-  public function sync() {}
+  public function sync():Void {}
   /**
    * Gets the Shape's position on the X and Y axis as a `Vector2`.
    */
@@ -149,15 +148,17 @@ class Shape implements IProxy {
 
   public inline function get_local_position():Vector2 return new Vector2(local_x, local_y);
 
-  public inline function set_local_position(value:Vector2):Vector2 {
-    lock_sync();
-    local_x = value.x;
-    local_y = value.y;
-    unlock_sync();
-    return value;
+  public inline function set_position(value:Vector2):Void {
+    x = value.x;
+    y = value.y;
   }
 
-  public function set_parent(?frame:Frame2) {
+  public inline function set_local_position(value:Vector2):Void {
+    local_x = value.x;
+    local_y = value.y;
+  }
+
+  public function set_parent(?frame:Frame2):Void {
     if (parent_frame == frame) return;
     parent_frame = frame;
     sync();

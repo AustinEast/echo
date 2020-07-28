@@ -14,7 +14,7 @@ class SAT {
   static final norm = new Vector2(0, 0);
 
   public static inline function point_in_rect(p:Vector2, r:Rect):Bool {
-    if (r.transformed_rect != null && !r.rotation.equals(0)) return p.point_in_polygon(r.transformed_rect);
+    if (r.transformed_rect != null && r.rotation != 0) return p.point_in_polygon(r.transformed_rect);
     return r.left <= p.x && r.right >= p.x && r.top <= p.x && r.bottom >= p.y;
   }
 
@@ -67,7 +67,7 @@ class SAT {
   }
 
   public static function line_interects_rect(l:Line, r:Rect):Null<IntersectionData> {
-    if (r.transformed_rect != null && !r.rotation.equals(0)) return r.transformed_rect.intersect(l);
+    if (r.transformed_rect != null && r.rotation != 0) return r.transformed_rect.intersect(l);
     var closest:Null<IntersectionData> = null;
 
     var left = r.left;
@@ -180,7 +180,7 @@ class SAT {
    * @return Null<CollisionData>
    */
   public static function rect_and_rect(rect1:Rect, rect2:Rect, flip:Bool = false):Null<CollisionData> {
-    if (!rect1.rotation.equals(0) || !rect2.rotation.equals(0)) {
+    if (rect1.rotation != 0 || rect2.rotation != 0) {
       if (rect1.transformed_rect != null) {
         return rect_and_polygon(rect2, rect1.transformed_rect, flip);
       }
@@ -305,7 +305,7 @@ class SAT {
    * @return Null<CollisionData>
    */
   public static function rect_and_circle(r:Rect, c:Circle, flip:Bool = false):Null<CollisionData> {
-    if (r.transformed_rect != null && !r.rotation.equals(0)) return circle_and_polygon(c, r.transformed_rect, flip);
+    if (r.transformed_rect != null && r.rotation != 0) return circle_and_polygon(c, r.transformed_rect, flip);
 
     // Vector from A to B
     var nx = flip ? c.x - r.x : r.x - c.x;
@@ -366,6 +366,7 @@ class SAT {
     if (r.transformed_rect != null) return polygon_and_polygon(r.transformed_rect, p, flip);
 
     var tr = Polygon.get_from_rect(r);
+    @:privateAccess
     tr.set_parent(r.parent_frame);
     var col = polygon_and_polygon(tr, p, flip);
 

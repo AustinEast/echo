@@ -24,20 +24,24 @@ class Polygon extends Shape implements IPooled {
    * This Array represents a cache'd value, so changes to this Array will be overwritten.
    * Use `set_vertice()` or `set_vertices()` to edit this Polygon's vertices.
    */
-  public var vertices(get, null):Array<Vector2> = [];
+  public var vertices(get, never):Array<Vector2>;
   /**
    * The Polygon's computed normals.
    *
    * This Array represents a cache'd value, so changes to this Array will be overwritten.
    * Use `set_vertice()` or `set_vertices()` to edit this Polygon's normals.
    */
-  public var normals(get, null):Array<Vector2> = [];
+  public var normals(get, never):Array<Vector2>;
 
   public var pooled:Bool;
 
   var local_frame:Frame2;
 
   var local_vertices:Array<Vector2>;
+
+  var _vertices:Array<Vector2>;
+
+  var _normals:Array<Vector2>;
 
   var dirty:Bool;
   /**
@@ -66,7 +70,6 @@ class Polygon extends Shape implements IPooled {
 
     polygon.set(x, y, rotation, verts);
     polygon.pooled = false;
-    polygon.dirty = true;
     return polygon;
   }
   /**
@@ -81,7 +84,6 @@ class Polygon extends Shape implements IPooled {
     var polygon = _pool.get();
     polygon.set(x, y, vertices);
     polygon.pooled = false;
-    polygon.dirty = true;
     return polygon;
   }
   /**
@@ -93,7 +95,6 @@ class Polygon extends Shape implements IPooled {
     var polygon = _pool.get();
     polygon.set_from_rect(rect);
     polygon.pooled = false;
-    polygon.dirty = true;
     return polygon;
   }
 
@@ -109,10 +110,12 @@ class Polygon extends Shape implements IPooled {
   }
 
   public inline function set(x:Float = 0, y:Float = 0, rotation:Float = 0, ?vertices:Array<Vector2>):Polygon {
+    lock_sync();
     local_x = x;
     local_y = y;
     local_rotation = rotation;
     set_vertices(vertices);
+    unlock_sync();
     return this;
   }
 
@@ -127,6 +130,7 @@ class Polygon extends Shape implements IPooled {
     local_x = rect.local_x;
     local_y = rect.local_y;
     local_rotation = rect.local_rotation;
+    dirty = true;
     unlock_sync();
     return this;
   }
@@ -134,8 +138,8 @@ class Polygon extends Shape implements IPooled {
   inline function new(?vertices:Array<Vector2>) {
     super();
     type = POLYGON;
-    this.vertices = [];
-    this.normals = [];
+    _vertices = [];
+    _normals = [];
     local_frame = new Frame2(new Vector2(0, 0), 0);
     set_vertices(vertices);
   }
@@ -143,16 +147,19 @@ class Polygon extends Shape implements IPooled {
   public inline function load(polygon:Polygon):Polygon return set(polygon.x, polygon.y, polygon.rotation, polygon.local_vertices);
 
   override inline function bounds(?aabb:AABB):AABB {
-    var left = vertices[0].x;
-    var top = vertices[0].y;
-    var right = vertices[0].x;
-    var bottom = vertices[0].y;
+    if (vertices.length == 0) return AABB.get();
+    var vertice = vertices[0];
+    var left = vertice.x;
+    var top = vertice.y;
+    var right = vertice.x;
+    var bottom = vertice.y;
 
     for (i in 1...count) {
-      if (vertices[i].x < left) left = vertices[i].x;
-      if (vertices[i].y < top) top = vertices[i].y;
-      if (vertices[i].x > right) right = vertices[i].x;
-      if (vertices[i].y > bottom) bottom = vertices[i].y;
+      vertice = vertices[i];
+      if (vertice.x < left) left = vertice.x;
+      if (vertice.y < top) top = vertice.y;
+      if (vertice.x > right) right = vertice.x;
+      if (vertice.y > bottom) bottom = vertice.y;
     }
 
     return aabb == null ? AABB.get_from_min_max(left, top, right, bottom) : aabb.set_from_min_max(left, top, right, bottom);
@@ -181,7 +188,7 @@ class Polygon extends Shape implements IPooled {
 
   override inline function collide_polygon(p:Polygon):Null<CollisionData> return p.polygon_and_polygon(this, true);
 
-  override function sync() {
+  override inline function sync() {
     if (parent_frame != null) {
       sync_pos.set(local_x, local_y);
       var pos = parent_frame.transformFrom(sync_pos);
@@ -258,13 +265,13 @@ class Polygon extends Shape implements IPooled {
   }
 
   inline function transform_vertices():Void {
-    vertices.resize(0);
+    _vertices.resize(0);
     local_frame.offset.set(local_x, local_y);
     local_frame.angleDegrees = local_rotation;
     if (parent_frame != null) local_frame.concatWith(parent_frame);
     for (i in 0...count) {
       if (local_vertices[i] == null) continue;
-      vertices[i] = local_frame.transformFrom(local_vertices[i].clone());
+      _vertices[i] = local_frame.transformFrom(local_vertices[i].clone());
     }
   }
   /**
@@ -272,13 +279,13 @@ class Polygon extends Shape implements IPooled {
    */
   inline function compute_normals():Void {
     for (i in 0...count) {
-      vertices[(i + 1) % count].copyTo(sync_pos);
-      sync_pos.subtractWith(vertices[i]);
+      _vertices[(i + 1) % count].copyTo(sync_pos);
+      sync_pos.subtractWith(_vertices[i]);
 
       // Calculate normal with 2D cross product between vector and scalar
-      if (normals[i] == null) normals[i] = new Vector2(-sync_pos.y, sync_pos.x);
-      else normals[i].set(-sync_pos.y, sync_pos.x);
-      normals[i].normalize();
+      if (_normals[i] == null) _normals[i] = new Vector2(-sync_pos.y, sync_pos.x);
+      else _normals[i].set(-sync_pos.y, sync_pos.x);
+      _normals[i].normalize();
     }
   }
 
@@ -292,7 +299,7 @@ class Polygon extends Shape implements IPooled {
       compute_normals();
     }
 
-    return vertices;
+    return _vertices;
   }
 
   inline function get_normals():Array<Vector2> {
@@ -302,7 +309,7 @@ class Polygon extends Shape implements IPooled {
       compute_normals();
     }
 
-    return normals;
+    return _normals;
   }
 
   // setters

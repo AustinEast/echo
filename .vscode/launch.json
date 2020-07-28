@@ -8,20 +8,24 @@
             "url": "file://${workspaceFolder}/bin/index.html",
             "webRoot": "${workspaceFolder}",
             "preLaunchTask": {
-				"type" : "haxe",
-				"args" : "active configuration"
-			}
+                "type": "haxe",
+                "args": "active configuration"
+            }
         },
         {
-			"request": "launch",
+            "request": "launch",
             "type": "hl",
             "name": "HashLink Debugger (WIP)",
-			"hxml": "compile.hxml",
-			"cwd": "${workspaceRoot}",
-			"preLaunchTask": {
-				"type" : "haxe",
-				"args" : "active configuration"
-			}
-		}
+            "cwd": "${workspaceRoot}",
+            "preLaunchTask": {
+                "type": "haxe",
+                "args": "active configuration"
+            }
+        },
+        {
+            "name": "Haxe Interpreter",
+            "type": "haxe-eval",
+            "request": "launch"
+        }
     ]
 }

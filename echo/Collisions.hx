@@ -173,7 +173,7 @@ class Collisions {
     for (member in bodies) {
       if (member.disposed) continue;
       for (result in (member.is_dynamic() ? qr : sqr)) {
-        if (result.id == member.id && bounds.overlaps(result.bounds)) results.push(Collision.get(body, member));
+        if (result.id == member.id) results.push(Collision.get(body, member));
       }
     }
     bounds.put();

@@ -4,7 +4,6 @@ import echo.util.AABB;
 import hxmath.frames.Frame2;
 import hxmath.math.Vector2;
 import echo.util.Disposable;
-import echo.util.Proxy;
 import echo.Shape;
 import echo.shape.Rect;
 import echo.data.Data;
@@ -70,7 +69,7 @@ class Body implements IDisposable {
    */
   public var rotation(get, set):Float;
   /**
-   * Value to determine how much of a Body's `velocity` should be retained during collisions (or how much should the `Body` "bounce" in other words).
+   * Value to determine how much of a Body's `velocity` should be retained during collisions (or how much should the `Body` "bounce", in other words).
    */
   public var elasticity:Float;
   /**
@@ -288,6 +287,8 @@ class Body implements IDisposable {
     if (dirty) {
       sync_shapes();
       update_static_bounds();
+      if (on_move != null) on_move(x, y);
+      if (on_rotate != null) on_rotate(rotation);
     }
   }
   /**
@@ -465,8 +466,8 @@ class Body implements IDisposable {
         // TODO - Child Body transforms
         // sync_children();
         update_static_bounds();
+        if (on_move != null) on_move(frame.offset.x, frame.offset.y);
       }
-      if (on_move != null) on_move(frame.offset.x, frame.offset.y);
     }
 
     return frame.offset.x;
@@ -482,9 +483,8 @@ class Body implements IDisposable {
         // TODO - Child Body transforms
         // sync_children();
         update_static_bounds();
+        if (on_move != null) on_move(frame.offset.x, frame.offset.y);
       }
-
-      if (on_move != null) on_move(frame.offset.x, frame.offset.y);
     }
     return frame.offset.y;
   }
@@ -508,9 +508,8 @@ class Body implements IDisposable {
         // TODO - Child Body transforms
         // sync_children();
         update_static_bounds();
+        if (on_rotate != null) on_rotate(rotation);
       }
-
-      if (on_rotate != null) on_rotate(rotation);
     }
 
     return frame.angleDegrees;

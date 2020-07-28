@@ -70,6 +70,7 @@ class QuadTree extends AABB implements IPooled {
       for (child in children) child.put();
       children.resize(0);
       contents.resize(0);
+      nodes_list.resize(0);
       _pool.put_unsafe(this);
     }
   }
@@ -90,7 +91,7 @@ class QuadTree extends AABB implements IPooled {
   /**
    * Attempts to remove the `QuadTreeData` from the QuadTree.
    */
-  public function remove(data:QuadTreeData) {
+  public function remove(data:QuadTreeData):Bool {
     if (leaf) return contents.remove(data);
 
     var removed = false;
@@ -183,24 +184,24 @@ class QuadTree extends AABB implements IPooled {
   /**
    * Clears the Quadtree's `QuadTreeData` contents and all children Quadtrees.
    */
-  public function clear() {
+  public inline function clear() {
     clear_children();
     contents.resize(0);
   }
   /**
    * Puts all of the Quadtree's children back in the pool and clears the `children` Array.
    */
-  function clear_children() {
-    for (child in children) {
-      child.clear_children();
-      child.put();
+  inline function clear_children() {
+    for (i in 0...children.length) {
+      children[i].clear_children();
+      children[i].put();
     }
     children.resize(0);
   }
   /**
    * Resets the `flag` value of the QuadTree's `QuadTreeData` contents.
    */
-  function reset_data_flags() {
+  inline function reset_data_flags() {
     if (leaf) for (i in 0...contents.length) contents[i].flag = false;
     else for (i in 0...children.length) children[i].reset_data_flags();
   }

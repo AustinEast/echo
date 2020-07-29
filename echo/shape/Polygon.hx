@@ -43,7 +43,11 @@ class Polygon extends Shape implements IPooled {
 
   var _normals:Array<Vector2>;
 
-  var dirty:Bool;
+  var _bounds:AABB;
+
+  var dirty_vertices:Bool;
+
+  var dirty_bounds:Bool;
   /**
    * Gets a Polygon from the pool, or creates a new one if none are available. Call `put()` on the Polygon to place it back in the pool.
    * @param x
@@ -130,7 +134,8 @@ class Polygon extends Shape implements IPooled {
     local_x = rect.local_x;
     local_y = rect.local_y;
     local_rotation = rect.local_rotation;
-    dirty = true;
+    dirty_vertices = true;
+    dirty_bounds = true;
     unlock_sync();
     return this;
   }
@@ -140,6 +145,7 @@ class Polygon extends Shape implements IPooled {
     type = POLYGON;
     _vertices = [];
     _normals = [];
+    _bounds = AABB.get();
     local_frame = new Frame2(new Vector2(0, 0), 0);
     set_vertices(vertices);
   }
@@ -147,22 +153,27 @@ class Polygon extends Shape implements IPooled {
   public inline function load(polygon:Polygon):Polygon return set(polygon.x, polygon.y, polygon.rotation, polygon.local_vertices);
 
   override inline function bounds(?aabb:AABB):AABB {
-    if (vertices.length == 0) return AABB.get();
-    var vertice = vertices[0];
-    var left = vertice.x;
-    var top = vertice.y;
-    var right = vertice.x;
-    var bottom = vertice.y;
+    if (dirty_bounds) {
+      dirty_bounds = false;
 
-    for (i in 1...count) {
-      vertice = vertices[i];
-      if (vertice.x < left) left = vertice.x;
-      if (vertice.y < top) top = vertice.y;
-      if (vertice.x > right) right = vertice.x;
-      if (vertice.y > bottom) bottom = vertice.y;
+      var vertice = vertices[0];
+      var left = vertice.x;
+      var top = vertice.y;
+      var right = vertice.x;
+      var bottom = vertice.y;
+
+      for (i in 1...count) {
+        vertice = vertices[i];
+        if (vertice.x < left) left = vertice.x;
+        if (vertice.y < top) top = vertice.y;
+        if (vertice.x > right) right = vertice.x;
+        if (vertice.y > bottom) bottom = vertice.y;
+      }
+
+      _bounds.set_from_min_max(left, top, right, bottom);
     }
 
-    return aabb == null ? AABB.get_from_min_max(left, top, right, bottom) : aabb.set_from_min_max(left, top, right, bottom);
+    return aabb == null ? _bounds.clone() : aabb.load(_bounds);
   }
 
   override function clone():Polygon return Polygon.get_from_vertices(x, y, rotation, local_vertices);
@@ -202,7 +213,8 @@ class Polygon extends Shape implements IPooled {
       _rotation = local_rotation;
     }
 
-    dirty = true;
+    dirty_vertices = true;
+    dirty_bounds = true;
   }
 
   override inline function get_top():Float {
@@ -253,7 +265,8 @@ class Polygon extends Shape implements IPooled {
     if (local_vertices[index] == null) local_vertices[index] = new Vector2(x, y);
     else local_vertices[index].set(x, y);
 
-    dirty = true;
+    dirty_vertices = true;
+    dirty_bounds = true;
   }
 
   public inline function set_vertices(?vertices:Array<Vector2>, ?count:Int):Void {
@@ -261,7 +274,8 @@ class Polygon extends Shape implements IPooled {
     this.count = (count != null && count >= 0) ? count : local_vertices.length;
     if (count > local_vertices.length) for (i in local_vertices.length...count) local_vertices[i] = new Vector2(0, 0);
 
-    dirty = true;
+    dirty_vertices = true;
+    dirty_bounds = true;
   }
 
   inline function transform_vertices():Void {
@@ -293,8 +307,8 @@ class Polygon extends Shape implements IPooled {
   static function get_pool():IPool<Polygon> return _pool;
 
   inline function get_vertices():Array<Vector2> {
-    if (dirty) {
-      dirty = false;
+    if (dirty_vertices) {
+      dirty_vertices = false;
       transform_vertices();
       compute_normals();
     }
@@ -303,8 +317,8 @@ class Polygon extends Shape implements IPooled {
   }
 
   inline function get_normals():Array<Vector2> {
-    if (dirty) {
-      dirty = false;
+    if (dirty_vertices) {
+      dirty_vertices = false;
       transform_vertices();
       compute_normals();
     }

@@ -199,22 +199,22 @@ class Rect extends Shape implements IPooled {
   function get_max():Vector2 return new Vector2(bottom, right);
 
   override inline function get_top():Float {
-    if (transformed_rect == null) return y - ey;
+    if (transformed_rect == null || rotation == 0) return y - ey;
     return transformed_rect.top;
   }
 
   override inline function get_bottom():Float {
-    if (transformed_rect == null) return y + ey;
+    if (transformed_rect == null || rotation == 0) return y + ey;
     return transformed_rect.bottom;
   }
 
   override inline function get_left():Float {
-    if (transformed_rect == null) return x - ex;
+    if (transformed_rect == null || rotation == 0) return x - ex;
     return transformed_rect.left;
   }
 
   override inline function get_right():Float {
-    if (transformed_rect == null) return x + ex;
+    if (transformed_rect == null || rotation == 0) return x + ex;
     return transformed_rect.right;
   }
 

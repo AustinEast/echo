@@ -96,9 +96,9 @@ class QuadTree extends AABB implements IPooled {
 
     var removed = false;
     for (child in children) if (child.remove(data)) removed = true;
-    if (removed) shake();
+    if (removed) return shake();
 
-    return removed;
+    return false;
   }
   /**
    * Updates the `QuadTreeData` in the QuadTree by first removing the `QuadTreeData` from the QuadTree, then inserting it.
@@ -130,7 +130,7 @@ class QuadTree extends AABB implements IPooled {
    *
    * Note - This works recursively.
    */
-  public function shake() {
+  public function shake():Bool {
     if (!leaf) {
       var len = count;
       if (len == 0) {
@@ -149,8 +149,10 @@ class QuadTree extends AABB implements IPooled {
           else for (child in node.children) nodes_list.push(child);
         }
         clear_children();
+        return true;
       }
     }
+    return false;
   }
   /**
    * Splits the Quadtree into 4 Quadtree children, and disperses it's `QuadTreeData` contents into them.
@@ -212,8 +214,8 @@ class QuadTree extends AABB implements IPooled {
     reset_data_flags();
     // Initialize the count with this node's content's length
     var num = 0;
-    for (data in contents) {
-      data.flag = true;
+    for (i in 0...contents.length) {
+      contents[i].flag = true;
       num += 1;
     }
 
@@ -229,14 +231,14 @@ class QuadTree extends AABB implements IPooled {
     while (nodes_list.length > 0) {
       var node = nodes_list.shift();
       if (node.leaf) {
-        for (data in node.contents) {
-          if (!data.flag) {
+        for (i in 0...node.contents.length) {
+          if (!node.contents[i].flag) {
             num += 1;
-            data.flag = true;
+            node.contents[i].flag = true;
           }
         }
       }
-      else for (child in node.children) nodes_list.push(child);
+      else for (i in 0...node.children.length) nodes_list.push(node.children[i]);
     }
     return num;
   }

@@ -282,7 +282,12 @@ class Polygon extends Shape implements IPooled {
     _vertices.resize(0);
     local_frame.offset.set(local_x, local_y);
     local_frame.angleDegrees = local_rotation;
-    if (parent_frame != null) local_frame.concatWith(parent_frame);
+    if (parent_frame != null) {
+      // concat the frames
+      var pos = (parent_frame.linearMatrix * local_frame.offset).addWith(parent_frame.offset);
+      local_frame.angleDegrees = MathUtil.wrap(parent_frame.angleDegrees + local_frame.angleDegrees, 360);
+      local_frame.offset = pos;
+    }
     for (i in 0...count) {
       if (local_vertices[i] == null) continue;
       _vertices[i] = local_frame.transformFrom(local_vertices[i].clone());

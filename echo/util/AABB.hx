@@ -24,7 +24,6 @@ class AABB implements IPooled {
    * @param y The centered Y position of the AABB.
    * @param width The width of the AABB.
    * @param height The height of the AABB.
-   * @param rotation The rotation of the AABB.
    * @return AABB
    */
   public static inline function get(x:Float = 0, y:Float = 0, width:Float = 1, height:Float = 0):AABB {
@@ -54,7 +53,16 @@ class AABB implements IPooled {
     min_y = 0;
     max_y = 1;
   }
-
+  /**
+   * Sets the values on this AABB.
+   *
+   * Note - The X and Y positions represent the center of the AABB. To set the AABB from its Top-Left origin, `AABB.set_from_min_max()` is available.
+   * @param x The centered X position of the AABB.
+   * @param y The centered Y position of the AABB.
+   * @param width The width of the AABB.
+   * @param height The height of the AABB.
+   * @return AABB
+   */
   public inline function set(x:Float = 0, y:Float = 0, width:Float = 1, height:Float = 1) {
     width *= 0.5;
     height *= 0.5;
@@ -82,11 +90,12 @@ class AABB implements IPooled {
     return this.min_x < other.max_x && this.max_x >= other.min_x && this.min_y < other.max_y && this.max_y >= other.min_y;
   }
 
-  public inline function load(aabb:AABB) {
+  public inline function load(aabb:AABB):AABB {
     this.min_x = aabb.min_x;
     this.max_x = aabb.max_x;
     this.min_y = aabb.min_y;
     this.max_y = aabb.max_y;
+    return this;
   }
   /**
    * Adds the bounds of an AABB into this AABB.
@@ -97,6 +106,10 @@ class AABB implements IPooled {
     if (min_y > aabb.min_y) min_y = aabb.min_y;
     if (max_x < aabb.max_x) max_x = aabb.max_x;
     if (max_y < aabb.max_y) max_y = aabb.max_y;
+  }
+
+  public inline function clone() {
+    return AABB.get_from_min_max(min_x, min_y, max_x, max_y);
   }
 
   public function put() {

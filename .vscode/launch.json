@@ -13,9 +13,9 @@
             }
         },
         {
+            "name": "HashLink",
             "request": "launch",
             "type": "hl",
-            "name": "HashLink Debugger (WIP)",
             "cwd": "${workspaceRoot}",
             "preLaunchTask": {
                 "type": "haxe",

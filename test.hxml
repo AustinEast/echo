@@ -1,9 +1,12 @@
 # class paths
 -cp test
+
 # entry point
 -main Main
+
 # libraries
 -lib echo
+
 # output
 -js bin/test.js
 --no-output

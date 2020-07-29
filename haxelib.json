@@ -1,12 +1,17 @@
 {
   "name": "echo",
   "license": "MIT",
-  "tags": ["physics", "collisions"],
+  "tags": [
+    "physics",
+    "collisions"
+  ],
   "description": "Simple Physics Library written in Haxe",
-  "contributors": ["austineast"],
+  "contributors": [
+    "austineast"
+  ],
   "url": "https://austineast.dev/echo",
-  "releasenote": "aabb and other optimizations (thanks @Yanrishatum!)",
-  "version": "2.0.0",
+  "releasenote": "optimizing and polygon fixes",
+  "version": "2.1.0",
   "dependencies": {
     "hxmath": ""
   }

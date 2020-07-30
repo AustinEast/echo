@@ -13,7 +13,6 @@
 #flags
 -dce full
 -D windowSize=1280x720
---no-inline
 
 # output
 -hl bin/sample.hl

@@ -163,10 +163,16 @@ class Rect extends Shape implements IPooled {
 
   override inline function sync() {
     if (parent_frame != null) {
-      sync_pos.set(local_x, local_y);
-      var pos = parent_frame.transformFrom(sync_pos);
-      _x = pos.x;
-      _y = pos.y;
+      if (local_x == 0 && local_y == 0) {
+        _x = parent_frame.offset.x;
+        _y = parent_frame.offset.y;
+      }
+      else {
+        sync_pos.set(local_x, local_y);
+        var pos = parent_frame.transformFrom(sync_pos);
+        _x = pos.x;
+        _y = pos.y;
+      }
       _rotation = parent_frame.angleDegrees + local_rotation;
     }
     else {

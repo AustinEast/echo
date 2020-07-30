@@ -152,22 +152,20 @@ class Polygon extends Shape implements IPooled {
 
   public inline function load(polygon:Polygon):Polygon return set(polygon.x, polygon.y, polygon.rotation, polygon.local_vertices);
 
-  override inline function bounds(?aabb:AABB):AABB {
+  override function bounds(?aabb:AABB):AABB {
     if (dirty_bounds) {
       dirty_bounds = false;
 
-      var vertice = vertices[0];
-      var left = vertice.x;
-      var top = vertice.y;
-      var right = vertice.x;
-      var bottom = vertice.y;
+      var left = vertices[0].x;
+      var top = vertices[0].y;
+      var right = vertices[0].x;
+      var bottom = vertices[0].y;
 
       for (i in 1...count) {
-        vertice = vertices[i];
-        if (vertice.x < left) left = vertice.x;
-        if (vertice.y < top) top = vertice.y;
-        if (vertice.x > right) right = vertice.x;
-        if (vertice.y > bottom) bottom = vertice.y;
+        if (vertices[i].x < left) left = vertices[i].x;
+        if (vertices[i].y < top) top = vertices[i].y;
+        if (vertices[i].x > right) right = vertices[i].x;
+        if (vertices[i].y > bottom) bottom = vertices[i].y;
       }
 
       _bounds.set_from_min_max(left, top, right, bottom);
@@ -285,18 +283,24 @@ class Polygon extends Shape implements IPooled {
   }
 
   inline function transform_vertices():Void {
-    _vertices.resize(0);
     local_frame.offset.set(local_x, local_y);
     local_frame.angleDegrees = local_rotation;
+
+    // concat the parent frame, if possible
     if (parent_frame != null) {
-      // concat the frames
       var pos = (parent_frame.linearMatrix * local_frame.offset).addWith(parent_frame.offset);
       local_frame.angleDegrees = MathUtil.wrap(parent_frame.angleDegrees + local_frame.angleDegrees, 360);
-      local_frame.offset = pos;
+      local_frame.offset.set(pos.x, pos.y);
     }
+
+    // clear any extra vertices
+    while (_vertices.length > count) _vertices.pop();
+
     for (i in 0...count) {
       if (local_vertices[i] == null) continue;
-      _vertices[i] = local_frame.transformFrom(local_vertices[i].clone());
+      if (_vertices[i] == null) _vertices[i] = new Vector2(0,0);
+      var pos = local_frame.transformFrom(local_vertices[i]);
+      _vertices[i].set(pos.x, pos.y);
     }
   }
   /**

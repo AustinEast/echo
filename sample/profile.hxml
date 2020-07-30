@@ -1,4 +1,4 @@
--debug
+--no-inline
 -D hl-profile
 -D hl-ver=1.11.0
 build.hxml

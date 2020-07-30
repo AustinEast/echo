@@ -12,6 +12,7 @@ using echo.util.Ext;
  */
 class SAT {
   static final norm = new Vector2(0, 0);
+  static final closest = new Vector2(0, 0);
 
   public static inline function point_in_rect(p:Vector2, r:Rect):Bool {
     if (r.transformed_rect != null && r.rotation != 0) return p.point_in_polygon(r.transformed_rect);
@@ -388,7 +389,6 @@ class SAT {
   public static function circle_and_polygon(c:Circle, p:Polygon, flip:Bool = false):Null<CollisionData> {
     var distance:Float = 0;
     var testDistance:Float = 0x3FFFFFFF;
-    var closest = new Vector2(0, 0);
     var c_pos = c.get_position();
 
     for (i in 0...p.count) {
@@ -463,6 +463,7 @@ class SAT {
 
       // Preform another test
       if (test1 > 0 || test2 > 0) {
+        col.put();
         return null;
       }
 

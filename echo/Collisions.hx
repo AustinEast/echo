@@ -90,22 +90,30 @@ class Collisions {
           result.put();
           continue;
         }
-        // Preform the full collision check
-        var ssa = result.a.shapes;
 
-        for (sa in ssa) {
-          var ssb = result.b.shapes;
-          var b1 = sa.bounds();
-          for (sb in ssb) {
-            var b2 = sb.bounds();
-            if (b1.overlaps(b2)) {
-              var col = sa.collides(sb);
-              if (col != null) result.data.push(col);
-            }
-            b2.put();
-          }
-          b1.put();
+        // Preform the full collision check
+        if (result.a.shapes.length == 1 && result.b.shapes.length == 1) {
+          var col = result.a.shape.collides(result.b.shape);
+          if (col != null) result.data.push(col);
         }
+        // If either body has more than one shape, iterate over each shape and perform bounds checks before checking for actual collision
+        else {
+          var sa = result.a.shapes;
+          for (i in 0...sa.length) {
+            var sb = result.b.shapes;
+            var b1 = sa[i].bounds();
+            for (j in 0...sb.length) {
+              var b2 = sb[j].bounds();
+              if (b1.overlaps(b2)) {
+                var col = sa[i].collides(sb[j]);
+                if (col != null) result.data.push(col);
+              }
+              b2.put();
+            }
+            b1.put();
+          }
+        }
+
         // If there was no collision, continue
         if (result.data.length == 0) {
           result.put();

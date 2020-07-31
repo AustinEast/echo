@@ -116,7 +116,8 @@ body.entity = new some.package.Entity();
 
 ### Engine/Framework Examples
 
-For an example of integrating echo with the Heaps engine, check out [this sample](https://github.com/AustinEast/echo-heaps).
+* [Heaps](https://heaps.io): https://github.com/AustinEast/echo-heaps
+* [Peyote View](https://github.com/maitag/peote-view): https://github.com/maitag/peote-views-samples/tree/master/echo
 
 ### Basic Example
 ```haxe

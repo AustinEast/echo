@@ -1,8 +1,8 @@
 package echo.util;
 
 import echo.data.Data;
-import hxmath.math.Vector2;
 import echo.shape.*;
+import hxmath.math.Vector2;
 
 using echo.util.Ext;
 using hxmath.math.MathUtil;
@@ -22,6 +22,7 @@ class Debug {
   public var intersection_overlap_color:Int;
   public var quadtree_color:Int;
   public var quadtree_fill_color:Int;
+  public var camera:Null<AABB>;
 
   public static function log(world:World) {
     trace('World State:');
@@ -47,6 +48,13 @@ class Debug {
       draw_qd(world.quadtree);
     }
     if (draw_bodies) world.for_each(member -> if (member.shapes.length != 0) {
+      if (camera != null) {
+        var bounds = member.bounds();
+        if (!bounds.overlaps(camera)) {
+          bounds.put();
+          return;
+        }
+      }
       if (draw_body_centers) draw_rect(member.x - 1, member.y - 1, 1, 1, quadtree_color);
       for (shape in member.shapes) {
         var x = shape.x;

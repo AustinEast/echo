@@ -10,8 +10,8 @@
     "austineast"
   ],
   "url": "https://austineast.dev/echo",
-  "releasenote": "optimizing and polygon fixes",
-  "version": "2.1.0",
+  "releasenote": "optimizations and fixes",
+  "version": "2.1.1",
   "dependencies": {
     "hxmath": ""
   }

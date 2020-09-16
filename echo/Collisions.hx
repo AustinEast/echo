@@ -1,9 +1,9 @@
 package echo;
 
-import echo.util.QuadTree;
 import echo.Body;
-import echo.data.Data;
 import echo.Listener;
+import echo.data.Data;
+import echo.util.QuadTree;
 
 using Lambda;
 /**
@@ -165,21 +165,21 @@ class Collisions {
 
   static function bodies_and_bodies(a:Array<Body>, b:Array<Body>, world:World, results:Array<Collision>, quadtree:QuadTree) {
     if (a.length == 0 || b.length == 0) return;
-    for (body in a) if (!body.disposed && body.active && body.is_dynamic()) body_and_bodies(body, b, world, results, quadtree);
+    for (body in a) body_and_bodies(body, b, world, results, quadtree);
   }
 
   static var qr:Array<QuadTreeData> = [];
   static var sqr:Array<QuadTreeData> = [];
 
   static function body_and_bodies(body:Body, bodies:Array<Body>, world:World, results:Array<Collision>, quadtree:QuadTree) {
-    if (!body.disposed && body.shapes.length == 0 || !body.active || body.is_static()) return;
+    if (body.disposed || body.shapes.length == 0 || !body.active || body.is_static()) return;
     var bounds = body.bounds();
     qr.resize(0);
     sqr.resize(0);
     quadtree.query(bounds, qr);
     world.static_quadtree.query(bounds, sqr);
     for (member in bodies) {
-      if (member.disposed) continue;
+      if (member.disposed || member.shapes.length == 0 || !member.active) continue;
       for (result in (member.is_dynamic() ? qr : sqr)) {
         if (result.id == member.id) results.push(Collision.get(body, member));
       }

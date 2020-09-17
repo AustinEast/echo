@@ -11,6 +11,7 @@ using echo.util.SAT;
 using echo.util.Ext;
 using hxmath.math.MathUtil;
 
+// TODO - extend Rect from Polygon to save on matrix calculations when syncing
 class Rect extends Shape implements IPooled {
   public static var pool(get, never):IPool<Rect>;
   static var _pool = new Pool<Rect>(Rect);

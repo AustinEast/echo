@@ -24,7 +24,7 @@ class Collisions {
             if (r.transformed_rect != null) r.transformed_rect.collided = false;
           }
         }
-        if (b.active && b.is_dynamic() && b.dirty) {
+        if (b.active && b.is_dynamic() && b.dirty && b.shapes.length > 0) {
           if (b.quadtree_data.bounds == null) b.quadtree_data.bounds = b.bounds();
           else b.bounds(b.quadtree_data.bounds);
           world.quadtree.update(b.quadtree_data);

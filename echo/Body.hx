@@ -239,6 +239,8 @@ class Body implements IDisposable {
     dirty = true;
     if (options.shape != null) create_shape(options.shape);
     if (options.shapes != null) for (shape in options.shapes) create_shape(shape);
+    if (options.shape_instance != null) add_shape(options.shape_instance);
+    if (options.shape_instances != null) for (shape in options.shape_instances) add_shape(shape);
   }
 
   public function clone():Body {
@@ -378,21 +380,19 @@ class Body implements IDisposable {
    * @param aabb Optional `AABB` to set the values to. If the Body does not have any shapes, the AABB will not be set.
    * @return Null<AABB>
    */
-  public function bounds(?aabb:AABB):Null<AABB> {
-    if (shapes.length == 0) return null;
-
+  public function bounds(?aabb:AABB):AABB {
+    if (shapes.length == 0) return AABB.get(x, y, 1, 1);
     var b1 = shapes[0].bounds();
 
     if (shapes.length > 1) for (i in 1...shapes.length) {
       var b2 = shapes[i].bounds();
+
       b1.add(b2);
       b2.put();
     }
-
     if (aabb == null) aabb = AABB.get();
     aabb.load(b1);
     b1.put();
-
     return aabb;
   }
   /**

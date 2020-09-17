@@ -16,3 +16,4 @@
 
 # output
 -hl bin/sample.hl
+-cmd hl bin/sample.hl

@@ -1,10 +1,11 @@
 -lib heaps
 -lib hlsdl
 -lib echo
+-lib ghostlib
+
 -main Main
+
 -dce full
--debug
 -D standalone
 -D windowSize=1280x720
 -hl bin/sample.hl
--cmd hl bin/sample.hl

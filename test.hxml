@@ -1,10 +1,12 @@
 # class paths
 -cp test
+
 # entry point
 -main Main
+
 # libraries
 -lib echo
--lib ghostlib
+
 # output
 -js bin/test.js
 --no-output

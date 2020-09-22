@@ -34,15 +34,7 @@ class Main extends BaseApp {
     });
     // Set up our Sample States
     sample_states = [
-      PolygonState,
-      StackingState,
-      MultiShapeState,
-      ShapesState,
-      GroupsState,
-      StaticState,
-      LinecastState,
-      Linecast2State,
-      TileMapState
+      PolygonState, StackingState, MultiShapeState, ShapesState, GroupsState, StaticState, LinecastState, Linecast2State, TileMapState, TileMapState2
     ];
     index = 0;
     // Create a State Manager and pass it the World and the first Sample

@@ -1,9 +1,9 @@
 package echo;
 
+import echo.util.AABB;
 import hxmath.frames.Frame2;
 import hxmath.math.Vector2;
 import echo.util.Disposable;
-import echo.util.Proxy;
 import echo.Shape;
 import echo.shape.Rect;
 import echo.data.Data;
@@ -69,7 +69,7 @@ class Body implements IDisposable {
    */
   public var rotation(get, set):Float;
   /**
-   * Value to determine how much of a Body's `velocity` should be retained during collisions (or how much should the `Body` "bounce" in other words).
+   * Value to determine how much of a Body's `velocity` should be retained during collisions (or how much should the `Body` "bounce", in other words).
    */
   public var elasticity:Float;
   /**
@@ -180,6 +180,10 @@ class Body implements IDisposable {
   public var last_y(default, null):Float;
   @:allow(echo.Physics.step)
   public var last_rotation(default, null):Float;
+  /**
+   *
+   */
+  public var sync_locked(default, null):Bool;
 
   @:dox(hide)
   @:allow(echo.World, echo.Collisions, echo.util.Debug)
@@ -203,6 +207,7 @@ class Body implements IDisposable {
     max_velocity = new Vector2(0, 0);
     drag = new Vector2(0, 0);
     data = {};
+    sync_locked = false;
     disposed = false;
     load_options(options);
   }
@@ -234,6 +239,8 @@ class Body implements IDisposable {
     dirty = true;
     if (options.shape != null) create_shape(options.shape);
     if (options.shapes != null) for (shape in options.shapes) create_shape(shape);
+    if (options.shape_instance != null) add_shape(options.shape_instance);
+    if (options.shape_instances != null) for (shape in options.shape_instances) add_shape(shape);
   }
 
   public function clone():Body {
@@ -271,6 +278,20 @@ class Body implements IDisposable {
   @:noCompletion
   private inline function sync() {
     // TODO - add "Local" x, y, and rot
+  }
+
+  public inline function lock_sync() {
+    sync_locked = true;
+  }
+
+  public inline function unlock_sync() {
+    sync_locked = false;
+    if (dirty) {
+      sync_shapes();
+      update_static_bounds();
+      if (on_move != null) on_move(x, y);
+      if (on_rotate != null) on_rotate(rotation);
+    }
   }
   /**
    * TODO - Child Body transforms
@@ -355,28 +376,24 @@ class Body implements IDisposable {
     acceleration.y += y;
   }
   /**
-   * If a Body has shapes, it will return an AABB `Rect` representing the bounds of its shapes relative to the Body's Position. If the Body does not have any shapes, this will return `null'.
-   * @param rect Optional `Rect` to set the values to. If the Body does not have any shapes, the Rect will not be set.
-   * @return Null<Rect>
+   * If a Body has shapes, it will return an `AABB` representing the bounds of the Body's shapes relative to its position. If the Body does not have any shapes, this will return `null'.
+   * @param aabb Optional `AABB` to set the values to. If the Body does not have any shapes, the AABB will not be set.
+   * @return Null<AABB>
    */
-  public function bounds(?rect:Rect):Null<Rect> {
-    if (shapes.length == 0) return null;
-
-    var s = shapes[0];
-    var min_x = s.left;
-    var min_y = s.top;
-    var max_x = s.right;
-    var max_y = s.bottom;
+  public function bounds(?aabb:AABB):AABB {
+    if (shapes.length == 0) return AABB.get(x, y, 1, 1);
+    var b1 = shapes[0].bounds();
 
     if (shapes.length > 1) for (i in 1...shapes.length) {
-      var shape = shapes[i];
-      if (shape.left < min_x) min_x = shape.left;
-      if (shape.top < min_y) min_y = shape.top;
-      if (shape.right > max_x) max_x = shape.right;
-      if (shape.bottom > max_y) max_y = shape.bottom;
-    }
+      var b2 = shapes[i].bounds();
 
-    return rect == null ? Rect.get_from_min_max(min_x, min_y, max_x, max_y) : rect.set_from_min_max(min_x, min_y, max_x, max_y);
+      b1.add(b2);
+      b2.put();
+    }
+    if (aabb == null) aabb = AABB.get();
+    aabb.load(b1);
+    b1.put();
+    return aabb;
   }
   /**
    * If the Body is attached to a World, it is removed.
@@ -441,16 +458,16 @@ class Body implements IDisposable {
   // setters
   inline function set_x(value:Float):Float {
     if (value != frame.offset.x) {
+      frame.offset = frame.offset.set(value, y);
       dirty = true;
 
-      frame.offset = frame.offset.set(value, y);
-      sync_shapes();
-      // TODO - Child Body transforms
-      // sync_children();
-
-      update_static_bounds();
-
-      if (on_move != null) on_move(frame.offset.x, frame.offset.y);
+      if (!sync_locked) {
+        sync_shapes();
+        // TODO - Child Body transforms
+        // sync_children();
+        update_static_bounds();
+        if (on_move != null) on_move(frame.offset.x, frame.offset.y);
+      }
     }
 
     return frame.offset.x;
@@ -458,16 +475,16 @@ class Body implements IDisposable {
 
   inline function set_y(value:Float):Float {
     if (value != frame.offset.y) {
+      frame.offset = frame.offset.set(x, value);
       dirty = true;
 
-      frame.offset = frame.offset.set(x, value);
-      sync_shapes();
-      // TODO - Child Body transforms
-      // sync_children();
-
-      update_static_bounds();
-
-      if (on_move != null) on_move(frame.offset.x, frame.offset.y);
+      if (!sync_locked) {
+        sync_shapes();
+        // TODO - Child Body transforms
+        // sync_children();
+        update_static_bounds();
+        if (on_move != null) on_move(frame.offset.x, frame.offset.y);
+      }
     }
     return frame.offset.y;
   }
@@ -483,16 +500,16 @@ class Body implements IDisposable {
 
   inline function set_rotation(value:Float):Float {
     if (value != frame.angleDegrees) {
+      frame.angleDegrees = value;
       dirty = true;
 
-      frame.angleDegrees = value;
-      sync_shapes();
-      // TODO - Child Body transforms
-      // sync_children();
-
-      update_static_bounds();
-
-      if (on_rotate != null) on_rotate(rotation);
+      if (!sync_locked) {
+        sync_shapes();
+        // TODO - Child Body transforms
+        // sync_children();
+        update_static_bounds();
+        if (on_rotate != null) on_rotate(rotation);
+      }
     }
 
     return frame.angleDegrees;

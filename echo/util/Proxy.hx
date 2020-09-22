@@ -68,7 +68,7 @@ class Proxy {
     return fields.concat(append);
   }
   /**
-   * TODO
+   * TODO - generate a `ClassOptions` structure from a `Class`, containing all public fields of the Class. Maybe add `load_options` method to `Class` that sets all the fields from options?
    * @return Array<Field>
    */
   public static function options():Array<Field> {

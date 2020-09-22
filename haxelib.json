@@ -1,12 +1,17 @@
 {
   "name": "echo",
   "license": "MIT",
-  "tags": ["physics", "collisions"],
+  "tags": [
+    "physics",
+    "collisions"
+  ],
   "description": "Simple Physics Library written in Haxe",
-  "contributors": ["austineast"],
+  "contributors": [
+    "austineast"
+  ],
   "url": "https://austineast.dev/echo",
-  "releasenote": "fix max rotational velocity",
-  "version": "1.5.1",
+  "releasenote": "optimizations and fixes",
+  "version": "2.1.1",
   "dependencies": {
     "hxmath": ""
   }

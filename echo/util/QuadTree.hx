@@ -8,7 +8,7 @@ import echo.data.Data;
 /**
  * Simple QuadTree implementation to assist with broad-phase 2D collisions.
  */
-class QuadTree extends Rect implements IPooled {
+class QuadTree extends AABB implements IPooled {
   public static var pool(get, never):IPool<QuadTree>;
   static var _pool = new Pool<QuadTree>(QuadTree);
   /**
@@ -32,7 +32,7 @@ class QuadTree extends Rect implements IPooled {
    */
   public var count(get, null):Int;
   /**
-   * A QuadTree is regarded as a `leaf` if it has any QuadTree children (ie `quadtree.children.length > 0`).
+   * A QuadTree is regarded as a `leaf` if it has **no** QuadTree children (ie `quadtree.children.length == 0`).
    */
   public var leaf(get, null):Bool;
   /**
@@ -42,11 +42,11 @@ class QuadTree extends Rect implements IPooled {
   /**
    * Cache'd list of QuadTrees used to help with memory management.
    */
-  var nodes_list = new List<QuadTree>();
+  var nodes_list:Array<QuadTree> = [];
 
-  function new(?rect:Rect, depth:Int = 0) {
+  function new(?aabb:AABB, depth:Int = 0) {
     super();
-    if (rect != null) load(rect);
+    if (aabb != null) load(aabb);
     this.depth = depth;
     children = [];
     contents = [];
@@ -70,6 +70,7 @@ class QuadTree extends Rect implements IPooled {
       for (child in children) child.put();
       children.resize(0);
       contents.resize(0);
+      nodes_list.resize(0);
       _pool.put_unsafe(this);
     }
   }
@@ -90,9 +91,14 @@ class QuadTree extends Rect implements IPooled {
   /**
    * Attempts to remove the `QuadTreeData` from the QuadTree.
    */
-  public function remove(data:QuadTreeData) {
-    leaf ? contents.remove(data) : for (child in children) child.remove(data);
-    shake();
+  public function remove(data:QuadTreeData):Bool {
+    if (leaf) return contents.remove(data);
+
+    var removed = false;
+    for (child in children) if (child.remove(data)) removed = true;
+    if (removed) return shake();
+
+    return false;
   }
   /**
    * Updates the `QuadTreeData` in the QuadTree by first removing the `QuadTreeData` from the QuadTree, then inserting it.
@@ -103,45 +109,50 @@ class QuadTree extends Rect implements IPooled {
     insert(data);
   }
   /**
-   * Queries the QuadTree for any `QuadTreeData` that overlaps the `Shape`.
-   * @param shape The `Shape` to query.
+   * Queries the QuadTree for any `QuadTreeData` that overlaps the `AABB`.
+   * @param aabb The `AABB` to query.
    * @param result An Array containing all `QuadTreeData` that collides with the shape.
    */
-  public function query(shape:Shape, result:Array<QuadTreeData>) {
-    if (!overlaps(shape)) return;
+  public function query(aabb:AABB, result:Array<QuadTreeData>) {
+    if (!overlaps(aabb)) {
+      return;
+    }
     if (leaf) {
-      for (data in contents) if (data.bounds.overlaps(shape)) result.push(data);
+      for (data in contents) if (data.bounds.overlaps(aabb)) result.push(data);
     }
     else {
-      for (child in children) child.query(shape, result);
+      for (child in children) child.query(aabb, result);
     }
   }
   /**
-   * If the QuadTree is a branch (_not_ a `leaf`), tsih lliw
-   * @param recursive
+   * If the QuadTree is a branch (_not_ a `leaf`), this will check if the amount of data from all the child Quadtrees can fit in the Quadtree without exceeding it's `max_contents`.
+   * If all the data can fit, the Quadtree branch will "shake" its child Quadtrees, absorbing all the data and clearing the children (putting all the child Quadtrees back in the pool).
+   *
+   * Note - This works recursively.
    */
-  public function shake() {
+  public function shake():Bool {
     if (!leaf) {
       var len = count;
       if (len == 0) {
         clear_children();
       }
       else if (len < max_contents) {
-        nodes_list.clear();
+        nodes_list.resize(0);
         nodes_list.push(this);
         while (nodes_list.length > 0) {
-          var node = nodes_list.last();
-          if (node.leaf) {
+          var node = nodes_list.shift();
+          if (node != this && node.leaf) {
             for (data in node.contents) {
               if (contents.indexOf(data) == -1) contents.push(data);
             }
           }
-          else for (child in node.children) nodes_list.add(child);
-          nodes_list.pop();
+          else for (child in node.children) nodes_list.push(child);
         }
         clear_children();
+        return true;
       }
     }
+    return false;
   }
   /**
    * Splits the Quadtree into 4 Quadtree children, and disperses it's `QuadTreeData` contents into them.
@@ -149,20 +160,20 @@ class QuadTree extends Rect implements IPooled {
   function split() {
     if (depth + 1 >= max_depth) return;
 
-    var xw = ex * 0.5;
-    var xh = ey * 0.5;
+    var xw = width * 0.5;
+    var xh = height * 0.5;
 
     for (i in 0...4) {
       var child = get();
       switch (i) {
         case 0:
-          child.set(x - xw, y - xh, ex, ey);
+          child.set_from_min_max(min_x, min_y, min_x + xw, min_y + xh);
         case 1:
-          child.set(x + xw, y - xh, ex, ey);
+          child.set_from_min_max(min_x + xw, min_y, max_x, min_y + xh);
         case 2:
-          child.set(x - xw, y + xh, ex, ey);
+          child.set_from_min_max(min_x, min_y + xh, min_x + xw, max_y);
         case 3:
-          child.set(x + xw, y + xh, ex, ey);
+          child.set_from_min_max(min_x + xw, min_y + xh, max_x, max_y);
       }
       child.depth = depth + 1;
       child.max_depth = max_depth;
@@ -183,9 +194,9 @@ class QuadTree extends Rect implements IPooled {
    * Puts all of the Quadtree's children back in the pool and clears the `children` Array.
    */
   inline function clear_children() {
-    for (child in children) {
-      child.clear_children();
-      child.put();
+    for (i in 0...children.length) {
+      children[i].clear_children();
+      children[i].put();
     }
     children.resize(0);
   }
@@ -193,8 +204,8 @@ class QuadTree extends Rect implements IPooled {
    * Resets the `flag` value of the QuadTree's `QuadTreeData` contents.
    */
   inline function reset_data_flags() {
-    if (leaf) for (data in contents) data.flag = false;
-    else for (child in children) child.reset_data_flags();
+    if (leaf) for (i in 0...contents.length) contents[i].flag = false;
+    else for (i in 0...children.length) children[i].reset_data_flags();
   }
 
   // getters
@@ -203,13 +214,13 @@ class QuadTree extends Rect implements IPooled {
     reset_data_flags();
     // Initialize the count with this node's content's length
     var num = 0;
-    for (data in contents) {
-      data.flag = true;
+    for (i in 0...contents.length) {
+      contents[i].flag = true;
       num += 1;
     }
 
     // Create a list of nodes to process and push the current tree to it.
-    nodes_list.clear();
+    nodes_list.resize(0);
     nodes_list.push(this);
 
     // Process the nodes.
@@ -218,16 +229,16 @@ class QuadTree extends Rect implements IPooled {
     // Else push this node's children to the end of the node list.
     // Finally, remove the node from the list.
     while (nodes_list.length > 0) {
-      var node = nodes_list.pop();
+      var node = nodes_list.shift();
       if (node.leaf) {
-        for (data in node.contents) {
-          if (!data.flag) {
+        for (i in 0...node.contents.length) {
+          if (!node.contents[i].flag) {
             num += 1;
-            data.flag = true;
+            node.contents[i].flag = true;
           }
         }
       }
-      else for (child in node.children) nodes_list.add(child);
+      else for (i in 0...node.children.length) nodes_list.push(node.children[i]);
     }
     return num;
   }

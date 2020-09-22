@@ -1,5 +1,6 @@
 package echo.data;
 
+import echo.util.AABB;
 import echo.util.Pool;
 import echo.shape.Rect;
 import hxmath.math.Vector2;
@@ -230,20 +231,20 @@ class IntersectionData implements IPooled {
   static function get_pool():IPool<IntersectionData> return _pool;
 }
 
-// TODO - convert to @:structInit class
-typedef QuadTreeData = {
+@:structInit
+class QuadTreeData {
   /**
    * Id of the Data.
    */
-  var id:Int;
+  public var id:Int;
   /**
    * Bounds of the Data.
    */
-  var ?bounds:Rect;
+  @:optional public var bounds:AABB;
   /**
    * Helper flag to check if this Data has been counted during queries.
    */
-  var flag:Bool;
+  public var flag:Bool;
 }
 
 @:enum

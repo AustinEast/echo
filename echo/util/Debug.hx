@@ -1,8 +1,8 @@
 package echo.util;
 
 import echo.data.Data;
-import hxmath.math.Vector2;
 import echo.shape.*;
+import hxmath.math.Vector2;
 
 using echo.util.Ext;
 using hxmath.math.MathUtil;
@@ -22,6 +22,7 @@ class Debug {
   public var intersection_overlap_color:Int;
   public var quadtree_color:Int;
   public var quadtree_fill_color:Int;
+  public var camera:Null<AABB>;
 
   public static function log(world:World) {
     trace('World State:');
@@ -47,6 +48,13 @@ class Debug {
       draw_qd(world.quadtree);
     }
     if (draw_bodies) world.for_each(member -> if (member.shapes.length != 0) {
+      if (camera != null) {
+        var bounds = member.bounds();
+        if (!bounds.overlaps(camera)) {
+          bounds.put();
+          return;
+        }
+      }
       if (draw_body_centers) draw_rect(member.x - 1, member.y - 1, 1, 1, quadtree_color);
       for (shape in member.shapes) {
         var x = shape.x;
@@ -59,7 +67,7 @@ class Debug {
                 r.transformed_rect.collided ? shape_collided_color : shape_color, shape_fill_alpha);
               if (draw_shape_bounds) {
                 var b = r.transformed_rect.bounds();
-                draw_rect(b.x - b.ex, b.y - b.ey, b.width, b.height, shape_fill_color, r.transformed_rect.collided ? shape_collided_color : shape_color, 0);
+                draw_rect(b.min_x, b.min_y, b.width, b.height, shape_fill_color, r.transformed_rect.collided ? shape_collided_color : shape_color, 0);
                 b.put();
               }
             }
@@ -70,7 +78,7 @@ class Debug {
             draw_circle(x, y, c.radius, shape_fill_color, shape.collided ? shape_collided_color : shape_color, shape_fill_alpha);
             if (draw_shape_bounds) {
               var b = c.bounds();
-              draw_rect(b.x - b.ex, b.y - b.ey, b.width, b.height, shape_fill_color, shape.collided ? shape_collided_color : shape_color, 0);
+              draw_rect(b.min_x, b.min_y, b.width, b.height, shape_fill_color, shape.collided ? shape_collided_color : shape_color, 0);
               b.put();
             }
           case POLYGON:
@@ -79,14 +87,14 @@ class Debug {
             draw_polygon(p.count, p.vertices, shape_fill_color, shape.collided ? shape_collided_color : shape_color, shape_fill_alpha);
             if (draw_shape_bounds) {
               var b = p.bounds();
-              draw_rect(b.x - b.ex, b.y - b.ey, b.width, b.height, shape_fill_color, shape.collided ? shape_collided_color : shape_color, 0);
+              draw_rect(b.min_x, b.min_y, b.width, b.height, shape_fill_color, shape.collided ? shape_collided_color : shape_color, 0);
               b.put();
             }
         }
       }
       if (draw_bounds) {
         var b = member.bounds();
-        draw_rect(b.x - b.ex, b.y - b.ey, b.width, b.height, shape_fill_color, shape_color, 0);
+        draw_rect(b.min_x, b.min_y, b.width, b.height, shape_fill_color, shape_color, 0);
         b.put();
       }
     });
@@ -114,7 +122,7 @@ class Debug {
   }
 
   function draw_qd(tree:QuadTree) for (child in tree.children) {
-    draw_rect(child.left, child.top, child.width, child.height, quadtree_fill_color, quadtree_color, 0.1);
+    draw_rect(child.min_x, child.min_y, child.width, child.height, quadtree_fill_color, quadtree_color, 0.1);
     draw_qd(child);
   }
 }

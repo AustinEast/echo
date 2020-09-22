@@ -1,7 +1,7 @@
 package echo;
 
+import echo.util.AABB;
 import hxmath.frames.Frame2;
-import echo.util.Proxy;
 import echo.shape.*;
 import echo.data.Data;
 import echo.data.Options;
@@ -10,7 +10,7 @@ import hxmath.math.Vector2;
 /**
  * Base Shape Class. Acts as a Body's collider. Check out `echo.shapes` for all available shapes
  */
-class Shape implements IProxy {
+class Shape {
   /**
    * Default Shape Options
    */
@@ -68,6 +68,7 @@ class Shape implements IProxy {
   inline function new(x:Float = 0, y:Float = 0, rotation:Float = 0) {
     sync_pos = new Vector2(0, 0);
     solid = true;
+    sync_locked = false;
     local_x = _x = x;
     local_y = _y = y;
     local_rotation = _rotation = rotation;
@@ -77,13 +78,13 @@ class Shape implements IProxy {
    */
   public var type:ShapeType;
   /**
-   * The Shape's position on the X axis.
+   * The Shape's position on the X axis. For Rects, Circles, and simple Polygons, this position is based on the center of the Shape.
    *
    * If added to a `Body`, this value is treated as an offset to the Body's X position.
    */
   public var x(get, set):Float;
   /**
-   * The Shape's position on the Y axis.
+   * The Shape's position on the Y axis. For Rects, Circles, and simple Polygons, this position is based on the center of the Shape.
    *
    * If added to a `Body`, this value is treated as an offset to the Body's Y position.
    */
@@ -123,23 +124,23 @@ class Shape implements IProxy {
    */
   public var collided:Bool;
 
-  var parent_frame:Frame2;
+  public var sync_locked(default, null):Bool;
+
+  var parent_frame(default, null):Frame2;
   /**
    * A cached `Vector2` used to reduce allocations. Used Internally.
    */
   var sync_pos:Vector2;
 
   var _x:Float;
-
   var _y:Float;
-
   var _rotation:Float;
 
   public function put() {
     parent_frame = null;
   }
 
-  public function sync() {}
+  public function sync():Void {}
   /**
    * Gets the Shape's position on the X and Y axis as a `Vector2`.
    */
@@ -147,22 +148,36 @@ class Shape implements IProxy {
 
   public inline function get_local_position():Vector2 return new Vector2(local_x, local_y);
 
-  public inline function set_local_position(value:Vector2):Vector2 {
-    local_x = value.x;
-    local_y = value.y;
-    return value;
+  public inline function set_position(value:Vector2):Void {
+    x = value.x;
+    y = value.y;
   }
 
-  public function set_parent(?frame:Frame2) {
+  public inline function set_local_position(value:Vector2):Void {
+    local_x = value.x;
+    local_y = value.y;
+  }
+
+  public function set_parent(?frame:Frame2):Void {
+    if (parent_frame == frame) return;
     parent_frame = frame;
     sync();
   }
+
+  public function lock_sync() {
+    sync_locked = true;
+  }
+
+  public function unlock_sync() {
+    sync_locked = false;
+    sync();
+  }
   /**
-   * Returns an AABB `Rect` representing the bounds of the `Shape`.
-   * @param rect Optional `Rect` to set the values to.
-   * @return Rect
+   * Returns an `AABB` representing the bounds of the `Shape`.
+   * @param aabb Optional `AABB` to set the values to.
+   * @return AABB
    */
-  public function bounds(?rect:Rect):Rect return rect == null ? Rect.get(x, y, 0, 0) : rect.set(x, y, 0, 0);
+  public function bounds(?aabb:AABB):AABB return aabb == null ? AABB.get(x, y, 0, 0) : aabb.set(x, y, 0, 0);
   /**
    * Clones the Shape into a new Shape
    * @return Shape return new Shape(x, y)
@@ -235,7 +250,9 @@ class Shape implements IProxy {
   inline function set_local_x(value:Float):Float {
     local_x = value;
 
-    if (parent_frame != null) sync();
+    if (parent_frame != null) {
+      if (!sync_locked) sync();
+    }
     else _x = local_x;
 
     return local_x;
@@ -244,7 +261,9 @@ class Shape implements IProxy {
   inline function set_local_y(value:Float):Float {
     local_y = value;
 
-    if (parent_frame != null) sync();
+    if (parent_frame != null) {
+      if (!sync_locked) sync();
+    }
     else _y = local_y;
 
     return local_y;
@@ -253,7 +272,9 @@ class Shape implements IProxy {
   inline function set_local_rotation(value:Float):Float {
     local_rotation = value;
 
-    if (parent_frame != null) sync();
+    if (parent_frame != null) {
+      if (!sync_locked) sync();
+    }
     else _rotation = local_rotation;
 
     return local_rotation;

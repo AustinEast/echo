@@ -19,15 +19,20 @@ class Physics {
   public static function step(world:World, dt:Float) {
     world.for_each_dynamic((member) -> {
       if (!member.disposed && member.active) {
+        member.lock_sync();
         member.last_x = member.x;
         member.last_y = member.y;
         member.last_rotation = member.rotation;
         // Compute Velocity
-        member.velocity.x = compute_velocity(member.velocity.x, member.acceleration.x + world.gravity.x * member.gravity_scale, member.drag.x,
-          member.max_velocity.x, dt);
-        member.velocity.y = compute_velocity(member.velocity.y, member.acceleration.y + world.gravity.y * member.gravity_scale, member.drag.y,
-          member.max_velocity.y, dt);
-        // Apply the Body's max_velocity_length and drag_length
+        var accel_x = member.acceleration.x;
+        var accel_y = member.acceleration.y;
+        if (!member.kinematic) {
+          accel_x += world.gravity.x * member.gravity_scale;
+          accel_y += world.gravity.y * member.gravity_scale;
+        }
+        member.velocity.x = compute_velocity(member.velocity.x, accel_x, member.drag.x, member.max_velocity.x, dt);
+        member.velocity.y = compute_velocity(member.velocity.y, accel_y, member.drag.y, member.max_velocity.y, dt);
+        // Apply the Body's mass_velocity_length and drag_length
         if (member.drag_length > 0 && member.acceleration == zero && member.velocity != zero) {
           member.velocity.normalizeTo(member.velocity.length - member.drag_length * dt);
         }
@@ -52,6 +57,7 @@ class Physics {
           }
         }
         member.rotation += member.rotational_velocity * dt;
+        member.unlock_sync();
       }
     });
   }
@@ -77,6 +83,10 @@ class Physics {
   public static function resolve(a:Body, b:Body, cd:CollisionData, correction_threshold:Float = 0.013, percent_correction:Float = 0.9) {
     // Do not resolve if either objects arent solid
     if (!cd.sa.solid || !cd.sb.solid || !a.active || !b.active || a.disposed || b.disposed || a.is_static() && b.is_static()) return;
+
+    a.lock_sync();
+    b.lock_sync();
+
     // Calculate relative velocity
     var rvx = a.velocity.x - b.velocity.x;
     var rvy = a.velocity.y - b.velocity.y;
@@ -117,6 +127,9 @@ class Physics {
       b.x += b.inverse_mass * cx;
       b.y += b.inverse_mass * cy;
     }
+
+    a.unlock_sync();
+    b.unlock_sync();
   }
 
   // TODO

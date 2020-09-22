@@ -12,9 +12,10 @@ using echo.util.Ext;
  */
 class SAT {
   static final norm = new Vector2(0, 0);
+  static final closest = new Vector2(0, 0);
 
   public static inline function point_in_rect(p:Vector2, r:Rect):Bool {
-    if (r.transformed_rect != null && !r.rotation.equals(0)) return p.point_in_polygon(r.transformed_rect);
+    if (r.transformed_rect != null && r.rotation != 0) return p.point_in_polygon(r.transformed_rect);
     return r.left <= p.x && r.right >= p.x && r.top <= p.x && r.bottom >= p.y;
   }
 
@@ -67,7 +68,7 @@ class SAT {
   }
 
   public static function line_interects_rect(l:Line, r:Rect):Null<IntersectionData> {
-    if (r.transformed_rect != null && !r.rotation.equals(0)) return r.transformed_rect.intersect(l);
+    if (r.transformed_rect != null && r.rotation != 0) return r.transformed_rect.intersect(l);
     var closest:Null<IntersectionData> = null;
 
     var left = r.left;
@@ -180,7 +181,7 @@ class SAT {
    * @return Null<CollisionData>
    */
   public static function rect_and_rect(rect1:Rect, rect2:Rect, flip:Bool = false):Null<CollisionData> {
-    if (!rect1.rotation.equals(0) || !rect2.rotation.equals(0)) {
+    if (rect1.rotation != 0 || rect2.rotation != 0) {
       if (rect1.transformed_rect != null) {
         return rect_and_polygon(rect2, rect1.transformed_rect, flip);
       }
@@ -305,7 +306,7 @@ class SAT {
    * @return Null<CollisionData>
    */
   public static function rect_and_circle(r:Rect, c:Circle, flip:Bool = false):Null<CollisionData> {
-    if (r.transformed_rect != null && !r.rotation.equals(0)) return circle_and_polygon(c, r.transformed_rect, flip);
+    if (r.transformed_rect != null && r.rotation != 0) return circle_and_polygon(c, r.transformed_rect, flip);
 
     // Vector from A to B
     var nx = flip ? c.x - r.x : r.x - c.x;
@@ -366,6 +367,8 @@ class SAT {
     if (r.transformed_rect != null) return polygon_and_polygon(r.transformed_rect, p, flip);
 
     var tr = Polygon.get_from_rect(r);
+    @:privateAccess
+    tr.set_parent(r.parent_frame);
     var col = polygon_and_polygon(tr, p, flip);
 
     if (col == null) return null;
@@ -386,7 +389,6 @@ class SAT {
   public static function circle_and_polygon(c:Circle, p:Polygon, flip:Bool = false):Null<CollisionData> {
     var distance:Float = 0;
     var testDistance:Float = 0x3FFFFFFF;
-    var closest = new Vector2(0, 0);
     var c_pos = c.get_position();
 
     for (i in 0...p.count) {
@@ -434,7 +436,7 @@ class SAT {
 
     // Find the normal axis for each point and project
     for (i in 0...p.count) {
-      normal = p.normals[i].clone();
+      normal.set(p.normals[i].x, p.normals[i].y);
 
       // Project the polygon
       min1 = normal * p.vertices[0];
@@ -461,6 +463,7 @@ class SAT {
 
       // Preform another test
       if (test1 > 0 || test2 > 0) {
+        col.put();
         return null;
       }
 
@@ -498,10 +501,11 @@ class SAT {
     var max2:Float = 0;
     var closest:Float = 0x3FFFFFFF;
     var col:Null<CollisionData> = null;
+    var normal = new Vector2(0, 0);
 
     // loop to begin projection
     for (i in 0...polygon1.count) {
-      var normal = polygon1.normals[i].clone();
+      normal.set(polygon1.normals[i].x, polygon1.normals[i].y);
 
       // project polygon1
       max1 = min1 = normal * polygon1.vertices[0];

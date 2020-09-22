@@ -1,5 +1,6 @@
 package echo.shape;
 
+import echo.util.AABB;
 import echo.util.Pool;
 import echo.shape.*;
 import echo.data.Data;
@@ -15,7 +16,14 @@ class Circle extends Shape implements IPooled {
   public var radius:Float;
   public var diameter(get, set):Float;
   public var pooled:Bool;
-
+  /**
+   * Gets a Cirlce from the pool, or creates a new one if none are available. Call `put()` on the Cirlce to place it back in the pool.
+   * @param x
+   * @param y
+   * @param radius
+   * @param rotation
+   * @return Circle
+   */
   public static inline function get(x:Float = 0, y:Float = 0, radius:Float = 1, rotation:Float = 0):Circle {
     var circle = _pool.get();
     circle.set(x, y, radius, rotation);
@@ -47,7 +55,7 @@ class Circle extends Shape implements IPooled {
 
   public inline function load(circle:Circle):Circle return set(circle.x, circle.y, circle.radius);
 
-  override inline function bounds(?rect:Rect):Rect return rect == null ? Rect.get(x, y, diameter, diameter) : rect.set(x, y, diameter, diameter);
+  override inline function bounds(?aabb:AABB):AABB return aabb == null ? AABB.get(x, y, diameter, diameter) : aabb.set(x, y, diameter, diameter);
 
   override function clone():Circle return Circle.get(local_x, local_y, radius);
 
@@ -74,10 +82,16 @@ class Circle extends Shape implements IPooled {
 
   override inline function sync() {
     if (parent_frame != null) {
-      sync_pos.set(local_x, local_y);
-      var pos = parent_frame.transformFrom(sync_pos);
-      _x = pos.x;
-      _y = pos.y;
+      if (local_x == 0 && local_y == 0) {
+        _x = parent_frame.offset.x;
+        _y = parent_frame.offset.y;
+      }
+      else {
+        sync_pos.set(local_x, local_y);
+        var pos = parent_frame.transformFrom(sync_pos);
+        _x = pos.x;
+        _y = pos.y;
+      }
       _rotation = parent_frame.angleDegrees + local_rotation;
     }
     else {

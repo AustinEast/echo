@@ -1,13 +1,13 @@
 package echo;
 
-import hxmath.math.Vector2;
-import echo.util.Disposable;
-import echo.util.QuadTree;
-import echo.util.History;
 import echo.Listener;
-import echo.shape.Rect;
 import echo.data.Data;
 import echo.data.Options;
+import echo.shape.Rect;
+import echo.util.Disposable;
+import echo.util.History;
+import echo.util.QuadTree;
+import hxmath.math.Vector2;
 /**
  * A `World` is an Object representing the state of a Physics simulation and it configurations. 
  */
@@ -64,6 +64,16 @@ class World implements IDisposable {
     listeners = new Listeners(options.listeners);
     iterations = options.iterations == null ? 5 : options.iterations;
     if (options.history != null) history = new History(options.history);
+  }
+
+  public inline function set(x:Float, y:Float, width:Float, height:Float) {
+    init = false;
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    init = true;
+    reset_quadtrees();
   }
 
   public inline function set_from_shape(s:Shape) {
@@ -151,10 +161,9 @@ class World implements IDisposable {
     quadtree = QuadTree.get();
     if (static_quadtree != null) static_quadtree.put();
     static_quadtree = QuadTree.get();
-    var r = center();
+    var r = center().to_aabb(true);
     quadtree.load(r);
     static_quadtree.load(r);
-    r.put();
     for_each((member)-> {
       if (member.is_dynamic()) {
         member.dirty = true;

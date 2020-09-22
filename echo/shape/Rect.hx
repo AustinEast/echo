@@ -1,5 +1,6 @@
 package echo.shape;
 
+import echo.util.AABB;
 import hxmath.frames.Frame2;
 import echo.shape.*;
 import echo.util.Pool;
@@ -10,6 +11,7 @@ using echo.util.SAT;
 using echo.util.Ext;
 using hxmath.math.MathUtil;
 
+// TODO - extend Rect from Polygon to save on matrix calculations when syncing
 class Rect extends Shape implements IPooled {
   public static var pool(get, never):IPool<Rect>;
   static var _pool = new Pool<Rect>(Rect);
@@ -41,14 +43,31 @@ class Rect extends Shape implements IPooled {
   public var pooled:Bool;
 
   public var transformed_rect(default, null):Null<Polygon>;
-
+  /**
+   * Gets a Rect from the pool, or creates a new one if none are available. Call `put()` on the Rect to place it back in the pool.
+   *
+   * Note - The X and Y positions represent the center of the Rect. To set the Rect from its Top-Left origin, `Rect.get_from_min_max()` is available.
+   * @param x The centered X position of the Rect.
+   * @param y The centered Y position of the Rect.
+   * @param width The width of the Rect.
+   * @param height The height of the Rect.
+   * @param rotation The rotation of the Rect.
+   * @return Rect
+   */
   public static inline function get(x:Float = 0, y:Float = 0, width:Float = 1, height:Float = 0, rotation:Float = 0):Rect {
     var rect = _pool.get();
     rect.set(x, y, width, height, rotation);
     rect.pooled = false;
     return rect;
   }
-
+  /**
+   * Gets a Rect from the pool, or creates a new one if none are available. Call `put()` on the Rect to place it back in the pool.
+   * @param min_x
+   * @param min_y
+   * @param max_x
+   * @param max_y
+   * @return Rect
+   */
   public static inline function get_from_min_max(min_x:Float, min_y:Float, max_x:Float, max_y:Float):Rect {
     var rect = _pool.get();
     rect.set_from_min_max(min_x, min_y, max_x, max_y);
@@ -97,9 +116,27 @@ class Rect extends Shape implements IPooled {
     return this;
   }
 
-  override inline function bounds(?rect:Rect):Rect {
-    if (transformed_rect != null) return transformed_rect.bounds(rect);
-    return (rect == null) ? Rect.get(x, y, width, height) : rect.set(x, y, width, height);
+  public function to_aabb(put_self:Bool = false):AABB {
+    if (put_self) {
+      var aabb = bounds();
+      put();
+      return aabb;
+    }
+    return bounds();
+  }
+
+  public function to_polygon(put_self:Bool = false):Polygon {
+    if (put_self) {
+      var polygon = Polygon.get_from_rect(this);
+      put();
+      return polygon;
+    }
+    return Polygon.get_from_rect(this);
+  }
+
+  override inline function bounds(?aabb:AABB):AABB {
+    if (transformed_rect != null && rotation != 0) return transformed_rect.bounds(aabb);
+    return (aabb == null) ? AABB.get(x, y, width, height) : aabb.set(x, y, width, height);
   }
 
   override inline function clone():Rect return Rect.get(local_x, local_y, width, height, local_rotation);
@@ -127,10 +164,16 @@ class Rect extends Shape implements IPooled {
 
   override inline function sync() {
     if (parent_frame != null) {
-      sync_pos.set(local_x, local_y);
-      var pos = parent_frame.transformFrom(sync_pos);
-      _x = pos.x;
-      _y = pos.y;
+      if (local_x == 0 && local_y == 0) {
+        _x = parent_frame.offset.x;
+        _y = parent_frame.offset.y;
+      }
+      else {
+        sync_pos.set(local_x, local_y);
+        var pos = parent_frame.transformFrom(sync_pos);
+        _x = pos.x;
+        _y = pos.y;
+      }
       _rotation = parent_frame.angleDegrees + local_rotation;
     }
     else {
@@ -139,8 +182,16 @@ class Rect extends Shape implements IPooled {
       _rotation = local_rotation;
     }
 
-    if (transformed_rect == null && !rotation.equals(0)) transformed_rect = Polygon.get_from_rect(this);
+    if (transformed_rect == null && rotation != 0) {
+      transformed_rect = Polygon.get_from_rect(this);
+      transformed_rect.set_parent(parent_frame);
+    }
     else if (transformed_rect != null) transformed_rect.set_from_rect(this);
+  }
+
+  override function set_parent(?frame:Frame2) {
+    super.set_parent(frame);
+    if (transformed_rect != null) transformed_rect.set_parent(frame);
   }
 
   // getters
@@ -155,22 +206,22 @@ class Rect extends Shape implements IPooled {
   function get_max():Vector2 return new Vector2(bottom, right);
 
   override inline function get_top():Float {
-    if (transformed_rect == null) return y - ey;
+    if (transformed_rect == null || rotation == 0) return y - ey;
     return transformed_rect.top;
   }
 
   override inline function get_bottom():Float {
-    if (transformed_rect == null) return y + ey;
+    if (transformed_rect == null || rotation == 0) return y + ey;
     return transformed_rect.bottom;
   }
 
   override inline function get_left():Float {
-    if (transformed_rect == null) return x - ex;
+    if (transformed_rect == null || rotation == 0) return x - ex;
     return transformed_rect.left;
   }
 
   override inline function get_right():Float {
-    if (transformed_rect == null) return x + ex;
+    if (transformed_rect == null || rotation == 0) return x + ex;
     return transformed_rect.right;
   }
 

@@ -86,7 +86,7 @@ class Polygon extends Shape implements IPooled {
    */
   public static inline function get_from_vertices(x:Float = 0, y:Float = 0, rotation:Float = 0, ?vertices:Array<Vector2>):Polygon {
     var polygon = _pool.get();
-    polygon.set(x, y, vertices);
+    polygon.set(x, y, rotation, vertices);
     polygon.pooled = false;
     return polygon;
   }
@@ -298,7 +298,7 @@ class Polygon extends Shape implements IPooled {
 
     for (i in 0...count) {
       if (local_vertices[i] == null) continue;
-      if (_vertices[i] == null) _vertices[i] = new Vector2(0,0);
+      if (_vertices[i] == null) _vertices[i] = new Vector2(0, 0);
       var pos = local_frame.transformFrom(local_vertices[i]);
       _vertices[i].set(pos.x, pos.y);
     }

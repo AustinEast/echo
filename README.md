@@ -34,11 +34,17 @@ Alternatively the dev version of the library can be installed from github:
 haxelib git echo https://github.com/AustinEast/echo.git
 ```
 
-Then include the library in your project's `.hxml`:
+Install echo's dependency, [hxmath](https://lib.haxe.org/p/hxmath). At the moment, installing the github version is recommended for performance reasons:
+```
+haxelib git hxmath https://github.com/tbrosman/hxmath.git
+```
+
+Then for standard Haxe applications, include the library in your project's `.hxml`:
 ```hxml
 -lib echo
 ```
-For OpenFL users, add this into your `Project.xml`:
+
+For OpenFL users, add the library into your `Project.xml`:
 
 ```xml
 <haxelib name="echo" />

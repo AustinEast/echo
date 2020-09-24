@@ -88,7 +88,7 @@ It's important to note that all Shapes (including Rectangles) have their origins
 
 #### Lines
 
-Use Lines to perform Linecasts against other Lines, Bodies, and Shapes.
+Use Lines to perform Linecasts against other Lines, Bodies, and Shapes. Check out the `Echo` class for various methods to preform Linecasts.
 
 #### Listeners
 

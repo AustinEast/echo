@@ -10,8 +10,8 @@
     "austineast"
   ],
   "url": "https://austineast.dev/echo",
-  "releasenote": "optimizations and fixes",
-  "version": "2.1.1",
+  "releasenote": "Adds support for Slopes and custom Shapes to the TileMap API. Breaking Change - the `start_index` argument in `TileMap.generate()` was incorrectly applied, and has been fixed. If you used this argument, you may need to adjust it for this new release.",
+  "version": "2.2.0",
   "dependencies": {
     "hxmath": ""
   }

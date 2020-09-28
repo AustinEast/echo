@@ -122,6 +122,7 @@ body.entity = new some.package.Entity();
 
 ### Engine/Framework Examples
 
+* [HaxeFlixel](https://haxeflixel.com): https://gist.github.com/AustinEast/524db026a4fea298a0eebf19459131cc
 * [Heaps](https://heaps.io): https://github.com/AustinEast/echo-heaps
 * [Peyote View](https://github.com/maitag/peote-view): https://github.com/maitag/peote-views-samples/tree/master/echo
 

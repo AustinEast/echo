@@ -10,8 +10,8 @@
     "austineast"
   ],
   "url": "https://austineast.dev/echo",
-  "releasenote": "implemented scaling",
-  "version": "2.3.0",
+  "releasenote": "fix null error on static platforms",
+  "version": "2.3.1",
   "dependencies": {
     "hxmath": ""
   }

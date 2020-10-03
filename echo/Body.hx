@@ -469,8 +469,6 @@ class Body implements IDisposable {
     velocity = null;
     max_velocity = null;
     drag = null;
-    layers = null;
-    layer_mask = null;
     data = null;
     on_move = null;
     on_rotate = null;

@@ -7,6 +7,13 @@
 # libraries
 -lib echo
 
+--each
+
 # output
+-hl bin/test.hl
+--no-output
+
+--next
+
 -js bin/test.js
 --no-output

@@ -57,7 +57,8 @@ class Polygon extends Shape implements IPooled {
    * @param rotation
    * @return Polygon
    */
-  public static inline function get(x:Float = 0, y:Float = 0, sides:Int = 3, radius:Float = 1, rotation:Float = 0):Polygon {
+  public static inline function get(x:Float = 0, y:Float = 0, sides:Int = 3, radius:Float = 1, rotation:Float = 0, scale_x:Float = 1,
+      scale_y:Float = 1):Polygon {
     if (sides < 3) throw 'Polygons require 3 sides as a minimum';
 
     var polygon = _pool.get();
@@ -72,7 +73,7 @@ class Polygon extends Shape implements IPooled {
       verts.push(vector);
     }
 
-    polygon.set(x, y, rotation, verts);
+    polygon.set(x, y, rotation, verts, scale_x, scale_y);
     polygon.pooled = false;
     return polygon;
   }
@@ -84,9 +85,10 @@ class Polygon extends Shape implements IPooled {
    * @param vertices
    * @return Polygon
    */
-  public static inline function get_from_vertices(x:Float = 0, y:Float = 0, rotation:Float = 0, ?vertices:Array<Vector2>):Polygon {
+  public static inline function get_from_vertices(x:Float = 0, y:Float = 0, rotation:Float = 0, ?vertices:Array<Vector2>, scale_x:Float = 1,
+      scale_y:Float = 1):Polygon {
     var polygon = _pool.get();
-    polygon.set(x, y, rotation, vertices);
+    polygon.set(x, y, rotation, vertices, scale_x, scale_y);
     polygon.pooled = false;
     return polygon;
   }
@@ -106,18 +108,20 @@ class Polygon extends Shape implements IPooled {
   // public static inline function get_from_circle(c:Circle, sub_divisions:Int = 6) {}
 
   override inline function put() {
-    parent_frame = null;
+    parent = null;
     if (!pooled) {
       pooled = true;
       _pool.put_unsafe(this);
     }
   }
 
-  public inline function set(x:Float = 0, y:Float = 0, rotation:Float = 0, ?vertices:Array<Vector2>):Polygon {
+  public inline function set(x:Float = 0, y:Float = 0, rotation:Float = 0, ?vertices:Array<Vector2>, scale_x:Float = 1, scale_y:Float = 1):Polygon {
     lock_sync();
     local_x = x;
     local_y = y;
     local_rotation = rotation;
+    local_scale_x = scale_x;
+    local_scale_y = scale_y;
     set_vertices(vertices);
     unlock_sync();
     return this;
@@ -134,6 +138,8 @@ class Polygon extends Shape implements IPooled {
     local_x = rect.local_x;
     local_y = rect.local_y;
     local_rotation = rect.local_rotation;
+    local_scale_x = rect.local_scale_x;
+    local_scale_y = rect.local_scale_y;
     dirty_vertices = true;
     dirty_bounds = true;
     unlock_sync();
@@ -150,7 +156,8 @@ class Polygon extends Shape implements IPooled {
     set_vertices(vertices);
   }
 
-  public inline function load(polygon:Polygon):Polygon return set(polygon.x, polygon.y, polygon.rotation, polygon.local_vertices);
+  public inline function load(polygon:Polygon):Polygon return set(polygon.local_x, polygon.local_y, polygon.local_rotation, polygon.local_vertices,
+    polygon.local_scale_x, polygon.local_scale_y);
 
   override function bounds(?aabb:AABB):AABB {
     if (dirty_bounds) {
@@ -197,26 +204,7 @@ class Polygon extends Shape implements IPooled {
 
   override inline function collide_polygon(p:Polygon):Null<CollisionData> return p.polygon_and_polygon(this, true);
 
-  override inline function sync() {
-    if (parent_frame != null) {
-      if (local_x == 0 && local_y == 0) {
-        _x = parent_frame.offset.x;
-        _y = parent_frame.offset.y;
-      }
-      else {
-        sync_pos.set(local_x, local_y);
-        var pos = parent_frame.transformFrom(sync_pos);
-        _x = pos.x;
-        _y = pos.y;
-      }
-      _rotation = parent_frame.angleDegrees + local_rotation;
-    }
-    else {
-      _x = local_x;
-      _y = local_x;
-      _rotation = local_rotation;
-    }
-
+  override inline function transform() {
     dirty_vertices = true;
     dirty_bounds = true;
   }
@@ -287,9 +275,11 @@ class Polygon extends Shape implements IPooled {
     local_frame.angleDegrees = local_rotation;
 
     // concat the parent frame, if possible
-    if (parent_frame != null) {
-      var pos = (parent_frame.linearMatrix * local_frame.offset).addWith(parent_frame.offset);
-      local_frame.angleDegrees = MathUtil.wrap(parent_frame.angleDegrees + local_frame.angleDegrees, 360);
+    if (parent != null) {
+      local_frame.offset.x *= parent.scale_x;
+      local_frame.offset.y *= parent.scale_y;
+      var pos = (parent.frame.linearMatrix * local_frame.offset).addWith(parent.frame.offset);
+      local_frame.angleDegrees = MathUtil.wrap(parent.frame.angleDegrees + local_frame.angleDegrees, 360);
       local_frame.offset.set(pos.x, pos.y);
     }
 
@@ -299,7 +289,7 @@ class Polygon extends Shape implements IPooled {
     for (i in 0...count) {
       if (local_vertices[i] == null) continue;
       if (_vertices[i] == null) _vertices[i] = new Vector2(0, 0);
-      var pos = local_frame.transformFrom(local_vertices[i]);
+      var pos = local_frame.transformFrom(new Vector2(local_vertices[i].x * scale_x, local_vertices[i].y * scale_y));
       _vertices[i].set(pos.x, pos.y);
     }
   }

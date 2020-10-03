@@ -2,7 +2,6 @@ package echo.data;
 
 import echo.util.AABB;
 import echo.util.Pool;
-import echo.shape.Rect;
 import hxmath.math.Vector2;
 
 @:structInit

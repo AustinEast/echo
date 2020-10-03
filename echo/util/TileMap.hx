@@ -1,9 +1,9 @@
 package echo.util;
 
-import hxmath.math.Vector2;
-import echo.shape.Polygon;
-import echo.data.Options.ShapeOptions;
 import echo.Shape;
+import echo.data.Options.ShapeOptions;
+import echo.shape.Polygon;
+import hxmath.math.Vector2;
 
 typedef TileShape = {
   index:Int,
@@ -317,11 +317,11 @@ class TileMap {
    * @return Array<Body>
    */
   public static function generate_grid(data:Array<Int>, tile_width:Int, tile_height:Int, width_in_tiles:Int, height_in_tiles:Int, offset_x:Float = 0,
-      offset_y:Float = 0, start_index:Int = 0):Array<Body> {
+      offset_y:Float = 0, start_index:Int = 1):Array<Body> {
     var colliders = [];
     for (i in 0...data.length) {
       var index = data[i];
-      if (index != -1 && index > start_index) {
+      if (index != -1 && index >= start_index) {
         var b = new Body({
           x: (i % width_in_tiles) * tile_width,
           y: Math.floor(i / width_in_tiles) * tile_height,

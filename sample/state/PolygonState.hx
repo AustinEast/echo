@@ -5,12 +5,13 @@ import echo.World;
 import ghost.Random;
 
 class PolygonState extends BaseState {
-  var body_count:Int = 40;
+  var body_count:Int = 100;
 
   override public function enter(world:World) {
     Main.instance.state_text.text = "Sample: Stacking Polygons";
     // Add a bunch of random Physics Bodies to the World
     for (i in 0...body_count) {
+      var scale = Random.range(0.3, 1);
       var b = new Body({
         x: Random.range(60, world.width - 60),
         y: Random.range(0, world.height / 2),
@@ -21,7 +22,9 @@ class PolygonState extends BaseState {
           radius: Random.range(16, 32),
           width: Random.range(16, 48),
           height: Random.range(16, 48),
-          sides: Random.range_int(3, 8)
+          sides: Random.range_int(3, 8),
+          scale_x: scale,
+          scale_y: scale
         }
       });
       world.add(b);

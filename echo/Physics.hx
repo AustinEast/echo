@@ -1,11 +1,11 @@
 package echo;
 
-import hxmath.math.Vector2;
-import echo.data.Data;
 import echo.Listener;
+import echo.data.Data;
+import hxmath.math.Vector2;
 
-using hxmath.math.MathUtil;
 using echo.util.Ext;
+using hxmath.math.MathUtil;
 /**
  * Class containing methods for performing Physics simulations on a World
  */
@@ -23,29 +23,31 @@ class Physics {
         member.last_x = member.x;
         member.last_y = member.y;
         member.last_rotation = member.rotation;
-        // Compute Velocity
         var accel_x = member.acceleration.x;
         var accel_y = member.acceleration.y;
+        // Apply Gravity
         if (!member.kinematic) {
           accel_x += world.gravity.x * member.gravity_scale;
           accel_y += world.gravity.y * member.gravity_scale;
         }
+        // Apply Acceleration, Drag, and Max Velocity
         member.velocity.x = compute_velocity(member.velocity.x, accel_x, member.drag.x, member.max_velocity.x, dt);
         member.velocity.y = compute_velocity(member.velocity.y, accel_y, member.drag.y, member.max_velocity.y, dt);
-        // Apply the Body's mass_velocity_length and drag_length
+        // Apply Linear Drag
         if (member.drag_length > 0 && member.acceleration == zero && member.velocity != zero) {
           member.velocity.normalizeTo(member.velocity.length - member.drag_length * dt);
         }
+        // Apply Linear Max Velocity
         if (member.max_velocity_length > 0 && member.velocity.length > member.max_velocity_length) {
           member.velocity.normalizeTo(member.max_velocity_length);
         }
         // Apply Velocity
         member.x += member.velocity.x * member.inverse_mass * dt;
         member.y += member.velocity.y * member.inverse_mass * dt;
-        // Apply Rotations
+        // Apply Max Rotational Velocity
         if (member.max_rotational_velocity > 0) member.rotational_velocity = member.rotational_velocity.clamp(-member.max_rotational_velocity,
           member.max_rotational_velocity);
-        // Apply Drag to Rotations
+        // Apply Rotational Drag
         if (member.rotational_drag > 0) {
           if (member.rotational_velocity > 0) {
             member.rotational_velocity -= member.rotational_drag * dt;
@@ -56,6 +58,7 @@ class Physics {
             if (member.rotational_velocity > 0) member.rotational_velocity = 0; // drag should never make us rotate in the opposite direction
           }
         }
+        // Apply Rotational Velocity
         member.rotation += member.rotational_velocity * dt;
         member.unlock_sync();
       }

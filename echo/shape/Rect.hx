@@ -24,13 +24,21 @@ class Rect extends Shape implements IPooled {
    */
   public var ey(default, set):Float;
   /**
-   * The width of the Rectangle.
+   * The width of the Rectangle, transformed with `scale_x`. Use `local_width` to get the untransformed width.
    */
   public var width(get, set):Float;
   /**
-   * The height of the Rectangle.
+   * The height of the Rectangle, transformed with `scale_y`. Use `local_height` to get the untransformed height.
    */
   public var height(get, set):Float;
+  /**
+   * The width of the Rectangle.
+   */
+  public var local_width(get, set):Float;
+  /**
+   * The height of the Rectangle.
+   */
+  public var local_height(get, set):Float;
   /**
    * The top-left position of the Rectangle.
    */
@@ -54,9 +62,10 @@ class Rect extends Shape implements IPooled {
    * @param rotation The rotation of the Rect.
    * @return Rect
    */
-  public static inline function get(x:Float = 0, y:Float = 0, width:Float = 1, height:Float = 0, rotation:Float = 0):Rect {
+  public static inline function get(x:Float = 0, y:Float = 0, width:Float = 1, height:Float = 0, rotation:Float = 0, scale_x:Float = 1,
+      scale_y:Float = 1):Rect {
     var rect = _pool.get();
-    rect.set(x, y, width, height, rotation);
+    rect.set(x, y, width, height, rotation, scale_x, scale_y);
     rect.pooled = false;
     return rect;
   }
@@ -83,7 +92,7 @@ class Rect extends Shape implements IPooled {
   }
 
   override function put() {
-    parent_frame = null;
+    parent = null;
     if (transformed_rect != null) {
       transformed_rect.put();
       transformed_rect = null;
@@ -94,12 +103,14 @@ class Rect extends Shape implements IPooled {
     }
   }
 
-  public inline function set(x:Float = 0, y:Float = 0, width:Float = 1, height:Float = 0, rotation:Float = 0):Rect {
-    this.local_x = x;
-    this.local_y = y;
-    this.width = width;
-    this.height = height <= 0 ? width : height;
-    this.local_rotation = rotation;
+  public inline function set(x:Float = 0, y:Float = 0, width:Float = 1, height:Float = 0, rotation:Float = 0, scale_x:Float = 1, scale_y:Float = 1):Rect {
+    local_x = x;
+    local_y = y;
+    local_width = width;
+    local_height = height <= 0 ? width : height;
+    local_rotation = rotation;
+    local_scale_x = scale_x;
+    local_scale_y = scale_y;
     return this;
   }
 
@@ -113,6 +124,8 @@ class Rect extends Shape implements IPooled {
     ex = rect.ex;
     ey = rect.ey;
     local_rotation = rect.local_rotation;
+    local_scale_x = rect.local_scale_x;
+    local_scale_y = rect.local_scale_y;
     return this;
   }
 
@@ -162,66 +175,51 @@ class Rect extends Shape implements IPooled {
 
   override inline function collide_polygon(p:Polygon):Null<CollisionData> return this.rect_and_polygon(p);
 
-  override inline function sync() {
-    if (parent_frame != null) {
-      if (local_x == 0 && local_y == 0) {
-        _x = parent_frame.offset.x;
-        _y = parent_frame.offset.y;
-      }
-      else {
-        sync_pos.set(local_x, local_y);
-        var pos = parent_frame.transformFrom(sync_pos);
-        _x = pos.x;
-        _y = pos.y;
-      }
-      _rotation = parent_frame.angleDegrees + local_rotation;
-    }
-    else {
-      _x = local_x;
-      _y = local_x;
-      _rotation = local_rotation;
-    }
-
+  override inline function transform() {
     if (transformed_rect == null && rotation != 0) {
       transformed_rect = Polygon.get_from_rect(this);
-      transformed_rect.set_parent(parent_frame);
+      transformed_rect.set_parent(parent);
     }
     else if (transformed_rect != null) transformed_rect.set_from_rect(this);
   }
 
-  override function set_parent(?frame:Frame2) {
-    super.set_parent(frame);
-    if (transformed_rect != null) transformed_rect.set_parent(frame);
+  override function set_parent(?body:Body) {
+    super.set_parent(body);
+    if (transformed_rect != null) transformed_rect.set_parent(body);
   }
 
   // getters
   static function get_pool():IPool<Rect> return _pool;
 
-  inline function get_width():Float return ex * 2;
+  inline function get_width():Float return local_width * scale_x;
 
-  inline function get_height():Float return ey * 2;
+  inline function get_height():Float return local_height * scale_y;
+
+  inline function get_local_width():Float return ex * 2;
+
+  inline function get_local_height():Float return ey * 2;
 
   function get_min():Vector2 return new Vector2(left, top);
 
   function get_max():Vector2 return new Vector2(bottom, right);
 
   override inline function get_top():Float {
-    if (transformed_rect == null || rotation == 0) return y - ey;
+    if (transformed_rect == null || rotation == 0) return y - ey * scale_y;
     return transformed_rect.top;
   }
 
   override inline function get_bottom():Float {
-    if (transformed_rect == null || rotation == 0) return y + ey;
+    if (transformed_rect == null || rotation == 0) return y + ey * scale_y;
     return transformed_rect.bottom;
   }
 
   override inline function get_left():Float {
-    if (transformed_rect == null || rotation == 0) return x - ex;
+    if (transformed_rect == null || rotation == 0) return x - ex * scale_x;
     return transformed_rect.left;
   }
 
   override inline function get_right():Float {
-    if (transformed_rect == null || rotation == 0) return x + ex;
+    if (transformed_rect == null || rotation == 0) return x + ex * scale_x;
     return transformed_rect.right;
   }
 
@@ -238,7 +236,17 @@ class Rect extends Shape implements IPooled {
     return ey;
   }
 
-  inline function set_width(value:Float):Float return ex = value * 0.5;
+  inline function set_width(value:Float):Float {
+    local_width = value / scale_x;
+    return value;
+  }
 
-  inline function set_height(value:Float):Float return ey = value * 0.5;
+  inline function set_height(value:Float):Float {
+    local_height = value / scale_y;
+    return value;
+  }
+
+  inline function set_local_width(value:Float):Float return ex = value * 0.5;
+
+  inline function set_local_height(value:Float):Float return ey = value * 0.5;
 }

@@ -49,17 +49,17 @@ class Collisions {
         case Left(ba):
           switch (listener.b) {
             case Left(bb):
-              var col = body_and_body(ba, bb);
+              var col = overlap_body_and_body_bounds(ba, bb);
               if (col != null) listener.quadtree_results.push(col);
             case Right(ab):
-              body_and_bodies(ba, ab, world, listener.quadtree_results, world.quadtree);
+              overlap_body_and_bodies_bounds(ba, ab, world, listener.quadtree_results);
           }
         case Right(aa):
           switch (listener.b) {
             case Left(bb):
-              body_and_bodies(bb, aa, world, listener.quadtree_results, world.quadtree);
+              overlap_body_and_bodies_bounds(bb, aa, world, listener.quadtree_results);
             case Right(ab):
-              bodies_and_bodies(aa, ab, world, listener.quadtree_results, world.quadtree);
+              overlap_bodies_and_bodies_bounds(aa, ab, world, listener.quadtree_results);
           }
       }
       // Narrow Phase
@@ -163,23 +163,23 @@ class Collisions {
     }
   }
 
-  static function bodies_and_bodies(a:Array<Body>, b:Array<Body>, world:World, results:Array<Collision>, quadtree:QuadTree) {
+  public static function overlap_bodies_and_bodies_bounds(a:Array<Body>, b:Array<Body>, world:World, results:Array<Collision>) {
     if (a.length == 0 || b.length == 0) return;
-    for (body in a) body_and_bodies(body, b, world, results, quadtree);
+    for (body in a) overlap_body_and_bodies_bounds(body, b, world, results);
   }
 
   static var qr:Array<QuadTreeData> = [];
   static var sqr:Array<QuadTreeData> = [];
 
-  static function body_and_bodies(body:Body, bodies:Array<Body>, world:World, results:Array<Collision>, quadtree:QuadTree) {
+  public static function overlap_body_and_bodies_bounds(body:Body, bodies:Array<Body>, world:World, results:Array<Collision>) {
     if (body.disposed || body.shapes.length == 0 || !body.active || body.is_static()) return;
     var bounds = body.bounds();
     qr.resize(0);
     sqr.resize(0);
-    quadtree.query(bounds, qr);
+    world.quadtree.query(bounds, qr);
     world.static_quadtree.query(bounds, sqr);
     for (member in bodies) {
-      if (member.disposed || member.shapes.length == 0 || !member.active) continue;
+      if (member.disposed || member.shapes.length == 0 || !member.active || !layer_match(body, member)) continue;
       for (result in (member.is_dynamic() ? qr : sqr)) {
         if (result.id == member.id) results.push(Collision.get(body, member));
       }
@@ -187,14 +187,18 @@ class Collisions {
     bounds.put();
   }
 
-  static function body_and_body(a:Body, b:Body):Null<Collision> {
-    if (a.disposed || b.disposed || a.shapes.length == 0 || b.shapes.length == 0 || !a.active || !b.active || a == b || a.is_static() && b.is_static()) return
-      null;
+  public static function overlap_body_and_body_bounds(a:Body, b:Body):Null<Collision> {
+    if (a.disposed || b.disposed || a.shapes.length == 0 || b.shapes.length == 0 || !a.active || !b.active || a == b || !layer_match(a, b) || a.is_static()
+      && b.is_static()) return null;
     var ab = a.bounds();
     var bb = b.bounds();
     var col = ab.overlaps(bb);
     ab.put();
     bb.put();
     return col ? Collision.get(a, b) : null;
+  }
+
+  static inline function layer_match(a:Body, b:Body) {
+    return a.layer_mask.is_empty() || a.layer_mask.contains(b.layers);
   }
 }

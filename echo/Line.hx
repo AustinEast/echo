@@ -1,6 +1,5 @@
 package echo;
 
-import hxmath.math.MathUtil;
 import echo.data.Data.IntersectionData;
 import echo.util.Pool;
 import echo.util.Proxy;

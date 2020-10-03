@@ -11,12 +11,15 @@ class MultiShapeState extends BaseState {
     Main.instance.state_text.text = "Sample: Bodies With Multiple Shapes";
     // Add a bunch of random Physics Bodies with multiple shapes to the World
     for (i in 0...body_count) {
+      var scale = Random.range(0.2, 1.6);
       var b = new Body({
         x: Random.range(0, world.width),
         y: Random.range(0, world.height / 2),
         elasticity: 0.3,
         // rotational_velocity: 25,
         rotation: Random.range(0, 360),
+        scale_x: scale,
+        scale_y: scale,
         shapes: [
           {
             type: i % 2 == 0 ? CIRCLE : RECT,

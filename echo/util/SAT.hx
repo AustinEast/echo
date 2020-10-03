@@ -103,10 +103,11 @@ class SAT {
   public static function line_intersects_circle(l:Line, c:Circle):Null<IntersectionData> {
     var d = l.end - l.start;
     var f = l.start - c.get_position();
+    var r = c.radius;
 
     var a = d * d;
     var b = 2 * (f * d);
-    var e = (f * f) - (c.radius * c.radius);
+    var e = (f * f) - (r * r);
 
     var discriminant = b * b - 4 * a * e;
     if (discriminant < 0) return null;
@@ -120,7 +121,7 @@ class SAT {
       var hit = l.point_along_ratio(t1);
       var distance = l.start.distanceTo(hit);
       var overlap = l.length - distance;
-      norm.set(hit.x - c.x, hit.y - c.y).divideWith(c.radius);
+      norm.set(hit.x - c.x, hit.y - c.y).divideWith(r);
 
       var i = IntersectionData.get(distance, overlap, hit.x, hit.y, norm.x, norm.y);
       i.line = l;
@@ -132,7 +133,7 @@ class SAT {
       var hit = l.point_along_ratio(t2);
       var distance = l.start.distanceTo(hit);
       var overlap = l.length - distance;
-      norm.set(hit.x - c.x, hit.y - c.y).applyNegate().divideWith(c.radius);
+      norm.set(hit.x - c.x, hit.y - c.y).applyNegate().divideWith(r);
 
       var i = IntersectionData.get(distance, overlap, hit.x, hit.y, norm.x, norm.y);
       i.line = l;
@@ -319,6 +320,7 @@ class SAT {
     cx = cx.clamp(-r.ex, r.ex);
     cy = cy.clamp(-r.ey, r.ey);
     var inside = false;
+    var rad = c.radius;
 
     // Circle is inside the AABB, so we need to clamp the circle's center
     // to the closest edge
@@ -327,11 +329,11 @@ class SAT {
       // Find closest axis
       if (Math.abs(nx) > Math.abs(ny)) {
         // Clamp to closest extent
-        cx = cx > 0 ? r.ex + c.radius + 0.1 : -r.ex - c.radius - 0.1;
+        cx = cx > 0 ? r.ex + rad + 0.1 : -r.ex - rad - 0.1;
       }
       else {
         // Clamp to closest extent
-        cy = cy > 0 ? r.ey + c.radius + 0.1 : -r.ey - c.radius - 0.1;
+        cy = cy > 0 ? r.ey + rad + 0.1 : -r.ey - rad - 0.1;
       }
     }
 
@@ -339,7 +341,6 @@ class SAT {
     ny -= cy;
     // length squared
     var d = nx * nx + ny * ny;
-    var rad = c.radius;
 
     // Early out if the radius is shorter than distance to closest point and
     // Circle not inside the AABB
@@ -368,7 +369,7 @@ class SAT {
 
     var tr = Polygon.get_from_rect(r);
     @:privateAccess
-    tr.set_parent(r.parent_frame);
+    tr.set_parent(r.parent);
     var col = polygon_and_polygon(tr, p, flip);
 
     if (col == null) return null;
@@ -390,6 +391,7 @@ class SAT {
     var distance:Float = 0;
     var testDistance:Float = 0x3FFFFFFF;
     var c_pos = c.get_position();
+    var c_rad = c.radius;
 
     for (i in 0...p.count) {
       distance = (c_pos - p.vertices[i]).lengthSq;
@@ -414,8 +416,8 @@ class SAT {
     }
 
     // Project the circle
-    var max2 = c.radius;
-    var min2 = -c.radius;
+    var max2 = c_rad;
+    var min2 = -c_rad;
     var offset = normal * -c_pos;
 
     min1 += offset;
@@ -450,8 +452,8 @@ class SAT {
       }
 
       // Project the circle
-      max2 = c.radius;
-      min2 = -c.radius;
+      max2 = c_rad;
+      min2 = -c_rad;
 
       // Offset points
       offset = normal * -c_pos;

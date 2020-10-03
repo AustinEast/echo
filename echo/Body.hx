@@ -1,5 +1,6 @@
 package echo;
 
+import echo.util.BitMask;
 import echo.util.AABB;
 import hxmath.frames.Frame2;
 import hxmath.math.Vector2;
@@ -69,6 +70,14 @@ class Body implements IDisposable {
    */
   public var rotation(get, set):Float;
   /**
+   * Body's scale on the X axis.
+   */
+  public var scale_x(default, set):Float;
+  /**
+   * Body's scale on the Y axis.
+   */
+  public var scale_y(default, set):Float;
+  /**
    * Value to determine how much of a Body's `velocity` should be retained during collisions (or how much should the `Body` "bounce", in other words).
    */
   public var elasticity:Float;
@@ -132,6 +141,22 @@ class Body implements IDisposable {
    * Flag to set if the Body is active and will participate in a World's Physics calculations or Collision querys.
    */
   public var active:Bool;
+  /**
+   * Collision layers that this Body belongs to. Combine with `layer_mask` to filter collisions between layers.
+   *
+   * Note: a maximum of 32 layers are supported.
+   */
+  @:dox(hide)
+  @:noCompletion
+  public var layers:BitMask;
+  /**
+   * Collision layers that this Body will collide with. Combine with `layers` to filter collisions between layers.
+   *
+   * Note: a maximum of 32 layers are supported.
+   */
+  @:dox(hide)
+  @:noCompletion
+  public var layer_mask:BitMask;
 
   public var disposed(default, null):Bool;
   /**
@@ -180,9 +205,7 @@ class Body implements IDisposable {
   public var last_y(default, null):Float;
   @:allow(echo.Physics.step)
   public var last_rotation(default, null):Float;
-  /**
-   *
-   */
+
   public var sync_locked(default, null):Bool;
 
   @:dox(hide)
@@ -202,11 +225,14 @@ class Body implements IDisposable {
     // TODO - Child Body transforms
     // children = [];
     frame = new Frame2(new Vector2(0, 0), 0);
+    scale_x = scale_y = 1;
     velocity = new Vector2(0, 0);
     acceleration = new Vector2(0, 0);
     max_velocity = new Vector2(0, 0);
     drag = new Vector2(0, 0);
     data = {};
+    layers = new BitMask();
+    layer_mask = new BitMask();
     sync_locked = false;
     disposed = false;
     load_options(options);
@@ -221,6 +247,8 @@ class Body implements IDisposable {
     x = options.x;
     y = options.y;
     rotation = options.rotation;
+    scale_x = options.scale_x;
+    scale_y = options.scale_y;
     kinematic = options.kinematic;
     mass = options.mass;
     elasticity = options.elasticity;
@@ -248,6 +276,8 @@ class Body implements IDisposable {
     b.x = x;
     b.y = y;
     b.rotation = rotation;
+    b.scale_x = scale_x;
+    b.scale_y = scale_y;
     b.kinematic = kinematic;
     b.mass = mass;
     b.elasticity = elasticity;
@@ -265,7 +295,7 @@ class Body implements IDisposable {
     b.last_rotation = last_rotation;
     b.shapes = shapes.map(s -> {
       var sc = s.clone();
-      sc.set_parent(b.frame);
+      sc.set_parent(b);
       return sc;
     });
 
@@ -277,7 +307,7 @@ class Body implements IDisposable {
   @:dox(hide)
   @:noCompletion
   private inline function sync() {
-    // TODO - add "Local" x, y, and rot
+    // TODO - add "Local" x, y, rot, scale
   }
 
   public inline function lock_sync() {
@@ -331,7 +361,7 @@ class Body implements IDisposable {
     if (shapes.indexOf(shape) == -1) {
       if (position > -1) shapes[position] = shape;
       else shapes.push(shape);
-      shape.set_parent(frame);
+      shape.set_parent(this);
       dirty = true;
       update_static_bounds();
     }
@@ -439,6 +469,8 @@ class Body implements IDisposable {
     velocity = null;
     max_velocity = null;
     drag = null;
+    layers = null;
+    layer_mask = null;
     data = null;
     on_move = null;
     on_rotate = null;
@@ -489,15 +521,6 @@ class Body implements IDisposable {
     return frame.offset.y;
   }
 
-  inline function set_shape(value:Shape) {
-    if (shapes[0] != null) shapes[0].put();
-    shapes[0] = value;
-    shapes[0].set_parent(frame);
-    dirty = true;
-    update_static_bounds();
-    return shapes[0];
-  }
-
   inline function set_rotation(value:Float):Float {
     if (value != frame.angleDegrees) {
       frame.angleDegrees = value;
@@ -513,6 +536,47 @@ class Body implements IDisposable {
     }
 
     return frame.angleDegrees;
+  }
+
+  inline function set_scale_x(value:Float) {
+    if (value != scale_x) {
+      scale_x = value;
+      dirty = true;
+
+      if (!sync_locked) {
+        sync_shapes();
+        // TODO - Child Body transforms
+        // sync_children();
+        update_static_bounds();
+      }
+    }
+
+    return scale_x;
+  }
+
+  inline function set_scale_y(value:Float) {
+    if (value != scale_y) {
+      scale_y = value;
+      dirty = true;
+
+      if (!sync_locked) {
+        sync_shapes();
+        // TODO - Child Body transforms
+        // sync_children();
+        update_static_bounds();
+      }
+    }
+
+    return scale_y;
+  }
+
+  inline function set_shape(value:Shape) {
+    if (shapes[0] != null) shapes[0].put();
+    shapes[0] = value;
+    shapes[0].set_parent(this);
+    dirty = true;
+    update_static_bounds();
+    return shapes[0];
   }
 
   inline function set_mass(value:Float):Float {
@@ -537,6 +601,8 @@ class Body implements IDisposable {
     x: 0,
     y: 0,
     rotation: 0,
+    scale_x: 1,
+    scale_y: 1,
     elasticity: 0,
     velocity_x: 0,
     velocity_y: 0,

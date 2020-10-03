@@ -49,6 +49,14 @@ typedef BodyOptions = {
    */
   var ?rotation:Float;
   /**
+   * The Body's scale on the X axis.
+   */
+  var ?scale_x:Float;
+  /**
+   * The Body's scale on the Y axis.
+   */
+  var ?scale_y:Float;
+  /**
    * Value to determine how much of a Body's `velocity` should be retained during collisions (or how much should the `Body` "bounce" in other words).
    */
   var ?elasticity:Float;
@@ -232,6 +240,14 @@ typedef ShapeOptions = {
    * The Shape's rotation.
    */
   var ?rotation:Float;
+  /**
+   * The Shape's scale on the X axis.
+   */
+  var ?scale_x:Float;
+  /**
+   * The Shape's scale on the Y axis.
+   */
+  var ?scale_y:Float;
   /**
    * The Shape's offset from it's parent Body on the X-Axis.
    */

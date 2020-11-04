@@ -26,7 +26,7 @@ class AABB implements IPooled {
    * @param height The height of the AABB.
    * @return AABB
    */
-  public static inline function get(x:Float = 0, y:Float = 0, width:Float = 1, height:Float = 0):AABB {
+  public static inline function get(x:Float = 0, y:Float = 0, width:Float = 1, height:Float = 1):AABB {
     var aabb = _pool.get();
     aabb.set(x, y, width, height);
     aabb.pooled = false;

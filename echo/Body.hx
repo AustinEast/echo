@@ -1,14 +1,14 @@
 package echo;
 
-import echo.util.BitMask;
-import echo.util.AABB;
-import hxmath.frames.Frame2;
-import hxmath.math.Vector2;
-import echo.util.Disposable;
 import echo.Shape;
-import echo.shape.Rect;
 import echo.data.Data;
 import echo.data.Options;
+import echo.shape.Rect;
+import echo.util.AABB;
+import echo.util.BitMask;
+import echo.util.Disposable;
+import hxmath.frames.Frame2;
+import hxmath.math.Vector2;
 
 using echo.util.Ext;
 /**
@@ -400,8 +400,13 @@ class Body implements IDisposable {
    * Adds forces to a Body's acceleration.
    * @param x
    * @param y
+   * @param forward Set as `true` to apply the forces along the Body's forward (based on the Body's `rotation`).
    */
-  public function push(x:Float = 0, y:Float = 0) {
+  public function push(x:Float = 0, y:Float = 0, forward:Bool = false) {
+    if (forward) {
+      x = x * Math.cos(rotation);
+      y = y * Math.sin(rotation);
+    }
     acceleration.x += x;
     acceleration.y += y;
   }

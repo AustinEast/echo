@@ -56,9 +56,9 @@ class Line implements IProxy implements IPooled {
     return this;
   }
 
-  public function set_from_vector(start:Vector2, angle:Float, length:Float) {
-    angle = MathUtil.degToRad(angle);
-    var end = new Vector2(start.x + (length * Math.cos(angle)), start.y + (length * Math.sin(angle)));
+  public function set_from_vector(start:Vector2, degrees:Float, length:Float) {
+    var rad = MathUtil.degToRad(degrees);
+    var end = new Vector2(start.x + (length * Math.cos(rad)), start.y + (length * Math.sin(rad)));
     return set(start.x, start.y, end.x, end.y);
   }
 

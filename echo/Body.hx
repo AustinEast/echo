@@ -175,7 +175,7 @@ class Body implements IDisposable {
   /**
    * Dynamic Object to store any user data on the `Body`. Useful for Callbacks.
    */
-  public var data(default, null):Dynamic;
+  public var data(default, default):Dynamic;
   /**
    * Flag to check if the Body collided with something during the step.
    * Used for debug drawing.

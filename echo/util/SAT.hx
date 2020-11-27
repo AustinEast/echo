@@ -49,7 +49,7 @@ class SAT {
     return point_in_polygon(v, p);
   }
 
-  public static inline function line_interects_line(line1:Line, line2:Line):Null<IntersectionData> {
+  public static inline function line_intersects_line(line1:Line, line2:Line):Null<IntersectionData> {
     var d = ((line2.dy - line2.y) * (line1.dx - line1.x)) - ((line2.dx - line2.x) * (line1.dy - line1.y));
 
     if (d.equals(0)) return null;
@@ -68,7 +68,7 @@ class SAT {
     return IntersectionData.get(distance, overlap, hit.x, hit.y, norm.x, norm.y, inverse);
   }
 
-  public static function line_interects_rect(l:Line, r:Rect):Null<IntersectionData> {
+  public static function line_intersects_rect(l:Line, r:Rect):Null<IntersectionData> {
     if (r.transformed_rect != null && r.rotation != 0) return r.transformed_rect.intersect(l);
     var closest:Null<IntersectionData> = null;
 
@@ -78,19 +78,19 @@ class SAT {
     var bottom = r.bottom;
 
     var line = Line.get(left, top, right, top);
-    var result = l.line_interects_line(line);
+    var result = l.line_intersects_line(line);
     if (result != null) closest = result;
 
     line.set(right, top, right, bottom);
-    result = l.line_interects_line(line);
+    result = l.line_intersects_line(line);
     if (result != null && (closest == null || closest.distance > result.distance)) closest = result;
 
     line.set(right, bottom, left, bottom);
-    result = l.line_interects_line(line);
+    result = l.line_intersects_line(line);
     if (result != null && (closest == null || closest.distance > result.distance)) closest = result;
 
     line.set(left, bottom, left, top);
-    result = l.line_interects_line(line);
+    result = l.line_intersects_line(line);
     if (result != null && (closest == null || closest.distance > result.distance)) closest = result;
 
     if (closest != null) {
@@ -152,7 +152,7 @@ class SAT {
 
     for (i in 0...p.count) {
       line.set_from_vectors(p.vertices[i], p.vertices[(i + 1) % p.count]);
-      var result = l.line_interects_line(line);
+      var result = l.line_intersects_line(line);
       if (result != null && (closest == null || closest.distance > result.distance)) closest = result;
     }
 
@@ -165,7 +165,7 @@ class SAT {
   }
 
   public static inline function rect_intersects(r:Rect, l:Line):Null<IntersectionData> {
-    return line_interects_rect(l, r);
+    return line_intersects_rect(l, r);
   }
 
   public static inline function circle_intersects(c:Circle, l:Line):Null<IntersectionData> {

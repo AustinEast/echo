@@ -172,32 +172,33 @@ class Intersection implements IPooled {
   static function get_pool():IPool<Intersection> return _pool;
 }
 /**
- * Class containing data describing an Intersection between a Line and a Shape.
+ * Class containing data describing an Intersection between a Line/Ray and a Shape.
  */
 class IntersectionData implements IPooled {
   public static var pool(get, never):IPool<IntersectionData>;
   static var _pool = new Pool<IntersectionData>(IntersectionData);
 
-  public var line:Line;
-  public var shape:Shape;
+  public var ray:Null<Ray>;
+  public var line:Null<Line>;
+  public var shape:Null<Shape>;
   /**
-   * The position along the line where the line hit the shape.
+   * The position along the Line/Ray where the Shape was hit.
    */
   public var hit:Vector2;
   /**
-   * The distance between the start of the line and the hit position.
+   * The distance between the start of the Line/Ray and the `hit` position.
    */
   public var distance:Float;
   /**
-   * The length of the line that has overlapped the shape.
+   * The length of the Line/Ray that has overlapped the Shape.
    */
   public var overlap:Float;
   /**
-   * The normal vector (direction) of the Line's penetration into the Shape.
+   * The normal (direction) of the Shape's hit face.
    */
   public var normal:Vector2;
   /**
-    Indicates if normal was inversed and usually occurs when Line penetrates into the Shape from the inside.
+    Indicates if normal was inversed. This usually occurs when a Line/Ray penetrates into the Shape from the inside.
   **/
   public var inverse_normal:Bool;
 

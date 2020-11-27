@@ -233,7 +233,13 @@ class Shape {
   // public function scale(v:Float) {}
   public function contains(v:Vector2):Bool return get_position() == v;
 
+  @:dox(hide)
+  @:deprecated("`intersect()` has been depricated - use `intersect_line()` or `intersect_ray()` instead.")
   public function intersect(l:Line):Null<IntersectionData> return null;
+
+  public function intersect_line(l:Line):Null<IntersectionData> return null;
+
+  public function intersect_ray(r:Ray):Null<IntersectionData> return null;
 
   public function overlaps(s:Shape):Bool return contains(s.get_position());
 

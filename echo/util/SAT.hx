@@ -164,16 +164,58 @@ class SAT {
     return closest;
   }
 
+  public static inline function ray_intersects_rect(r:Ray, rect:Rect):Null<IntersectionData> {
+    return null;
+  }
+
+  public static inline function ray_intersects_circle(r:Ray, c:Circle):Null<IntersectionData> {
+    return null;
+  }
+
+  public static inline function ray_intersects_polygon(r:Ray, p:Polygon):Null<IntersectionData> {
+    return null;
+  }
+
+  @:dox(hide)
+  @:deprecated("`rect_intersects()` has been depricated - use `rect_intersects_line()` or `rect_intersects_ray()` instead.")
   public static inline function rect_intersects(r:Rect, l:Line):Null<IntersectionData> {
     return line_intersects_rect(l, r);
   }
 
+  @:dox(hide)
+  @:deprecated("`circle_intersects()` has been depricated - use `circle_intersects_line()` or `circle_intersects_ray()` instead.")
   public static inline function circle_intersects(c:Circle, l:Line):Null<IntersectionData> {
     return line_intersects_circle(l, c);
   }
 
+  @:dox(hide)
+  @:deprecated("`polygon_intersects()` has been depricated - use `polygon_intersects_line()` or `polygon_intersects_ray()` instead.")
   public static inline function polygon_intersects(p:Polygon, l:Line):Null<IntersectionData> {
     return line_intersects_polygon(l, p);
+  }
+
+  public static inline function rect_intersects_line(r:Rect, l:Line):Null<IntersectionData> {
+    return line_intersects_rect(l, r);
+  }
+
+  public static inline function circle_intersects_line(c:Circle, l:Line):Null<IntersectionData> {
+    return line_intersects_circle(l, c);
+  }
+
+  public static inline function polygon_intersects_line(p:Polygon, l:Line):Null<IntersectionData> {
+    return line_intersects_polygon(l, p);
+  }
+
+  public static inline function rect_intersects_ray(rect:Rect, r:Ray):Null<IntersectionData> {
+    return ray_intersects_rect(r, rect);
+  }
+
+  public static inline function circle_intersects_ray(c:Circle, r:Ray):Null<IntersectionData> {
+    return ray_intersects_circle(r, c);
+  }
+
+  public static inline function polygon_intersects_ray(p:Polygon, r:Ray):Null<IntersectionData> {
+    return ray_intersects_polygon(r, p);
   }
   /**
    * Test two Rects for a Collision.

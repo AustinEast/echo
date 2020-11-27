@@ -81,7 +81,7 @@ class Line implements IProxy implements IPooled {
   }
 
   public inline function intersect(shape:Shape):Null<IntersectionData> {
-    return shape.intersect(this);
+    return shape.intersect_line(this);
   }
 
   public inline function point_along_ratio(ratio:Float):Vector2 {

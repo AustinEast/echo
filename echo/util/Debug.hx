@@ -19,6 +19,8 @@ class Debug {
   public var draw_quadtree:Bool = true;
   public var shape_outline_width:Float = 1;
   public var shape_fill_alpha:Float = 0;
+
+  // colors
   public var shape_color:Int;
   public var shape_fill_color:Int;
   public var shape_collided_color:Int;
@@ -26,6 +28,7 @@ class Debug {
   public var intersection_overlap_color:Int;
   public var quadtree_color:Int;
   public var quadtree_fill_color:Int;
+
   public var camera:Null<AABB>;
 
   public static function log(world:World) {
@@ -109,10 +112,14 @@ class Debug {
     var closest = intersection.closest;
     if (closest == null) return;
 
-    draw_line(closest.line.start.x, closest.line.start.y, closest.hit.x, closest.hit.y, intersection_color);
-    if (draw_overlap) draw_line(closest.hit.x, closest.hit.y, closest.line.end.x, closest.line.end.y, intersection_overlap_color);
+    draw_intersection_data(closest, draw_overlap, draw_normal);
+  }
+
+  public function draw_intersection_data(data:IntersectionData, draw_overlap:Bool = true, draw_normal:Bool = true) {
+    draw_line(data.line.start.x, data.line.start.y, data.hit.x, data.hit.y, intersection_color);
+    if (draw_overlap) draw_line(data.hit.x, data.hit.y, data.line.end.x, data.line.end.y, intersection_overlap_color);
     if (draw_normal) {
-      var normal = Line.get_from_vector(closest.hit, closest.normal.angle.radToDeg(), 10);
+      var normal = Line.get_from_vector(data.hit, data.normal.angle.radToDeg(), 10);
       draw_line(normal.x, normal.y, normal.dx, normal.dy, intersection_overlap_color);
       normal.put();
     }
@@ -123,6 +130,42 @@ class Debug {
     for (i in 1...count) draw_line(vertices[i - 1].x, vertices[i - 1].y, vertices[i].x, vertices[i].y, stroke, 1);
     var vl = count - 1;
     draw_line(vertices[vl].x, vertices[vl].y, vertices[0].x, vertices[0].y, stroke, 1);
+  }
+
+  public function draw_bezier(bezier:Bezier) {
+    var max_control_points = bezier.curve_count * bezier.curve_mode;
+    // Draw Control Point Tangent Lines
+    if (bezier.curve_mode != Linear) for (i in 0...bezier.curve_count) {
+      var index = i * bezier.curve_mode;
+      if (i > 0 && index + bezier.curve_mode >= max_control_points) break;
+      switch bezier.curve_mode {
+        case Cubic:
+          var p1 = bezier.get_control_point(index);
+          var p2 = bezier.get_control_point(index + 1);
+          var p3 = bezier.get_control_point(index + 2);
+          var p4 = bezier.get_control_point(index + 3);
+          if (p1 != null && p2 != null) draw_line(p1.x, p1.y, p2.x, p2.y, shape_collided_color);
+          if (p3 != null && p4 != null) draw_line(p3.x, p3.y, p4.x, p4.y, shape_collided_color);
+        case Quadratic:
+          var p1 = bezier.get_control_point(index);
+          var p2 = bezier.get_control_point(index + 1);
+          var p3 = bezier.get_control_point(index + 2);
+          if (p1 != null && p2 != null) draw_line(p1.x, p1.y, p2.x, p2.y, shape_collided_color);
+          if (p2 != null && p3 != null) draw_line(p2.x, p2.y, p3.x, p3.y, shape_collided_color);
+        default:
+      }
+    }
+
+    // Draw the Curve
+    for (l in bezier.lines) {
+      draw_line(l.start.x, l.start.y, l.end.x, l.end.y, intersection_color);
+    }
+
+    // Draw the Control Points
+    for (i in 0...bezier.control_count) {
+      var p = bezier.get_control_point(i);
+      draw_circle(p.x, p.y, 3, shape_fill_color, shape_color, shape_fill_alpha);
+    }
   }
 
   function draw_qd(tree:QuadTree) for (child in tree.children) {

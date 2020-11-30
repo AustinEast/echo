@@ -65,7 +65,9 @@ class SAT {
     var inverse = d >= 0;
     var l2l = line2.length * (inverse ? -1 : 1);
     norm.set((line2.dy - line2.y) / l2l, -(line2.dx - line2.x) / l2l);
-    return IntersectionData.get(distance, overlap, hit.x, hit.y, norm.x, norm.y, inverse);
+    var data = IntersectionData.get(distance, overlap, hit.x, hit.y, norm.x, norm.y, inverse);
+    data.line = line1;
+    return data;
   }
 
   public static function line_intersects_rect(l:Line, r:Rect):Null<IntersectionData> {

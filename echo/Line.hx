@@ -84,8 +84,8 @@ class Line implements IProxy implements IPooled {
     return shape.intersect(this);
   }
   /**
-   * Gets the position on the `Line` at the specified ratio.
-   * @param ratio The ratio from the Line's start and end points (between 0.0 and 1.0).
+   * Gets a position on the `Line` at the specified ratio.
+   * @param ratio The ratio from the Line's `start` and `end` points (between 0.0 and 1.0).
    * @return Vector2
    */
   public inline function point_along_ratio(ratio:Float):Vector2 {

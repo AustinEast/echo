@@ -45,7 +45,7 @@ class Main extends BaseApp {
     // Set the Background color of the Scene
     engine.backgroundColor = 0x45283c;
     // Set the Heaps Scene size
-    s2d.scaleMode = Stretch(width, height);
+    s2d.scaleMode = LetterBox(width, height);
     // Get a static reference to the Heaps scene so we can access it later
     scene = s2d;
     // Add the UI elements

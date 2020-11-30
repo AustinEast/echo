@@ -137,7 +137,7 @@ class Debug {
     // Draw Control Point Tangent Lines
     if (bezier.curve_mode != Linear) for (i in 0...bezier.curve_count) {
       var index = i * bezier.curve_mode;
-      if (i > 0 && index + bezier.curve_mode >= max_control_points) break;
+      if (i > 0 && index + bezier.curve_mode > max_control_points) break;
       switch bezier.curve_mode {
         case Cubic:
           var p1 = bezier.get_control_point(index);
@@ -164,7 +164,7 @@ class Debug {
     // Draw the Control Points
     for (i in 0...bezier.control_count) {
       var p = bezier.get_control_point(i);
-      draw_circle(p.x, p.y, 3, shape_fill_color, shape_color, shape_fill_alpha);
+      draw_circle(p.x, p.y, 4, shape_fill_color);
     }
   }
 

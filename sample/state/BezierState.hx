@@ -29,13 +29,12 @@ class BezierState extends BaseState {
     // Create a new Bezier Curve with some control points
     bezier = new Bezier([
       new Vector2(c.x - 170, c.y + 80),
-      new Vector2(c.x - 40, c.y + 80),
-      new Vector2(c.x + 40, c.y - 80),
-      new Vector2(c.x + 170, c.y - 80),
-      // new Vector2(c.x - 170, c.y + 100),
-      // new Vector2(c.x - 40, c.y + 100),
-      // new Vector2(c.x + 40, c.y - 100),
-      // new Vector2(c.x + 170, c.y - 100)
+      new Vector2(c.x - 90, c.y + 80),
+      new Vector2(c.x - 80, c.y - 80),
+      new Vector2(c.x, c.y - 80),
+      new Vector2(c.x + 80, c.y - 80),
+      new Vector2(c.x + 90, c.y + 80),
+      new Vector2(c.x + 170, c.y + 80),
     ]);
 
     // For each control point in the Bezier Curve, create an h2d.Interactive so we can move the control points around

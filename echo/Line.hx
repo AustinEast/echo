@@ -33,10 +33,15 @@ class Line implements IProxy implements IPooled {
     line.pooled = false;
     return line;
   }
-
-  public static inline function get_from_vector(start:Vector2, angle:Float, length:Float) {
+  /**
+   * Gets a Line with the defined start point, angle (in degrees), and length.
+   * @param start A Vector2 describing the starting position of the Line.
+   * @param degrees The angle of the Line (in degrees).
+   * @param length The length of the Line.
+   */
+  public static inline function get_from_vector(start:Vector2, degrees:Float, length:Float) {
     var line = _pool.get();
-    line.set_from_vector(start, angle, length);
+    line.set_from_vector(start, degrees, length);
     line.pooled = false;
     return line;
   }
@@ -55,7 +60,12 @@ class Line implements IProxy implements IPooled {
     end.set(dx, dy);
     return this;
   }
-
+  /**
+   * Sets the Line with the defined start point, angle (in degrees), and length.
+   * @param start A Vector2 describing the starting position of the Line.
+   * @param degrees The angle of the Line (in degrees).
+   * @param length The length of the Line.
+   */
   public function set_from_vector(start:Vector2, degrees:Float, length:Float) {
     var rad = MathUtil.degToRad(degrees);
     var end = new Vector2(start.x + (length * Math.cos(rad)), start.y + (length * Math.sin(rad)));

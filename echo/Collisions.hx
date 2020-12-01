@@ -60,6 +60,7 @@ class Collisions {
               overlap_body_and_bodies_bounds(bb, aa, world, listener.quadtree_results);
             case Right(ab):
               overlap_bodies_and_bodies_bounds(aa, ab, world, listener.quadtree_results);
+              if (aa != ab) overlap_bodies_and_bodies_bounds(ab, aa, world, listener.quadtree_results);
           }
       }
       // Narrow Phase

@@ -199,11 +199,11 @@ class Body implements IDisposable {
    */
   public var on_rotate:Null<Float->Void>;
 
-  @:allow(echo.Physics.step)
+  @:allow(echo.Physics.step_body)
   public var last_x(default, null):Float;
-  @:allow(echo.Physics.step)
+  @:allow(echo.Physics.step_body)
   public var last_y(default, null):Float;
-  @:allow(echo.Physics.step)
+  @:allow(echo.Physics.step_body)
   public var last_rotation(default, null):Float;
 
   public var sync_locked(default, null):Bool;

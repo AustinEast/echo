@@ -63,48 +63,50 @@ class Debug {
         }
       }
       if (draw_body_centers) draw_rect(member.x - 1, member.y - 1, 1, 1, quadtree_color);
-      for (shape in member.shapes) {
-        var x = shape.x;
-        var y = shape.y;
-        switch (shape.type) {
-          case RECT:
-            var r:Rect = cast shape;
-            if (r.transformed_rect != null && !r.rotation.equals(0)) {
-              draw_polygon(r.transformed_rect.count, r.transformed_rect.vertices, shape_fill_color,
-                r.transformed_rect.collided ? shape_collided_color : shape_color, shape_fill_alpha);
-              if (draw_shape_bounds) {
-                var b = r.transformed_rect.bounds();
-                draw_rect(b.min_x, b.min_y, b.width, b.height, shape_fill_color, r.transformed_rect.collided ? shape_collided_color : shape_color, 0);
-                b.put();
-              }
-            }
-            else draw_rect(x - r.ex, y - r.ey, r.width, r.height, shape_fill_color, shape.collided ? shape_collided_color : shape_color, 0);
-          case CIRCLE:
-            var c:Circle = cast shape;
-
-            draw_circle(x, y, c.radius, shape_fill_color, shape.collided ? shape_collided_color : shape_color, shape_fill_alpha);
-            if (draw_shape_bounds) {
-              var b = c.bounds();
-              draw_rect(b.min_x, b.min_y, b.width, b.height, shape_fill_color, shape.collided ? shape_collided_color : shape_color, 0);
-              b.put();
-            }
-          case POLYGON:
-            var p:Polygon = cast shape;
-
-            draw_polygon(p.count, p.vertices, shape_fill_color, shape.collided ? shape_collided_color : shape_color, shape_fill_alpha);
-            if (draw_shape_bounds) {
-              var b = p.bounds();
-              draw_rect(b.min_x, b.min_y, b.width, b.height, shape_fill_color, shape.collided ? shape_collided_color : shape_color, 0);
-              b.put();
-            }
-        }
-      }
+      for (shape in member.shapes) draw_shape(shape);
       if (draw_bounds) {
         var b = member.bounds();
         draw_rect(b.min_x, b.min_y, b.width, b.height, shape_fill_color, shape_color, 0);
         b.put();
       }
     });
+  }
+
+  public function draw_shape(shape:Shape) {
+    var x = shape.x;
+    var y = shape.y;
+    switch (shape.type) {
+      case RECT:
+        var r:Rect = cast shape;
+        if (r.transformed_rect != null && !r.rotation.equals(0)) {
+          draw_polygon(r.transformed_rect.count, r.transformed_rect.vertices, shape_fill_color, r.collided ? shape_collided_color : shape_color,
+            shape_fill_alpha);
+          if (draw_shape_bounds) {
+            var b = r.transformed_rect.bounds();
+            draw_rect(b.min_x, b.min_y, b.width, b.height, shape_fill_color, r.collided ? shape_collided_color : shape_color, 0);
+            b.put();
+          }
+        }
+        else draw_rect(x - r.width * 0.5, y - r.height * 0.5, r.width, r.height, shape_fill_color, r.collided ? shape_collided_color : shape_color, 0);
+      case CIRCLE:
+        var c:Circle = cast shape;
+
+        draw_circle(x, y, c.radius, shape_fill_color, shape.collided ? shape_collided_color : shape_color, shape_fill_alpha);
+        if (draw_shape_bounds) {
+          var b = c.bounds();
+          draw_rect(b.min_x, b.min_y, b.width, b.height, shape_fill_color, shape.collided ? shape_collided_color : shape_color, 0);
+          b.put();
+        }
+      case POLYGON:
+        var p:Polygon = cast shape;
+
+        draw_polygon(p.count, p.vertices, shape_fill_color, shape.collided ? shape_collided_color : shape_color, shape_fill_alpha);
+        if (draw_shape_bounds) {
+          var b = p.bounds();
+          draw_rect(b.min_x, b.min_y, b.width, b.height, shape_fill_color, shape.collided ? shape_collided_color : shape_color, 0);
+          b.put();
+        }
+    }
   }
 
   public function draw_intersection(intersection:Intersection, draw_overlap:Bool = true, draw_normal:Bool = true) {

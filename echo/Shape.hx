@@ -162,6 +162,7 @@ class Shape {
 
   public function put() {
     parent = null;
+    collided = false;
   }
 
   public inline function sync():Void {

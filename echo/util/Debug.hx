@@ -78,7 +78,7 @@ class Debug {
     switch (shape.type) {
       case RECT:
         var r:Rect = cast shape;
-        if (r.transformed_rect != null && !r.rotation.equals(0)) {
+        if (r.transformed_rect != null && r.rotation != 0) {
           draw_polygon(r.transformed_rect.count, r.transformed_rect.vertices, shape_fill_color, r.collided ? shape_collided_color : shape_color,
             shape_fill_alpha);
           if (draw_shape_bounds) {

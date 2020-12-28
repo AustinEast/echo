@@ -1,7 +1,6 @@
 package echo.shape;
 
 import echo.util.AABB;
-import hxmath.frames.Frame2;
 import echo.shape.*;
 import echo.util.Pool;
 import echo.data.Data;
@@ -11,7 +10,6 @@ using echo.util.SAT;
 using echo.util.Ext;
 using hxmath.math.MathUtil;
 
-// TODO - extend Rect from Polygon to save on matrix calculations when syncing
 class Rect extends Shape implements IPooled {
   public static var pool(get, never):IPool<Rect>;
   static var _pool = new Pool<Rect>(Rect);
@@ -182,6 +180,7 @@ class Rect extends Shape implements IPooled {
 
   override function set_parent(?body:Body) {
     super.set_parent(body);
+    set_dirty();
     if (transformed_rect != null) transformed_rect.set_parent(body);
   }
 

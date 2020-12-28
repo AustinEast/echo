@@ -10,6 +10,8 @@ import echo.util.Bezier;
 import echo.World;
 import hxmath.math.Vector2;
 
+using hxmath.math.MathUtil;
+
 class BezierState extends BaseState {
   final segments = 100;
 
@@ -75,7 +77,7 @@ class BezierState extends BaseState {
     }
 
     // Draw the Bezier Curve
-    Main.instance.debug.draw_bezier(bezier);
+    Main.instance.debug.draw_bezier(bezier, true, true);
 
     // Move the linecasting Line
     var c = parent.center();

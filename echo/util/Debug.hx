@@ -134,10 +134,10 @@ class Debug {
     draw_line(vertices[vl].x, vertices[vl].y, vertices[0].x, vertices[0].y, stroke, 1);
   }
 
-  public function draw_bezier(bezier:Bezier) {
+  public function draw_bezier(bezier:Bezier, draw_control_points:Bool = false, draw_segment_markers:Bool = false) {
     var max_control_points = bezier.curve_count * bezier.curve_mode;
     // Draw Control Point Tangent Lines
-    if (bezier.curve_mode != Linear) for (i in 0...bezier.curve_count) {
+    if (draw_control_points && bezier.curve_mode != Linear) for (i in 0...bezier.curve_count) {
       var index = i * bezier.curve_mode;
       if (i > 0 && index + bezier.curve_mode > max_control_points) break;
       switch bezier.curve_mode {
@@ -161,10 +161,17 @@ class Debug {
     // Draw the Curve
     for (l in bezier.lines) {
       draw_line(l.start.x, l.start.y, l.end.x, l.end.y, intersection_color);
+
+      if (!draw_segment_markers) continue;
+
+      var p = l.point_along_ratio(.5);
+      var edge = Line.get_from_vector(p, l.radians.radToDeg() - 90, 5);
+      draw_line(edge.start.x, edge.start.y, edge.end.x, edge.end.y, intersection_overlap_color);
+      edge.put();
     }
 
     // Draw the Control Points
-    for (i in 0...bezier.control_count) {
+    if (draw_control_points) for (i in 0...bezier.control_count) {
       var p = bezier.get_control_point(i);
       draw_circle(p.x, p.y, 4, shape_fill_color);
     }

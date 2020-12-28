@@ -150,6 +150,7 @@ class Shape {
   public function put() {
     transform.set_parent(null);
     parent = null;
+    collided = false;
   }
   /**
    * Gets the Shape's position on the X and Y axis as a `Vector2`.

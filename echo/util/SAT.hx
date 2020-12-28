@@ -185,12 +185,27 @@ class SAT {
    * @return Null<CollisionData>
    */
   public static function rect_and_rect(rect1:Rect, rect2:Rect, flip:Bool = false):Null<CollisionData> {
+    var col:CollisionData = null;
     if (rect1.rotation != 0 || rect2.rotation != 0) {
       if (rect1.transformed_rect != null) {
-        return rect_and_polygon(rect2, rect1.transformed_rect, flip);
+        col = rect_and_polygon(rect2, rect1.transformed_rect, flip);
+
+        if (col == null) return null;
+
+        if (flip) col.sa = rect1;
+        else col.sb = rect1;
+
+        return col;
       }
       if (rect2.transformed_rect != null) {
-        return rect_and_polygon(rect1, rect2.transformed_rect, !flip);
+        col = rect_and_polygon(rect1, rect2.transformed_rect, !flip);
+
+        if (col == null) return null;
+
+        if (flip) col.sa = rect2;
+        else col.sb = rect2;
+
+        return col;
       }
     }
 
@@ -203,7 +218,6 @@ class SAT {
     // Calculate overlap on x axis
     var x_overlap = sa.ex + sb.ex - Math.abs(nx);
 
-    var col:CollisionData = null;
     // SAT test on x axis
     if (x_overlap > 0) {
       // Calculate overlap on y axis
@@ -310,7 +324,16 @@ class SAT {
    * @return Null<CollisionData>
    */
   public static function rect_and_circle(r:Rect, c:Circle, flip:Bool = false):Null<CollisionData> {
-    if (r.transformed_rect != null && r.rotation != 0) return circle_and_polygon(c, r.transformed_rect, flip);
+    if (r.transformed_rect != null && r.rotation != 0) {
+      var col = circle_and_polygon(c, r.transformed_rect, flip);
+
+      if (col == null) return null;
+
+      if (flip) col.sa = r;
+      else col.sb = r;
+
+      return col;
+    }
 
     // Vector from A to B
     var nx = flip ? c.x - r.x : r.x - c.x;
@@ -368,18 +391,22 @@ class SAT {
   }
 
   public static function rect_and_polygon(r:Rect, p:Polygon, flip:Bool = false):Null<CollisionData> {
-    if (r.transformed_rect != null) return polygon_and_polygon(r.transformed_rect, p, flip);
-
-    var tr = Polygon.get_from_rect(r);
-    @:privateAccess
-    tr.set_parent(r.parent);
-    var col = polygon_and_polygon(tr, p, flip);
+    var col:CollisionData = null;
+    if (r.transformed_rect != null) {
+      col = polygon_and_polygon(r.transformed_rect, p, flip);
+    }
+    else {
+      var tr = Polygon.get_from_rect(r);
+      @:privateAccess
+      tr.set_parent(r.parent);
+      col = polygon_and_polygon(tr, p, flip);
+      tr.put();
+    }
 
     if (col == null) return null;
 
     if (flip) col.sb = r;
     else col.sa = r;
-    tr.put();
 
     return col;
   }

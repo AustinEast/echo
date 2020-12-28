@@ -54,7 +54,7 @@ class QuadTree extends AABB implements IPooled {
   /**
    * Gets a QuadTree from the pool of available Quadtrees (or creates one if none are available), and sets it with the provided values.
    */
-  public static inline function get(x:Float = 0, y:Float = 0, width:Float = 0, height:Float = 0):QuadTree {
+  public static inline function get(x:Float = 0, y:Float = 0, width:Float = 1, height:Float = 1):QuadTree {
     var qt = _pool.get();
     qt.set(x, y, width, height);
     qt.clear_children();

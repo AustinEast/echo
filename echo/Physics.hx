@@ -22,7 +22,6 @@ class Physics {
 
   public static inline function step_body(body:Body, dt:Float, gravity_x:Float, gravity_y:Float) {
     if (!body.disposed && body.active) {
-      body.lock_sync();
       body.last_x = body.x;
       body.last_y = body.y;
       body.last_rotation = body.rotation;
@@ -63,7 +62,6 @@ class Physics {
       }
       // Apply Rotational Velocity
       body.rotation += body.rotational_velocity * dt;
-      body.unlock_sync();
     }
   }
   /**
@@ -88,9 +86,6 @@ class Physics {
   public static inline function resolve(a:Body, b:Body, cd:CollisionData, correction_threshold:Float = 0.013, percent_correction:Float = 0.9) {
     // Do not resolve if either objects arent solid
     if (!cd.sa.solid || !cd.sb.solid || !a.active || !b.active || a.disposed || b.disposed || a.is_static() && b.is_static()) return;
-
-    a.lock_sync();
-    b.lock_sync();
 
     // Calculate relative velocity
     var rvx = a.velocity.x - b.velocity.x;
@@ -132,9 +127,6 @@ class Physics {
       b.x += b.inverse_mass * cx;
       b.y += b.inverse_mass * cy;
     }
-
-    a.unlock_sync();
-    b.unlock_sync();
   }
 
   // TODO

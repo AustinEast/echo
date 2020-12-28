@@ -3,10 +3,10 @@ package echo;
 import echo.Shape;
 import echo.data.Data;
 import echo.data.Options;
-import echo.shape.Rect;
 import echo.util.AABB;
 import echo.util.BitMask;
 import echo.util.Disposable;
+import echo.util.Transform;
 import hxmath.frames.Frame2;
 import hxmath.math.Vector2;
 
@@ -37,6 +37,18 @@ class Body implements IDisposable {
    */
   public var y(get, set):Float;
   /**
+   * Body's current rotational angle.
+   */
+  public var rotation(get, set):Float;
+  /**
+   * Body's scale on the X axis.
+   */
+  public var scale_x(get, set):Float;
+  /**
+   * Body's scale on the Y axis.
+   */
+  public var scale_y(get, set):Float;
+  /**
    * The Body's first `Shape` object in the `shapes` array. If it **isn't** null, this `Shape` object act as the Body's Collider, allowing it to be checked for Collisions.
    */
   public var shape(get, set):Null<Shape>;
@@ -46,11 +58,6 @@ class Body implements IDisposable {
    * NOTE: If adding shapes directly to this Array, make sure to parent the Shape to the Body (ie `shape.set_parent(body.frame);`).
    */
   public var shapes(default, null):Array<Shape>;
-  /**
-   * TODO - Child Body transforms
-   */
-  @:dox(hide)
-  private var children(default, null):Array<Body>;
   /**
    * Flag to set how a Body is affected by Collisions.
    *
@@ -66,31 +73,19 @@ class Body implements IDisposable {
    */
   public var mass(default, set):Float;
   /**
-   * Body's current rotational angle.
-   */
-  public var rotation(get, set):Float;
-  /**
-   * Body's scale on the X axis.
-   */
-  public var scale_x(default, set):Float;
-  /**
-   * Body's scale on the Y axis.
-   */
-  public var scale_y(default, set):Float;
-  /**
    * Value to determine how much of a Body's `velocity` should be retained during collisions (or how much should the `Body` "bounce", in other words).
    */
   public var elasticity:Float;
   /**
    * The units/second that a `Body` moves.
    */
-  public var velocity:Vector2;
+  public var velocity:Vector2 = new Vector2(0, 0);
   /**
    * A measure of how fast a `Body` will change it's velocity.
    *
    * Can be thought of the sum of all external forces on an object during a step.
    */
-  public var acceleration:Vector2;
+  public var acceleration:Vector2 = new Vector2(0, 0);
   /**
    * The units/second that a `Body` will rotate.
    */
@@ -100,7 +95,7 @@ class Body implements IDisposable {
    *
    * Note: this is calculated separately from a Body's `max_velocity_length`, so be careful when applying both.
    */
-  public var max_velocity:Vector2;
+  public var max_velocity:Vector2 = new Vector2(0, 0);
   /**
    * The maximum velocity that a `Body` can have along the velocity's length. If set to 0, the Body has no restrictions on how fast it can move.
    *
@@ -118,7 +113,7 @@ class Body implements IDisposable {
    *
    * Note: this is calculated separately from a Body's `drag_length`, so be careful when applying both.
    */
-  public var drag:Vector2;
+  public var drag:Vector2 = new Vector2(0, 0);
   /**
    * A measure of how fast a Body will move its velocity towards 0 along the velocity's length, when there is no acceleration.
    *
@@ -148,7 +143,7 @@ class Body implements IDisposable {
    */
   @:dox(hide)
   @:noCompletion
-  public var layers:BitMask;
+  public var layers:BitMask = new BitMask();
   /**
    * Collision layers that this Body will collide with. Combine with `layers` to filter collisions between layers.
    *
@@ -156,7 +151,7 @@ class Body implements IDisposable {
    */
   @:dox(hide)
   @:noCompletion
-  public var layer_mask:BitMask;
+  public var layer_mask:BitMask = new BitMask();
 
   public var disposed(default, null):Bool;
   /**
@@ -166,6 +161,7 @@ class Body implements IDisposable {
    * If the Body's World has the `sleeping_bodies` optimization on, this flag determines if the Body will participate in a World's Physics calculations or Collision querys.
    */
   @:dox(hide)
+  @:noCompletion
   private var sleeping:Bool;
   /**
    * The `World` that this body is attached to. It can only be a part of one `World` at a time.
@@ -182,9 +178,9 @@ class Body implements IDisposable {
    */
   public var collided:Bool;
   /**
-   * Structure to help perform matrix calculations for the Body's position and rotation.
+   * Structure to help perform matrix calculations for the Body's position, rotation, and scale.
    */
-  public var frame(default, null):Frame2;
+  public var transform:Transform = new Transform();
   /**
    * Flag to check if the Body has changed its position, rotation, or shape colliders.
    * Used for Collision optimization.
@@ -206,14 +202,9 @@ class Body implements IDisposable {
   @:allow(echo.Physics.step_body)
   public var last_rotation(default, null):Float;
 
-  public var sync_locked(default, null):Bool;
-
   @:dox(hide)
   @:allow(echo.World, echo.Collisions, echo.util.Debug)
   var quadtree_data:QuadTreeData;
-  @:dox(hide)
-  @:noCompletion
-  var parent_frame:Frame2;
   /**
    * Creates a new Body.
    * @param options Optional values to configure the new Body
@@ -222,19 +213,9 @@ class Body implements IDisposable {
     this.id = ++ids;
     active = true;
     shapes = [];
-    // TODO - Child Body transforms
-    // children = [];
-    frame = new Frame2(new Vector2(0, 0), 0);
-    scale_x = scale_y = 1;
-    velocity = new Vector2(0, 0);
-    acceleration = new Vector2(0, 0);
-    max_velocity = new Vector2(0, 0);
-    drag = new Vector2(0, 0);
     data = {};
-    layers = new BitMask();
-    layer_mask = new BitMask();
-    sync_locked = false;
     disposed = false;
+    transform.on_dirty = on_dirty;
     load_options(options);
   }
   /**
@@ -302,46 +283,6 @@ class Body implements IDisposable {
     return b;
   }
   /**
-   * TODO - Child Body transforms
-   */
-  @:dox(hide)
-  @:noCompletion
-  private inline function sync() {
-    // TODO - add "Local" x, y, rot, scale
-  }
-
-  public inline function lock_sync() {
-    sync_locked = true;
-  }
-
-  public inline function unlock_sync() {
-    sync_locked = false;
-    if (dirty) {
-      sync_shapes();
-      update_static_bounds();
-      if (on_move != null) on_move(x, y);
-      if (on_rotate != null) on_rotate(rotation);
-    }
-  }
-  /**
-   * TODO - Child Body transforms
-   */
-  @:dox(hide)
-  @:noCompletion
-  private inline function add_child(child:Body) {
-    if (children.indexOf(child) == -1) {
-      child.parent_frame = frame;
-      child.sync();
-    }
-  }
-  /**
-   * TODO - Child Body transforms
-   * Syncs the transforms of the Body's shapes. Generally this does not need to be called manually.
-   */
-  @:dox(hide)
-  @:noCompletion
-  private inline function sync_children():Void if (children.length > 0) for (child in children) child.sync();
-  /**
    * Adds a new `Shape` to the Body based on the `ShapeOptions` passed in.
    * @param options
    * @param position The position in the Body's `shapes` array the Shape will be added to. If set to -1, the Shape is pushed to the end.
@@ -377,10 +318,6 @@ class Body implements IDisposable {
     return shape;
   }
   /**
-   * Syncs the transforms of the Body's shapes. Generally this does not need to be called manually.
-   */
-  public inline function sync_shapes():Void if (shapes.length > 0) for (shape in shapes) shape.sync();
-  /**
    * Clears all Shapes from the Body, releasing them to their respective pools.
    */
   public inline function clear_shapes() {
@@ -390,7 +327,7 @@ class Body implements IDisposable {
   /**
    * Gets the Body's position as a new `Vector2` (or sets the `Vector2`, if passed in).
    */
-  public function get_position(?vec2:Vector2):Vector2 return vec2 == null ? frame.offset.clone() : vec2.set(frame.offset.x, frame.offset.y);
+  public function get_position(?vec2:Vector2):Vector2 return vec2 == null ? transform.get_local_position() : vec2.set(transform.local_x, transform.local_y);
 
   public function set_position(x:Float = 0, y:Float = 0) {
     this.x = x;
@@ -482,95 +419,64 @@ class Body implements IDisposable {
 
   function toString() return 'Body: {id: $id, x: $x, y: $y, rotation: $rotation}';
 
-  inline function get_x() return frame.offset.x;
+  function on_dirty(t) {
+    dirty = true;
+    update_static_bounds();
+  }
 
-  inline function get_y() return frame.offset.y;
+  inline function get_x() return transform.local_x;
 
-  inline function get_rotation() return frame.angleDegrees;
+  inline function get_y() return transform.local_y;
+
+  inline function get_rotation() return transform.local_rotation;
+
+  inline function get_scale_x() return transform.local_scale_x;
+
+  inline function get_scale_y() return transform.local_scale_y;
 
   inline function get_shape() return shapes[0];
 
   // setters
   inline function set_x(value:Float):Float {
-    if (value != frame.offset.x) {
-      frame.offset = frame.offset.set(value, y);
-      dirty = true;
-
-      if (!sync_locked) {
-        sync_shapes();
-        // TODO - Child Body transforms
-        // sync_children();
-        update_static_bounds();
-        if (on_move != null) on_move(frame.offset.x, frame.offset.y);
-      }
+    if (value != transform.local_x) {
+      transform.local_x = value;
+      if (on_move != null) on_move(transform.local_x, transform.local_y);
     }
 
-    return frame.offset.x;
+    return transform.local_x;
   }
 
   inline function set_y(value:Float):Float {
-    if (value != frame.offset.y) {
-      frame.offset = frame.offset.set(x, value);
-      dirty = true;
-
-      if (!sync_locked) {
-        sync_shapes();
-        // TODO - Child Body transforms
-        // sync_children();
-        update_static_bounds();
-        if (on_move != null) on_move(frame.offset.x, frame.offset.y);
-      }
+    if (value != transform.local_y) {
+      transform.local_y = value;
+      if (on_move != null) on_move(transform.local_x, transform.local_y);
     }
-    return frame.offset.y;
+    return transform.local_y;
   }
 
   inline function set_rotation(value:Float):Float {
-    if (value != frame.angleDegrees) {
-      frame.angleDegrees = value;
-      dirty = true;
-
-      if (!sync_locked) {
-        sync_shapes();
-        // TODO - Child Body transforms
-        // sync_children();
-        update_static_bounds();
-        if (on_rotate != null) on_rotate(rotation);
-      }
+    if (value != transform.local_rotation) {
+      transform.local_rotation = value;
+      if (on_rotate != null) on_rotate(transform.local_rotation);
     }
 
-    return frame.angleDegrees;
+    return transform.local_rotation;
   }
 
   inline function set_scale_x(value:Float) {
-    if (value != scale_x) {
-      scale_x = value;
-      dirty = true;
-
-      if (!sync_locked) {
-        sync_shapes();
-        // TODO - Child Body transforms
-        // sync_children();
-        update_static_bounds();
-      }
+    if (value != transform.local_scale_x) {
+      transform.local_scale_x = value;
     }
 
-    return scale_x;
+    return transform.local_scale_x;
   }
 
   inline function set_scale_y(value:Float) {
-    if (value != scale_y) {
-      scale_y = value;
-      dirty = true;
-
-      if (!sync_locked) {
-        sync_shapes();
-        // TODO - Child Body transforms
-        // sync_children();
-        update_static_bounds();
-      }
+    if (value != transform.local_scale_y) {
+      transform.local_scale_y = value;
     }
 
-    return scale_y;
+    return transform.local_scale_y;
   }
 
   inline function set_shape(value:Shape) {

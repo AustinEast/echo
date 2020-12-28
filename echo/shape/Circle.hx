@@ -48,7 +48,7 @@ class Circle extends Shape implements IPooled {
   }
 
   override inline function put() {
-    parent = null;
+    super.put();
     if (!pooled) {
       pooled = true;
       _pool.put_unsafe(this);

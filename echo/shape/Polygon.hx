@@ -35,8 +35,6 @@ class Polygon extends Shape implements IPooled {
 
   public var pooled:Bool;
 
-  var local_frame:Frame2;
-
   var local_vertices:Array<Vector2>;
 
   var _vertices:Array<Vector2>;
@@ -48,6 +46,10 @@ class Polygon extends Shape implements IPooled {
   var dirty_vertices:Bool;
 
   var dirty_bounds:Bool;
+  /**
+   * A cached `Vector2` used to reduce allocations. Used Internally.
+   */
+  var sync_pos:Vector2 = new Vector2(0, 0);
   /**
    * Gets a Polygon from the pool, or creates a new one if none are available. Call `put()` on the Polygon to place it back in the pool.
    * @param x
@@ -107,8 +109,8 @@ class Polygon extends Shape implements IPooled {
   // TODO
   // public static inline function get_from_circle(c:Circle, sub_divisions:Int = 6) {}
 
-  override inline function put() {
-    parent = null;
+  override function put() {
+    super.put();
     if (!pooled) {
       pooled = true;
       _pool.put_unsafe(this);
@@ -116,14 +118,12 @@ class Polygon extends Shape implements IPooled {
   }
 
   public inline function set(x:Float = 0, y:Float = 0, rotation:Float = 0, ?vertices:Array<Vector2>, scale_x:Float = 1, scale_y:Float = 1):Polygon {
-    lock_sync();
     local_x = x;
     local_y = y;
     local_rotation = rotation;
     local_scale_x = scale_x;
     local_scale_y = scale_y;
     set_vertices(vertices);
-    unlock_sync();
     return this;
   }
 
@@ -134,7 +134,6 @@ class Polygon extends Shape implements IPooled {
     local_vertices[1].set(rect.ex, -rect.ey);
     local_vertices[2].set(rect.ex, rect.ey);
     local_vertices[3].set(-rect.ex, rect.ey);
-    lock_sync();
     local_x = rect.local_x;
     local_y = rect.local_y;
     local_rotation = rect.local_rotation;
@@ -142,7 +141,6 @@ class Polygon extends Shape implements IPooled {
     local_scale_y = rect.local_scale_y;
     dirty_vertices = true;
     dirty_bounds = true;
-    unlock_sync();
     return this;
   }
 
@@ -152,7 +150,7 @@ class Polygon extends Shape implements IPooled {
     _vertices = [];
     _normals = [];
     _bounds = AABB.get();
-    local_frame = new Frame2(new Vector2(0, 0), 0);
+    transform.on_dirty = on_dirty;
     set_vertices(vertices);
   }
 
@@ -204,11 +202,6 @@ class Polygon extends Shape implements IPooled {
 
   override inline function collide_polygon(p:Polygon):Null<CollisionData> return p.polygon_and_polygon(this, true);
 
-  override inline function transform() {
-    dirty_vertices = true;
-    dirty_bounds = true;
-  }
-
   override inline function get_top():Float {
     if (count == 0 || vertices[0] == null) return y;
 
@@ -257,8 +250,7 @@ class Polygon extends Shape implements IPooled {
     if (local_vertices[index] == null) local_vertices[index] = new Vector2(x, y);
     else local_vertices[index].set(x, y);
 
-    dirty_vertices = true;
-    dirty_bounds = true;
+    set_dirty();
   }
 
   public inline function set_vertices(?vertices:Array<Vector2>, ?count:Int):Void {
@@ -266,30 +258,26 @@ class Polygon extends Shape implements IPooled {
     this.count = (count != null && count >= 0) ? count : local_vertices.length;
     if (count > local_vertices.length) for (i in local_vertices.length...count) local_vertices[i] = new Vector2(0, 0);
 
+    set_dirty();
+  }
+
+  function on_dirty(t) {
+    set_dirty();
+  }
+
+  inline function set_dirty() {
     dirty_vertices = true;
     dirty_bounds = true;
   }
 
   inline function transform_vertices():Void {
-    local_frame.offset.set(local_x, local_y);
-    local_frame.angleDegrees = local_rotation;
-
-    // concat the parent frame, if possible
-    if (parent != null) {
-      local_frame.offset.x *= parent.scale_x;
-      local_frame.offset.y *= parent.scale_y;
-      var pos = (parent.frame.linearMatrix * local_frame.offset).addWith(parent.frame.offset);
-      local_frame.angleDegrees = MathUtil.wrap(parent.frame.angleDegrees + local_frame.angleDegrees, 360);
-      local_frame.offset.set(pos.x, pos.y);
-    }
-
     // clear any extra vertices
     while (_vertices.length > count) _vertices.pop();
 
     for (i in 0...count) {
       if (local_vertices[i] == null) continue;
       if (_vertices[i] == null) _vertices[i] = new Vector2(0, 0);
-      var pos = local_frame.transformFrom(new Vector2(local_vertices[i].x * scale_x, local_vertices[i].y * scale_y));
+      var pos = transform.point_to_world(local_vertices[i].x, local_vertices[i].y);
       _vertices[i].set(pos.x, pos.y);
     }
   }

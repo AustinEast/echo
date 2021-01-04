@@ -1,6 +1,5 @@
 package state;
 
-import hxmath.math.MathUtil;
 import echo.data.Data.IntersectionData;
 import echo.util.SAT;
 import echo.Line;
@@ -22,8 +21,15 @@ class BezierState extends BaseState {
   var line:Line;
   var t:Float = 0;
   var qt:Float = 0;
+  var curve_mode_button:Interactive;
 
   override function enter(parent:World) {
+    Main.instance.state_text.text = "Sample: Bezier Curves (CLICK to drag Control Points)";
+    curve_mode_button = Main.instance.addChoice('Curve Mode', ['Cubic', 'Quadratic', 'Linear'], (i) -> {
+      current_mode = i;
+      bezier.curve_mode = mode[current_mode];
+    }, current_mode, 140);
+
     super.enter(parent);
 
     var c = parent.center();
@@ -70,12 +76,6 @@ class BezierState extends BaseState {
     t += dt;
     qt += dt * 0.25;
 
-    if (Key.isPressed(Key.SPACE)) {
-      current_mode++;
-      if (current_mode >= mode.length) current_mode = 0;
-      bezier.curve_mode = mode[current_mode];
-    }
-
     // Draw the Bezier Curve
     Main.instance.debug.draw_bezier(bezier, true, true);
 
@@ -98,5 +98,10 @@ class BezierState extends BaseState {
     // Draw a point along the Bezier Curve
     var p = bezier.get_point(0.5 * (1 + Math.sin(2 * Math.PI * qt)));
     if (p != null) Main.instance.debug.draw_circle(p.x, p.y, 5, Main.instance.debug.shape_color);
+  }
+
+  override function exit(world:World) {
+    curve_mode_button.remove();
+    super.exit(world);
   }
 }

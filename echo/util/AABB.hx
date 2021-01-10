@@ -119,6 +119,8 @@ class AABB implements IPooled {
     }
   }
 
+  function toString() return 'AABB: {min_x: $min_x, min_y: $min_y, max_x: $max_x, max_y: $max_y}';
+
   // getters
   static function get_pool():IPool<AABB> return _pool;
 

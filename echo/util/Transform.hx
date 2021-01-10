@@ -5,11 +5,11 @@ import hxmath.math.Matrix3x3;
 import hxmath.math.Vector2;
 import hxmath.math.Vector3;
 
-using hxmath.math.MathUtil;
-using echo.util.Ext;
 using Math;
+using echo.util.Ext;
+using hxmath.math.MathUtil;
 
-class Transform implements IDisposable {
+class Transform implements IDisposable #if cog implements cog.IComponent #end {
   /**
    * The Transform's position on the X axis in world coordinates.
    */
@@ -33,23 +33,23 @@ class Transform implements IDisposable {
   /**
    * The Transform's position on the X axis in local coordinates.
    */
-  public var local_x(default, set):Float = 0;
+  public var local_x(default, set):Float;
   /**
    * The Transform's position on the Y axis in local coordinates.
    */
-  public var local_y(default, set):Float = 0;
+  public var local_y(default, set):Float;
   /**
    * The Transform's rotation (as degrees) in local coordinates.
    */
-  public var local_rotation(default, set):Float = 0;
+  public var local_rotation(default, set):Float;
   /**
    * The Transform's scale on the X axis in local coordinates.
    */
-  public var local_scale_x(default, set):Float = 1;
+  public var local_scale_x(default, set):Float;
   /**
    * The Transform's scale on the Y axis in local coordinates.
    */
-  public var local_scale_y(default, set):Float = 1;
+  public var local_scale_y(default, set):Float;
   /**
    * Optional callback method that gets called when the Transform is set as dirty.
    */
@@ -112,7 +112,13 @@ class Transform implements IDisposable {
       + a.m22 * v.z);
   }
 
-  public function new() {}
+  public function new(x:Float = 0, y:Float = 0, rotation:Float = 0, scale_x:Float = 1, scale_y:Float = 1) {
+    local_x = x;
+    local_y = y;
+    local_rotation = rotation;
+    local_scale_x = scale_x;
+    local_scale_y = scale_y;
+  }
   /**
    * Gets this Transform's parent Transform, if it has one.
   **/
@@ -300,6 +306,11 @@ class Transform implements IDisposable {
     if (parent == null) set_local_position(position);
     else set_local_position(parent.point_to_local(position.x, position.y));
   }
+
+  public inline function set_xy(x:Float = 0, y:Float = 0) {
+    this.x = x;
+    this.y = y;
+  }
   /**
    * Gets the Transform's scale in world coordinates.
    */
@@ -315,6 +326,11 @@ class Transform implements IDisposable {
     if (parent == null) set_local_scale(scale);
     else set_local_scale(parent.scale_to_local(scale.x, scale.y));
   }
+
+  public inline function set_scale_xy(x:Float = 0, y:Float = 0) {
+    scale_x = x;
+    scale_y = y;
+  }
   /**
    * Gets the Transform's position in local coordinates.
    */
@@ -329,11 +345,21 @@ class Transform implements IDisposable {
     local_x = position.x;
     local_y = position.y;
   }
+
+  public inline function set_local_xy(x:Float = 0, y:Float = 0) {
+    local_x = x;
+    local_y = y;
+  }
   /**
    * Gets the Transform's scale in local coordinates.
    */
   public inline function get_local_scale() {
     return new Vector2(local_scale_x, local_scale_y);
+  }
+
+  public inline function set_local_scale_xy(x:Float = 0, y:Float = 0) {
+    local_scale_x = x;
+    local_scale_y = y;
   }
   /**
    * Sets the Transform's scale from local coordinates.

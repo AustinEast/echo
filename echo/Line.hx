@@ -1,10 +1,12 @@
 package echo;
 
 import echo.data.Data.IntersectionData;
+import echo.util.AABB;
 import echo.util.Pool;
 import echo.util.Proxy;
 import hxmath.math.Vector2;
 
+using echo.util.Ext;
 using hxmath.math.MathUtil;
 
 @:using(echo.Echo)
@@ -102,9 +104,9 @@ class Line implements IProxy implements IPooled {
     return start - ratio.clamp(0, 1) * (start - end);
   }
   /**
-   * Gets the normal on the side of the line the point is.
+   * Gets the Line's normal based on the relative position of the point.
    */
-  public function side(point:Vector2, ?set:Vector2) {
+  public inline function side(point:Vector2, ?set:Vector2) {
     var rad = (dx - x) * (point.y - y) - (dy - y) * (point.x - x);
     var dir = start - end;
     var normal = set == null ? new Vector2(0, 0) : set;
@@ -114,9 +116,46 @@ class Line implements IProxy implements IPooled {
     return normal.normalize();
   }
 
-  public inline function get_length() return start.distanceTo(end);
+  public inline function to_aabb(put_self:Bool = false) {
+    if (put_self) {
+      var aabb = bounds();
+      put();
+      return aabb;
+    }
+    return bounds();
+  }
 
-  public inline function get_radians() return Math.atan2(dy - y, dx - x);
+  public inline function bounds(?aabb:AABB) {
+    var min_x = 0.;
+    var min_y = 0.;
+    var max_x = 0.;
+    var max_y = 0.;
+    if (x < dx) {
+      min_x = x;
+      max_x = dx;
+    }
+    else {
+      min_x = dx;
+      max_x = x;
+    }
+    if (y < dy) {
+      min_y = y;
+      max_y = dy;
+    }
+    else {
+      min_y = dy;
+      max_y = y;
+    }
+
+    if (min_x - max_x == 0) max_x += 1;
+    if (min_y + max_y == 0) max_y += 1;
+
+    return (aabb == null) ? AABB.get_from_min_max(min_x, min_y, max_x, max_y) : aabb.set_from_min_max(min_x, min_y, max_x, max_y);
+  }
+
+  inline function get_length() return start.distanceTo(end);
+
+  inline function get_radians() return Math.atan2(dy - y, dx - x);
 
   public function set_length(l:Float):Float {
     var old = length;

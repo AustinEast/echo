@@ -1,10 +1,10 @@
 package echo.util;
 
-import echo.util.Pool;
 import echo.Body;
 import echo.Shape;
-import echo.shape.Rect;
 import echo.data.Data;
+import echo.shape.Rect;
+import echo.util.Pool;
 /**
  * Simple QuadTree implementation to assist with broad-phase 2D collisions.
  */
@@ -52,11 +52,33 @@ class QuadTree extends AABB implements IPooled {
     contents = [];
   }
   /**
-   * Gets a QuadTree from the pool of available Quadtrees (or creates one if none are available), and sets it with the provided values.
+   * Gets an Quadtree from the pool, or creates a new one if none are available. Call `put()` on the Quadtree to place it back in the pool.
+   *
+   * Note - The X and Y positions represent the center of the Quadtree. To set the Quadtree from its Top-Left origin, `Quadtree.get_from_min_max()` is available.
+   * @param x The centered X position of the Quadtree.
+   * @param y The centered Y position of the Quadtree.
+   * @param width The width of the Quadtree.
+   * @param height The height of the Quadtree.
+   * @return Quadtree
    */
   public static inline function get(x:Float = 0, y:Float = 0, width:Float = 1, height:Float = 1):QuadTree {
     var qt = _pool.get();
     qt.set(x, y, width, height);
+    qt.clear_children();
+    qt.pooled = false;
+    return qt;
+  }
+  /**
+   * Gets an Quadtree from the pool, or creates a new one if none are available. Call `put()` on the Quadtree to place it back in the pool.
+   * @param min_x
+   * @param min_y
+   * @param max_x
+   * @param max_y
+   * @return Quadtree
+   */
+  public static inline function get_from_min_max(min_x:Float, min_y:Float, max_x:Float, max_y:Float):QuadTree {
+    var qt = _pool.get();
+    qt.set_from_min_max(min_x, min_y, max_x, max_y);
     qt.clear_children();
     qt.pooled = false;
     return qt;

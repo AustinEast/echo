@@ -2,6 +2,7 @@ package echo.util;
 
 import echo.shape.Rect;
 import echo.util.Pool;
+import hxmath.math.Vector2;
 
 class AABB implements IPooled {
   public static var pool(get, never):IPool<AABB>;
@@ -88,6 +89,10 @@ class AABB implements IPooled {
 
   public inline function overlaps(other:AABB):Bool {
     return this.min_x < other.max_x && this.max_x >= other.min_x && this.min_y < other.max_y && this.max_y >= other.min_y;
+  }
+
+  public inline function contains(point:Vector2):Bool {
+    return min_x <= point.x && max_x >= point.x && min_y <= point.y && max_y >= point.y;
   }
 
   public inline function load(aabb:AABB):AABB {

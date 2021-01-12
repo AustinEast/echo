@@ -3,8 +3,8 @@ package echo.util;
 import echo.util.Disposable;
 import hxmath.math.Vector2;
 
-using hxmath.math.MathUtil;
 using Math;
+using hxmath.math.MathUtil;
 
 class Bezier implements IDisposable {
   /**
@@ -316,6 +316,8 @@ class Bezier implements IDisposable {
 
   public var curve_count(default, null):Int = 0;
 
+  public var on_dirty:Bezier->Void;
+
   var control_points:Array<Vector2>;
 
   var dirty:Bool = true;
@@ -324,6 +326,7 @@ class Bezier implements IDisposable {
     this.control_points = control_points != null ? control_points : [];
     this.curve_mode = curve_mode;
     update_curve_count();
+    set_dirty();
   }
 
   public function dispose() {
@@ -334,7 +337,7 @@ class Bezier implements IDisposable {
   public function add_control_point(x:Float, y:Float) {
     control_points.push(new Vector2(x, y));
     update_curve_count();
-    dirty = true;
+    set_dirty();
   }
 
   public inline function get_control_point(index:Int):Null<Vector2> {
@@ -349,19 +352,19 @@ class Bezier implements IDisposable {
       update_curve_count();
     }
     control_points[index].set(x, y);
-    dirty = true;
+    set_dirty();
   }
 
   public inline function remove_control_point(index:Int) {
     control_points.splice(index, 1);
     update_curve_count();
-    dirty = true;
+    set_dirty();
   }
 
   public inline function remove_all_control_points() {
     control_points.resize(0);
     update_curve_count();
-    dirty = true;
+    set_dirty();
   }
   /**
    * Gets the point on the Curve at the defined `t`.
@@ -447,6 +450,11 @@ class Bezier implements IDisposable {
     return lines;
   }
 
+  public function set_dirty() {
+    if (!dirty && on_dirty != null) on_dirty(this);
+    dirty = true;
+  }
+
   inline function get_control_count() return control_points.length;
 
   inline function update_curve_count() {
@@ -454,7 +462,7 @@ class Bezier implements IDisposable {
   }
 
   inline function set_line_mode(v:BezierLineMode) {
-    if (line_mode != v) dirty = true;
+    if (line_mode != v) set_dirty();
     return line_mode = v;
   }
 
@@ -462,7 +470,7 @@ class Bezier implements IDisposable {
     if (curve_mode != v) {
       curve_mode = v;
       update_curve_count();
-      dirty = true;
+      set_dirty();
     }
     return curve_mode;
   }

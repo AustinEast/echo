@@ -1,12 +1,12 @@
 package echo.util;
 
-import echo.shape.*;
 import echo.data.Data;
+import echo.shape.*;
 import hxmath.math.Vector2;
 
-using hxmath.math.MathUtil;
-using echo.util.SAT;
 using echo.util.Ext;
+using echo.util.SAT;
+using hxmath.math.MathUtil;
 /**
  * Class containing methods to perform collision checks using the Separating Axis Thereom
  */
@@ -16,7 +16,7 @@ class SAT {
 
   public static inline function point_in_rect(p:Vector2, r:Rect):Bool {
     if (r.transformed_rect != null && r.rotation != 0) return p.point_in_polygon(r.transformed_rect);
-    return r.left <= p.x && r.right >= p.x && r.top <= p.x && r.bottom >= p.y;
+    return r.left <= p.x && r.right >= p.x && r.top <= p.y && r.bottom >= p.y;
   }
 
   public static inline function point_in_circle(p:Vector2, c:Circle):Bool {
@@ -67,6 +67,7 @@ class SAT {
     norm.set((line2.dy - line2.y) / l2l, -(line2.dx - line2.x) / l2l);
     var data = IntersectionData.get(distance, overlap, hit.x, hit.y, norm.x, norm.y, inverse);
     data.line = line1;
+    data.line2 = line2;
     return data;
   }
 

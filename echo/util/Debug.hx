@@ -40,7 +40,7 @@ class Debug {
   public function draw_line(from_x:Float, from_y:Float, to_x:Float, to_y:Float, color:Int, alpha:Float = 1) {}
 
   // Override Me!
-  public function draw_rect(x:Float, y:Float, width:Float, height:Float, color:Int, ?stroke:Int, alpha:Float = 1) {}
+  public function draw_rect(min_x:Float, min_y:Float, width:Float, height:Float, color:Int, ?stroke:Int, alpha:Float = 1) {}
 
   // Override Me!
   public function draw_circle(x:Float, y:Float, radius:Float, color:Int, ?stroke:Int, alpha:Float = 1) {}
@@ -134,7 +134,7 @@ class Debug {
     draw_line(vertices[vl].x, vertices[vl].y, vertices[0].x, vertices[0].y, stroke, 1);
   }
 
-  public function draw_bezier(bezier:Bezier, draw_control_points:Bool = false, draw_segment_markers:Bool = false) {
+  public function draw_bezier(bezier:Bezier, draw_control_points:Bool = false, draw_segment_markers:Bool = false, draw_lines:Bool = true) {
     var max_control_points = bezier.curve_count * bezier.curve_mode;
     // Draw Control Point Tangent Lines
     if (draw_control_points && bezier.curve_mode != Linear) for (i in 0...bezier.curve_count) {
@@ -160,14 +160,14 @@ class Debug {
 
     // Draw the Curve
     for (l in bezier.lines) {
-      draw_line(l.start.x, l.start.y, l.end.x, l.end.y, intersection_color);
+      if (draw_lines) draw_line(l.start.x, l.start.y, l.end.x, l.end.y, intersection_color);
 
-      if (!draw_segment_markers) continue;
-
-      var p = l.point_along_ratio(.5);
-      var edge = Line.get_from_vector(p, l.radians.radToDeg() - 90, 5);
-      draw_line(edge.start.x, edge.start.y, edge.end.x, edge.end.y, intersection_overlap_color);
-      edge.put();
+      if (draw_segment_markers) {
+        var p = l.point_along_ratio(.5);
+        var edge = Line.get_from_vector(p, l.radians.radToDeg() - 90, 5);
+        draw_line(edge.start.x, edge.start.y, edge.end.x, edge.end.y, intersection_overlap_color);
+        edge.put();
+      }
     }
 
     // Draw the Control Points
@@ -177,7 +177,7 @@ class Debug {
     }
   }
 
-  function draw_qd(tree:QuadTree) for (child in tree.children) {
+  public function draw_qd(tree:QuadTree) for (child in tree.children) {
     draw_rect(child.min_x, child.min_y, child.width, child.height, quadtree_fill_color, quadtree_color, 0.1);
     draw_qd(child);
   }
@@ -205,10 +205,10 @@ class HeapsDebug extends Debug {
     canvas.lineTo(to_x, to_y);
   }
 
-  override public inline function draw_rect(x:Float, y:Float, width:Float, height:Float, color:Int, ?stroke:Int, alpha:Float = 1.) {
+  override public inline function draw_rect(min_x:Float, min_y:Float, width:Float, height:Float, color:Int, ?stroke:Int, alpha:Float = 1.) {
     canvas.beginFill(color, alpha);
     stroke != null ? canvas.lineStyle(shape_outline_width, stroke, 1) : canvas.lineStyle();
-    canvas.drawRect(x, y, width, height);
+    canvas.drawRect(min_x, min_y, width, height);
     canvas.endFill();
   }
 
@@ -255,10 +255,10 @@ class OpenFLDebug extends Debug {
     canvas.graphics.lineTo(to_x, to_y);
   }
 
-  override public inline function draw_rect(x:Float, y:Float, width:Float, height:Float, color:Int, ?stroke:Int, alpha:Float = 1.) {
+  override public inline function draw_rect(min_x:Float, min_y:Float, width:Float, height:Float, color:Int, ?stroke:Int, alpha:Float = 1.) {
     canvas.graphics.beginFill(color, alpha);
     stroke != null ? canvas.graphics.lineStyle(1, stroke, 1) : canvas.graphics.lineStyle();
-    canvas.graphics.drawRect(x, y, width, height);
+    canvas.graphics.drawRect(min_x, min_y, width, height);
     canvas.graphics.endFill();
   }
 
@@ -290,12 +290,12 @@ class HaxePunkDebug extends Debug {
     Draw.line(from_x, from_y, to_x, to_y);
   }
 
-  override public inline function draw_rect(x:Float, y:Float, width:Float, height:Float, color:Int, ?stroke:Int, alpha:Float = 1.) {
+  override public inline function draw_rect(min_x:Float, min_y:Float, width:Float, height:Float, color:Int, ?stroke:Int, alpha:Float = 1.) {
     Draw.setColor(color, alpha);
-    Draw.rect(x, y, width, height);
+    Draw.rect(min_x, min_y, width, height);
     if (stroke != null) {
       Draw.setColor(stroke, 1);
-      Draw.rect(x, y, width, height);
+      Draw.rect(min_x, min_y, width, height);
     }
   }
 

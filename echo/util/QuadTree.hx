@@ -1,9 +1,6 @@
 package echo.util;
 
-import echo.Body;
-import echo.Shape;
 import echo.data.Data;
-import echo.shape.Rect;
 import echo.util.Pool;
 /**
  * Simple QuadTree implementation to assist with broad-phase 2D collisions.
@@ -28,9 +25,11 @@ class QuadTree extends AABB implements IPooled {
    */
   public var contents:Array<QuadTreeData>;
   /**
-   * Gets the total amount of `QuadTreeData` contents in the Quadtree, recursively. To get the non-recursive amount, check `quadtree.contents.length`.
+   * Gets the total amount of `QuadTreeData` contents in the Quadtree, recursively. To get the non-recursive amount, check `quadtree.contents_count`.
    */
   public var count(get, null):Int;
+
+  public var contents_count:Int;
   /**
    * A QuadTree is regarded as a `leaf` if it has **no** QuadTree children (ie `quadtree.children.length == 0`).
    */
@@ -50,6 +49,7 @@ class QuadTree extends AABB implements IPooled {
     this.depth = depth;
     children = [];
     contents = [];
+    contents_count = 0;
   }
   /**
    * Gets an Quadtree from the pool, or creates a new one if none are available. Call `put()` on the Quadtree to place it back in the pool.
@@ -92,6 +92,7 @@ class QuadTree extends AABB implements IPooled {
       for (child in children) child.put();
       children.resize(0);
       contents.resize(0);
+      contents_count = 0;
       nodes_list.resize(0);
       _pool.put_unsafe(this);
     }
@@ -104,23 +105,40 @@ class QuadTree extends AABB implements IPooled {
     // If the new data does not intersect this node, stop.
     if (!data.bounds.overlaps(this)) return;
     // If the node is a leaf and contains more than the maximum allowed, split it.
-    if (leaf && contents.length + 1 > max_contents) split();
+    if (leaf && contents_count + 1 > max_contents) split();
     // If the node is still a leaf, push the data to it.
     // Else try to insert the data into the node's children
-    if (leaf) contents.push(data);
+    if (leaf) {
+      var index = get_first_null(contents);
+      if (index == -1) contents.push(data);
+      else contents[index] = data;
+      contents_count++;
+    }
     else for (child in children) child.insert(data);
   }
   /**
    * Attempts to remove the `QuadTreeData` from the QuadTree.
    */
   public function remove(data:QuadTreeData):Bool {
-    if (leaf) return contents.remove(data);
+    if (leaf) {
+      var i = 0;
+      while (i < contents.length) {
+        if (contents[i] != null && contents[i].id == data.id) {
+          contents[i] = null;
+          contents_count--;
+          return true;
+        }
+        i++;
+      }
+      return false;
+      // return contents.remove(data);
+    }
 
     var removed = false;
     for (child in children) if (child.remove(data)) removed = true;
-    if (removed) return shake();
+    if (removed) shake();
 
-    return false;
+    return removed;
   }
   /**
    * Updates the `QuadTreeData` in the QuadTree by first removing the `QuadTreeData` from the QuadTree, then inserting it.
@@ -140,7 +158,7 @@ class QuadTree extends AABB implements IPooled {
       return;
     }
     if (leaf) {
-      for (data in contents) if (data.bounds.overlaps(aabb)) result.push(data);
+      for (data in contents) if (data != null && data.bounds.overlaps(aabb)) result.push(data);
     }
     else {
       for (child in children) child.query(aabb, result);
@@ -165,7 +183,12 @@ class QuadTree extends AABB implements IPooled {
           var node = nodes_list.shift();
           if (node != this && node.leaf) {
             for (data in node.contents) {
-              if (contents.indexOf(data) == -1) contents.push(data);
+              if (contents.indexOf(data) == -1) {
+                var index = get_first_null(contents);
+                if (index == -1) contents.push(data);
+                else contents[index] = data;
+                contents_count++;
+              }
             }
           }
           else for (child in node.children) nodes_list.push(child);
@@ -200,10 +223,11 @@ class QuadTree extends AABB implements IPooled {
       child.depth = depth + 1;
       child.max_depth = max_depth;
       child.max_contents = max_contents;
-      for (j in 0...contents.length) child.insert(contents[j]);
+      for (j in 0...contents.length) if (contents[j] != null) child.insert(contents[j]);
       children.push(child);
     }
     contents.resize(0);
+    contents_count = 0;
   }
   /**
    * Clears the Quadtree's `QuadTreeData` contents and all children Quadtrees.
@@ -211,6 +235,7 @@ class QuadTree extends AABB implements IPooled {
   public inline function clear() {
     clear_children();
     contents.resize(0);
+    contents_count = 0;
   }
   /**
    * Puts all of the Quadtree's children back in the pool and clears the `children` Array.
@@ -226,7 +251,7 @@ class QuadTree extends AABB implements IPooled {
    * Resets the `flag` value of the QuadTree's `QuadTreeData` contents.
    */
   inline function reset_data_flags() {
-    if (leaf) for (i in 0...contents.length) contents[i].flag = false;
+    if (leaf) for (i in 0...contents.length) if (contents[i] != null) contents[i].flag = false;
     else for (i in 0...children.length) children[i].reset_data_flags();
   }
 
@@ -237,8 +262,10 @@ class QuadTree extends AABB implements IPooled {
     // Initialize the count with this node's content's length
     var num = 0;
     for (i in 0...contents.length) {
-      contents[i].flag = true;
-      num += 1;
+      if (contents[i] != null) {
+        contents[i].flag = true;
+        num += 1;
+      }
     }
 
     // Create a list of nodes to process and push the current tree to it.
@@ -254,7 +281,7 @@ class QuadTree extends AABB implements IPooled {
       var node = nodes_list.shift();
       if (node.leaf) {
         for (i in 0...node.contents.length) {
-          if (!node.contents[i].flag) {
+          if (node.contents[i] != null && !node.contents[i].flag) {
             num += 1;
             node.contents[i].flag = true;
           }
@@ -263,6 +290,11 @@ class QuadTree extends AABB implements IPooled {
       else for (i in 0...node.children.length) nodes_list.push(node.children[i]);
     }
     return num;
+  }
+
+  function get_first_null(arr:Array<QuadTreeData>) {
+    for (i in 0...arr.length) if (arr[i] == null) return i;
+    return -1;
   }
 
   inline function get_leaf() return children.length == 0;

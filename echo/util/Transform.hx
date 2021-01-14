@@ -153,7 +153,11 @@ class Transform implements IDisposable #if cog implements cog.IComponent #end {
    * @return Matrix3x3
    */
   public inline function get_local_matrix():Matrix3x3 {
-    return translate(local_x, local_y) * rotate(local_rotation.degToRad()) * scale(local_scale_x, local_scale_y);
+    // translate(local_x, local_y) * rotate(local_rotation.degToRad()) * scale(local_scale_x, local_scale_y);
+    var radians = local_rotation.degToRad();
+    var s = Math.sin(radians);
+    var c = Math.cos(radians);
+    return new Matrix3x3(c * local_scale_x, -s * local_scale_y, local_x, s * local_scale_x, c * local_scale_y, local_y, 0, 0, 1);
   }
   /**
    * Gets the Matrix that converts from local coordinates to world coordinates.

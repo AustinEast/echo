@@ -278,6 +278,8 @@ class QuadTree extends AABB implements IPooled {
 
   inline function set_max_contents(value:Int) {
     for (child in children) child.max_contents = value;
-    return max_contents = value;
+    max_contents = value;
+    shake();
+    return max_contents;
   }
 }

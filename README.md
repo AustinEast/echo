@@ -188,10 +188,8 @@ class Main {
 
 ## Roadmap
 ### Sooner
-* Linecast updates 
-  * Endless length Line support
-  * Allow querying World's Quadtree when Linecasting
-* Allow parenting of Body transforms
+* Endless length Line support
+* Update Readme with info on the various utilities (Tilemap, Bezier, etc)
 ### Later
 * Allow Concave Polygons (through Convex Decomposition)
 * Sleeping Body optimations

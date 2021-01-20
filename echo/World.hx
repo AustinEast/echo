@@ -1,5 +1,6 @@
 package echo;
 
+import echo.util.LinearArray;
 import echo.Listener;
 import echo.data.Data;
 import echo.data.Options;
@@ -42,7 +43,7 @@ class World implements IDisposable {
    */
   public var static_quadtree:QuadTree;
   public var listeners:Listeners;
-  public var members:Array<Body>;
+  public var members:LinearArray<Body>;
   public var count(get, never):Int;
   /**
    * The amount of iterations that occur each time the World is stepped. The higher the number, the more stable the Physics Simulation will be, at the cost of performance.
@@ -52,7 +53,7 @@ class World implements IDisposable {
   var init:Bool;
 
   public function new(options:WorldOptions) {
-    members = options.members == null ? [] : options.members;
+    members = options.members == null ? new LinearArray() : options.members;
     init = false;
     width = options.width < 1 ? throw("World must have a width of at least 1") : options.width;
     height = options.height < 1 ? throw("World must have a width of at least 1") : options.height;
@@ -91,7 +92,7 @@ class World implements IDisposable {
     if (body.world == this) return body;
     if (body.world != null) body.remove();
     body.world = this;
-    members.push(body);
+    members.add(body);
     body.quadtree_data = {id: body.id, bounds: body.bounds(), flag: false};
     body.is_static() ? static_quadtree.insert(body.quadtree_data) : quadtree.insert(body.quadtree_data);
     return body;
@@ -136,7 +137,7 @@ class World implements IDisposable {
    * Clears the World's members and listeners.
    */
   public function clear() {
-    members.resize(0);
+    members.clear();
     reset_quadtrees();
     listeners.clear();
   }

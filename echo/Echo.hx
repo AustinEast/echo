@@ -50,7 +50,7 @@ class Echo {
    * @return Listener
    */
   public static function listen(world:World, ?a:BodyOrBodies, ?b:BodyOrBodies, ?options:ListenerOptions):Listener {
-    if (a == null) return b == null ? world.listeners.add(world.members, world.members, options) : world.listeners.add(b, b, options);
+    if (a == null) return b == null ? world.listeners.add(world.members.to_array(), world.members.to_array(), options) : world.listeners.add(b, b, options);
     if (b == null) return world.listeners.add(a, a, options);
     return world.listeners.add(a, b, options);
   }
@@ -64,7 +64,7 @@ class Echo {
   public static function check(world:World, ?a:BodyOrBodies, ?b:BodyOrBodies, ?options:ListenerOptions) {
     cached_listeners.clear();
 
-    if (a == null && b == null) cached_listeners.add(world.members, world.members, options);
+    if (a == null && b == null) cached_listeners.add(world.members.to_array(), world.members.to_array(), options);
     else if (a == null) cached_listeners.add(b, b, options);
     else if (b == null) cached_listeners.add(a, a, options);
     else cached_listeners.add(a, b, options);

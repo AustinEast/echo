@@ -1,5 +1,6 @@
 package echo.data;
 
+import echo.util.LinearArray;
 import echo.Body;
 import echo.data.Data;
 import echo.data.Types;
@@ -150,7 +151,7 @@ typedef WorldOptions = {
    */
   var ?gravity_y:Float;
 
-  var ?members:Array<Body>;
+  var ?members:LinearArray<Body>;
   var ?listeners:Array<Listener>;
   /**
    * The amount of iterations that occur each time the World is stepped. The higher the number, the more stable the Physics Simulation will be, at the cost of performance.

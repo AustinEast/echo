@@ -169,14 +169,14 @@ class Collisions {
   static var sqr:Array<QuadTreeData> = [];
 
   public static function overlap_body_and_bodies_bounds(body:Body, bodies:Array<Body>, world:World, results:Array<Collision>) {
-    if (body.disposed || body.shapes.length == 0 || !body.active || body.is_static()) return;
+    if (body == null || body.disposed || body.shapes.length == 0 || !body.active || body.is_static()) return;
     var bounds = body.bounds();
     qr.resize(0);
     sqr.resize(0);
     world.quadtree.query(bounds, qr);
     world.static_quadtree.query(bounds, sqr);
     for (member in bodies) {
-      if (member.disposed || member.shapes.length == 0 || !member.active || !layer_match(body, member)) continue;
+      if (member == null || member.disposed || member.shapes.length == 0 || !member.active || !layer_match(body, member)) continue;
       for (result in (member.is_dynamic() ? qr : sqr)) {
         if (result.id == member.id) results.push(Collision.get(body, member));
       }
@@ -185,8 +185,8 @@ class Collisions {
   }
 
   public static function overlap_body_and_body_bounds(a:Body, b:Body):Null<Collision> {
-    if (a.disposed || b.disposed || a.shapes.length == 0 || b.shapes.length == 0 || !a.active || !b.active || a == b || !layer_match(a, b) || a.is_static()
-      && b.is_static()) return null;
+    if (a == null || b == null || a.disposed || b.disposed || a.shapes.length == 0 || b.shapes.length == 0 || !a.active || !b.active || a == b
+      || !layer_match(a, b) || a.is_static() && b.is_static()) return null;
     var ab = a.bounds();
     var bb = b.bounds();
     var col = ab.overlaps(bb);

@@ -22,12 +22,13 @@ class Body implements IDisposable {
    * Default Body Options
    */
   public static var defaults(get, null):BodyOptions;
-
-  static var ids:Int = 0;
   /**
    * Unique id of the Body.
+   *
+   * It defaults to `-1` when the Body is created, but it is set to a unique value once the Body is added to a `World`.
+   * When a Body is removed from a `World`, it is set back to `-1`.
    */
-  public var id(default, null):Int;
+  public var id:Int;
   /**
    * The Body's position on the X axis.
    */
@@ -210,7 +211,7 @@ class Body implements IDisposable {
    * @param options Optional values to configure the new Body
    */
   public function new(?options:BodyOptions) {
-    this.id = ++ids;
+    this.id = -1;
     active = true;
     shapes = [];
     data = {};

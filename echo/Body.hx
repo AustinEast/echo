@@ -17,7 +17,7 @@ using echo.util.Ext;
  * Bodies have position, velocity, mass, an optional collider shape, and many other properties that are used in a `World` simulation.
  */
 @:build(echo.Macros.build_body())
-class Body implements IDisposable {
+class Body implements IDisposable #if cog implements cog.IComponent #end {
   /**
    * Default Body Options
    */

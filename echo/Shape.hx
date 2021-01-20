@@ -1,16 +1,16 @@
 package echo;
 
-import echo.util.Transform;
-import echo.util.AABB;
-import echo.shape.*;
 import echo.data.Data;
 import echo.data.Options;
 import echo.data.Types;
+import echo.shape.*;
+import echo.util.AABB;
+import echo.util.Transform;
 import hxmath.math.Vector2;
 /**
  * Base Shape Class. Acts as a Body's collider. Check out `echo.shapes` for all available shapes.
  */
-class Shape {
+class Shape #if cog implements cog.IComponent #end {
   /**
    * Default Shape Options
    */

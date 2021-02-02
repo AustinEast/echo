@@ -5,7 +5,7 @@ import hxmath.math.Vector2;
 import echo.Line;
 import echo.Body;
 import echo.World;
-import ghost.Random;
+import util.Random;
 
 class Linecast2State extends BaseState {
   var body_count:Int = 50;

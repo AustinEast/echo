@@ -2,7 +2,7 @@ package;
 
 import echo.World;
 import echo.util.Debug;
-import ghost.FSM;
+import util.FSM;
 
 class BaseApp extends hxd.App {
   public var debug:HeapsDebug;

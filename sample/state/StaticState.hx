@@ -2,7 +2,7 @@ package state;
 
 import echo.Body;
 import echo.World;
-import ghost.Random;
+import util.Random;
 
 class StaticState extends BaseState {
   var dynamics:Array<Body>;

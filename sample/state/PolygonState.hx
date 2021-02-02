@@ -2,7 +2,7 @@ package state;
 
 import echo.Body;
 import echo.World;
-import ghost.Random;
+import util.Random;
 
 class PolygonState extends BaseState {
   var body_count:Int = 100;

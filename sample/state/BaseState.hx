@@ -2,7 +2,7 @@ package state;
 
 import echo.Body;
 import echo.World;
-import ghost.FSM;
+import util.FSM;
 
 class BaseState extends State<World> {
   override public function exit(world:World) world.clear();

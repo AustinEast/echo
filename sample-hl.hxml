@@ -9,13 +9,13 @@
 -lib heaps
 -lib hlsdl
 # -lib hldx
--lib ghostlib
 
 #flags
 -dce full
 -D windowSize=1280x720
 # -D HXMATH_USE_HEAPS_STRUCTURES
 # -D hl-profile
+# -D hl-ver=1.11.0
 # -D dump=pretty
 
 # output

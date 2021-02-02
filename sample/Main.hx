@@ -4,7 +4,7 @@ import hxd.Key;
 import echo.Echo;
 import echo.World;
 import echo.util.Debug;
-import ghost.FSM;
+import util.FSM;
 import state.*;
 
 class Main extends BaseApp {

@@ -3,7 +3,7 @@ package state;
 import echo.Line;
 import echo.Body;
 import echo.World;
-import ghost.Random;
+import util.Random;
 
 class LinecastState extends BaseState {
   var body_count:Int = 30;

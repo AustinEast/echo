@@ -4,7 +4,7 @@ import hxd.Key;
 import echo.Echo;
 import echo.World;
 import echo.util.Debug;
-import ghost.FSM;
+import util.FSM;
 import state.*;
 
 class Main extends BaseApp {
@@ -28,23 +28,24 @@ class Main extends BaseApp {
     world = Echo.start({
       width: width,
       height: height,
-      gravity_y: 50,
+      gravity_y: 100,
       iterations: 5,
       history: 1000
     });
     // Set up our Sample States
     sample_states = [
-      PolygonState, StackingState, MultiShapeState, ShapesState, GroupsState, StaticState, LinecastState, Linecast2State, TileMapState, TileMapState2
+      PolygonState, StackingState, MultiShapeState, ShapesState, GroupsState, StaticState, LinecastState, Linecast2State, TileMapState, TileMapState2,
+      BezierState
     ];
     index = 0;
     // Create a State Manager and pass it the World and the first Sample
-    fsm = new FSM<World>(world, new PolygonState());
+    fsm = new FSM<World>(world, Type.createInstance(sample_states[index], []));
     // Create a Debug drawer to display debug graphics
     debug = new HeapsDebug(s2d);
     // Set the Background color of the Scene
     engine.backgroundColor = 0x45283c;
     // Set the Heaps Scene size
-    s2d.scaleMode = Stretch(width, height);
+    s2d.scaleMode = LetterBox(width, height);
     // Get a static reference to the Heaps scene so we can access it later
     scene = s2d;
     // Add the UI elements
@@ -112,7 +113,7 @@ class Main extends BaseApp {
     addButton("Previous", previous_state, buttons);
     addButton("Restart", reset_state, buttons);
     addButton("Next", next_state, buttons);
-    gravity_slider = addSlider("Gravity", () -> return world.gravity.y, (v) -> world.gravity.y = v, -200, 200);
+    gravity_slider = addSlider("Gravity", () -> return world.gravity.y, (v) -> world.gravity.y = v, -100, 300);
     iterations_slider = addSlider("Iterations", () -> return world.iterations, (v) -> world.iterations = Std.int(v), 1, 10, true);
   }
 

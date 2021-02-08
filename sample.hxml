@@ -7,10 +7,9 @@
 # libraries
 -lib echo
 -lib heaps
--lib ghostlib
 
 # copy assets
---macro ghost.Assets.copyProjectAssets()
+--macro util.Assets.copyProjectAssets()
 
 # flags 
 # use Heaps math structures with hxmath

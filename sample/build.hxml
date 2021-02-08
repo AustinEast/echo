@@ -1,7 +1,6 @@
 -lib heaps
 -lib hlsdl
 -lib echo
--lib ghostlib
 
 -main Main
 

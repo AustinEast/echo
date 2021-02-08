@@ -1,9 +1,9 @@
 package echo.shape;
 
+import echo.data.Data;
+import echo.shape.*;
 import echo.util.AABB;
 import echo.util.Pool;
-import echo.shape.*;
-import echo.data.Data;
 import hxmath.math.Vector2;
 
 using echo.util.SAT;
@@ -47,8 +47,8 @@ class Circle extends Shape implements IPooled {
     radius = 0;
   }
 
-  override inline function put() {
-    parent = null;
+  override function put() {
+    super.put();
     if (!pooled) {
       pooled = true;
       _pool.put_unsafe(this);

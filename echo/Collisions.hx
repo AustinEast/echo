@@ -19,10 +19,6 @@ class Collisions {
         b.collided = false;
         for (shape in b.shapes) {
           shape.collided = false;
-          if (shape.type == RECT) {
-            var r:echo.shape.Rect = cast shape;
-            if (r.transformed_rect != null) r.transformed_rect.collided = false;
-          }
         }
         if (b.active && b.is_dynamic() && b.dirty && b.shapes.length > 0) {
           if (b.quadtree_data.bounds == null) b.quadtree_data.bounds = b.bounds();
@@ -60,6 +56,7 @@ class Collisions {
               overlap_body_and_bodies_bounds(bb, aa, world, listener.quadtree_results);
             case Right(ab):
               overlap_bodies_and_bodies_bounds(aa, ab, world, listener.quadtree_results);
+              if (aa != ab) overlap_bodies_and_bodies_bounds(ab, aa, world, listener.quadtree_results);
           }
       }
       // Narrow Phase

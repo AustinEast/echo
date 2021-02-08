@@ -110,7 +110,7 @@ class Echo {
    * @param test The Body or Array of Bodies to Cast the Line at.
    * @return Null<Intersection> the Intersection with the closest Body, if any occured.
    */
-  public static inline function linecast_floats(x:Float, y:Float, dx:Float, dy:Float, test:BodyOrBodies, ?world:World):Null<Intersection> {
+  public static function linecast_floats(x:Float, y:Float, dx:Float, dy:Float, test:BodyOrBodies, ?world:World):Null<Intersection> {
     var line = Line.get(x, y, dx, dy);
     var result = linecast(line, test, world);
     line.put();
@@ -124,7 +124,7 @@ class Echo {
    * @param test The Body or Array of Bodies to Cast the Line at.
    * @return Null<Intersection> the Intersection with the closest Body, if any occured.
    */
-  public static inline function linecast_vector(start:Vector2, angle:Float, length:Float, test:BodyOrBodies, ?world:World):Null<Intersection> {
+  public static function linecast_vector(start:Vector2, angle:Float, length:Float, test:BodyOrBodies, ?world:World):Null<Intersection> {
     var line = Line.get_from_vector(start, angle, length);
     var result = linecast(line, test, world);
     line.put();
@@ -137,7 +137,7 @@ class Echo {
    * @param test The Body or Array of Bodies to Cast the Line at.
    * @return Null<Intersection> the Intersection with the closest Body, if any occured.
    */
-  public static inline function linecast_vectors(start:Vector2, end:Vector2, test:BodyOrBodies, ?world:World):Null<Intersection> {
+  public static function linecast_vectors(start:Vector2, end:Vector2, test:BodyOrBodies, ?world:World):Null<Intersection> {
     var line = Line.get_from_vectors(start, end);
     var result = linecast(line, test, world);
     line.put();
@@ -149,7 +149,7 @@ class Echo {
    * @param test The Body or Array of Bodies to Cast the Line at.
    * @return Null<Intersection> the Intersection with the closest Body, if any occured.
    */
-  public static inline function linecast(line:Line, test:BodyOrBodies, ?world:World):Null<Intersection> {
+  public static function linecast(line:Line, test:BodyOrBodies, ?world:World):Null<Intersection> {
     var closest:Null<Intersection> = null;
     var lb = AABB.get_from_min_max(Math.min(line.start.x, line.end.x), Math.min(line.start.y, line.end.y), Math.max(line.start.x, line.end.x),
       Math.max(line.start.y, line.end.y));
@@ -220,7 +220,7 @@ class Echo {
    * @param test The Body or Array of Bodies to Cast the Line at.
    * @return Array<Intersection> All Intersections found. if none occured, the length will be 0.
    */
-  public static inline function linecast_all(line:Line, test:BodyOrBodies, ?world:World):Array<Intersection> {
+  public static function linecast_all(line:Line, test:BodyOrBodies, ?world:World):Array<Intersection> {
     var intersections:Array<Intersection> = [];
     var lb = AABB.get_from_min_max(Math.min(line.start.x, line.end.x), Math.min(line.start.y, line.end.y), Math.max(line.start.x, line.end.x),
       Math.max(line.start.y, line.end.y));

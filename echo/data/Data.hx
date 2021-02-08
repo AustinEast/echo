@@ -181,6 +181,10 @@ class IntersectionData implements IPooled {
   public var line:Line;
   public var shape:Shape;
   /**
+   * The second Line in the Intersection. This is only set when intersecting two Lines.
+   */
+  public var line2:Line;
+  /**
    * The position along the line where the line hit the shape.
    */
   public var hit:Vector2;
@@ -196,14 +200,20 @@ class IntersectionData implements IPooled {
    * The normal vector (direction) of the Line's penetration into the Shape.
    */
   public var normal:Vector2;
+  /**
+    Indicates if normal was inversed and usually occurs when Line penetrates into the Shape from the inside.
+  **/
+  public var inverse_normal:Bool;
 
   public var pooled:Bool;
 
-  public static inline function get(distance:Float, overlap:Float, x:Float, y:Float, normal_x:Float, normal_y:Float):IntersectionData {
+  public static inline function get(distance:Float, overlap:Float, x:Float, y:Float, normal_x:Float, normal_y:Float,
+      inverse_normal:Bool = false):IntersectionData {
     var i = _pool.get();
     i.line = null;
     i.shape = null;
-    i.set(distance, overlap, x, y, normal_x, normal_y);
+    i.line2 = null;
+    i.set(distance, overlap, x, y, normal_x, normal_y, inverse_normal);
     i.pooled = false;
     return i;
   }
@@ -213,9 +223,10 @@ class IntersectionData implements IPooled {
     normal = new Vector2(0, 0);
   }
 
-  public inline function set(distance:Float, overlap:Float, x:Float, y:Float, normal_x:Float, normal_y:Float) {
+  public inline function set(distance:Float, overlap:Float, x:Float, y:Float, normal_x:Float, normal_y:Float, inverse_normal:Bool = false) {
     this.distance = distance;
     this.overlap = overlap;
+    this.inverse_normal = inverse_normal;
     hit.set(x, y);
     normal.set(normal_x, normal_y);
   }
@@ -243,7 +254,7 @@ class QuadTreeData {
   /**
    * Helper flag to check if this Data has been counted during queries.
    */
-  public var flag:Bool;
+  public var flag:Bool = false;
 }
 
 @:enum

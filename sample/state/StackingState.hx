@@ -2,7 +2,7 @@ package state;
 
 import echo.Body;
 import echo.World;
-import ghost.Random;
+import util.Random;
 
 class StackingState extends BaseState {
   var body_count:Int = 149;

@@ -1,16 +1,16 @@
 package echo;
 
-import echo.util.AABB;
-import hxmath.frames.Frame2;
-import echo.shape.*;
 import echo.data.Data;
 import echo.data.Options;
 import echo.data.Types;
+import echo.shape.*;
+import echo.util.AABB;
+import echo.util.Transform;
 import hxmath.math.Vector2;
 /**
- * Base Shape Class. Acts as a Body's collider. Check out `echo.shapes` for all available shapes
+ * Base Shape Class. Acts as a Body's collider. Check out `echo.shapes` for all available shapes.
  */
-class Shape {
+class Shape #if cog implements cog.IComponent #end {
   /**
    * Default Shape Options
    */
@@ -63,19 +63,6 @@ class Shape {
    */
   public static inline function circle(?x:Float, ?y:Float, ?radius:Float, ?scale_x:Float, ?scale_y:Float) return Circle.get(x, y, radius, scale_x, scale_y);
   /**
-   * Creates a new Shape
-   * @param x
-   * @param y
-   */
-  inline function new(x:Float = 0, y:Float = 0, rotation:Float = 0) {
-    sync_pos = new Vector2(0, 0);
-    solid = true;
-    sync_locked = false;
-    local_x = _x = x;
-    local_y = _y = y;
-    local_rotation = _rotation = rotation;
-  }
-  /**
    * Enum value determining what shape this Object is (Rect, Circle, Polygon).
    */
   public var type:ShapeType;
@@ -106,25 +93,27 @@ class Shape {
    *
    * If added to a `Body`, this value is treated as an offset to the Body's X position.
    */
-  public var local_x(default, set):Float;
+  public var local_x(get, set):Float;
   /**
    * The Shape's position on the Y axis. For Rects, Circles, and simple Polygons, this position is based on the center of the Shape.
    *
    * If added to a `Body`, this value is treated as an offset to the Body's Y position.
    */
-  public var local_y(default, set):Float;
+  public var local_y(get, set):Float;
 
-  public var local_rotation(default, set):Float;
+  public var local_rotation(get, set):Float;
 
-  public var local_scale_x(default, set):Float;
+  public var local_scale_x(get, set):Float;
 
-  public var local_scale_y(default, set):Float;
+  public var local_scale_y(get, set):Float;
+
+  public var transform:Transform = new Transform();
   /**
    * Flag to set whether the Shape collides with other Shapes.
    *
    * If false, this Shape's Body will not have its position or velocity affected by other Bodies, but it will still call collision callbacks
    */
-  public var solid:Bool;
+  public var solid:Bool = true;
   /**
    * The Upper Bounds of the Shape.
    */
@@ -146,77 +135,42 @@ class Shape {
    */
   public var collided:Bool;
 
-  public var sync_locked(default, null):Bool;
-
   var parent(default, null):Body;
   /**
-   * A cached `Vector2` used to reduce allocations. Used Internally.
+   * Creates a new Shape
+   * @param x
+   * @param y
    */
-  var sync_pos:Vector2;
-
-  var _x:Float;
-  var _y:Float;
-  var _rotation:Float;
-  var _scale_x:Float;
-  var _scale_y:Float;
-
-  public function put() {
-    parent = null;
+  inline function new(x:Float = 0, y:Float = 0, rotation:Float = 0) {
+    local_x = x;
+    local_y = y;
+    local_rotation = rotation;
   }
 
-  public inline function sync():Void {
-    if (parent != null) {
-      if (local_x == 0 && local_y == 0) {
-        _x = parent.frame.offset.x;
-        _y = parent.frame.offset.y;
-      }
-      else {
-        sync_pos.set(local_x * parent.scale_x, local_y * parent.scale_y);
-        var pos = parent.frame.transformFrom(sync_pos);
-        _x = pos.x;
-        _y = pos.y;
-      }
-      _rotation = parent.frame.angleDegrees + local_rotation;
-      _scale_x = parent.scale_x * local_scale_x;
-      _scale_y = parent.scale_y * local_scale_y;
-    }
-    else {
-      _x = local_x;
-      _y = local_x;
-      _rotation = local_rotation;
-    }
-    transform();
+  public function put() {
+    transform.set_parent(null);
+    parent = null;
+    collided = false;
   }
   /**
    * Gets the Shape's position on the X and Y axis as a `Vector2`.
    */
-  public inline function get_position():Vector2 return new Vector2(_x, _y);
+  public inline function get_position():Vector2 return transform.get_position();
 
-  public inline function get_local_position():Vector2 return new Vector2(local_x, local_y);
+  public inline function get_local_position():Vector2 return transform.get_local_position();
 
-  public inline function set_position(value:Vector2):Void {
-    x = value.x;
-    y = value.y;
+  public inline function set_position(position:Vector2):Void {
+    transform.set_position(position);
   }
 
-  public inline function set_local_position(value:Vector2):Void {
-    local_x = value.x;
-    local_y = value.y;
+  public inline function set_local_position(position:Vector2):Void {
+    transform.set_local_position(position);
   }
 
   public function set_parent(?body:Body):Void {
     if (parent == body) return;
     parent = body;
-    sync();
-  }
-
-  public function lock_sync() {
-    sync_locked = true;
-  }
-
-  public function unlock_sync() {
-    sync_locked = false;
-    sync();
+    transform.set_parent(body == null ? null : body.transform);
   }
   /**
    * Returns an `AABB` representing the bounds of the `Shape`.
@@ -245,8 +199,6 @@ class Shape {
 
   function collide_polygon(p:Polygon):Null<CollisionData> return null;
 
-  function transform() {}
-
   function toString() {
     var s = switch (type) {
       case RECT: 'rect';
@@ -257,15 +209,25 @@ class Shape {
   }
 
   // getters
-  inline function get_x():Float return _x;
+  inline function get_x():Float return transform.x;
 
-  inline function get_y():Float return _y;
+  inline function get_y():Float return transform.y;
 
-  inline function get_rotation():Float return _rotation;
+  inline function get_rotation():Float return transform.rotation;
 
-  inline function get_scale_x():Float return _scale_x;
+  inline function get_scale_x():Float return transform.scale_x;
 
-  inline function get_scale_y():Float return _scale_y;
+  inline function get_scale_y():Float return transform.scale_y;
+
+  inline function get_local_x():Float return transform.local_x;
+
+  inline function get_local_y():Float return transform.local_y;
+
+  inline function get_local_rotation():Float return transform.local_rotation;
+
+  inline function get_local_scale_x():Float return transform.local_scale_x;
+
+  inline function get_local_scale_y():Float return transform.local_scale_y;
 
   function get_top():Float return y;
 
@@ -276,94 +238,44 @@ class Shape {
   function get_right():Float return x;
 
   // setters
-  inline function set_x(value:Float):Float {
-    if (parent == null) return local_x = value;
-
-    var pos = new Vector2(value, y);
-    set_local_position(parent.frame.transformTo(pos));
-    return _x;
+  inline function set_x(v:Float):Float {
+    return transform.x = v;
   }
 
-  inline function set_y(value:Float):Float {
-    if (parent == null) return local_y = value;
-
-    var pos = new Vector2(x, value);
-    set_local_position(parent.frame.transformTo(pos));
-    return _y;
+  inline function set_y(v:Float):Float {
+    return transform.y = v;
   }
 
-  inline function set_rotation(value:Float):Float {
-    if (parent == null) return local_rotation = value;
-
-    local_rotation = value - parent.frame.angleDegrees;
-    return _rotation;
+  inline function set_rotation(v:Float):Float {
+    return transform.rotation = v;
   }
 
-  inline function set_scale_x(value:Float):Float {
-    if (parent == null) return local_scale_x = value;
-    local_scale_x = value / parent.scale_x;
-    return _scale_x;
+  inline function set_scale_x(v:Float):Float {
+    return transform.scale_x = v;
   }
 
-  inline function set_scale_y(value:Float):Float {
-    if (parent == null) return local_scale_y = value;
-    local_scale_y = value / parent.scale_y;
-    return _scale_y;
+  inline function set_scale_y(v:Float):Float {
+    return transform.scale_y = v;
   }
 
-  inline function set_local_x(value:Float):Float {
-    local_x = value;
-
-    if (parent != null) {
-      if (!sync_locked) sync();
-    }
-    else _x = local_x;
-
-    return local_x;
+  inline function set_local_x(v:Float):Float {
+    return transform.local_x = v;
   }
 
-  inline function set_local_y(value:Float):Float {
-    local_y = value;
-
-    if (parent != null) {
-      if (!sync_locked) sync();
-    }
-    else _y = local_y;
-
-    return local_y;
+  inline function set_local_y(v:Float):Float {
+    return transform.local_y = v;
   }
 
-  inline function set_local_rotation(value:Float):Float {
-    local_rotation = value;
-
-    if (parent != null) {
-      if (!sync_locked) sync();
-    }
-    else _rotation = local_rotation;
-
-    return local_rotation;
+  inline function set_local_rotation(v:Float):Float {
+    return transform.local_rotation = v;
   }
 
-  inline function set_local_scale_x(value:Float):Float {
-    local_scale_x = value;
-
-    if (parent != null) {
-      if (!sync_locked) sync();
-    }
-    else _scale_x = local_scale_x;
-
-    return local_scale_x;
+  inline function set_local_scale_x(v:Float):Float {
+    return transform.local_scale_x = v;
   }
 
-  inline function set_local_scale_y(value:Float):Float {
-    local_scale_y = value;
-
-    if (parent != null) {
-      if (!sync_locked) sync();
-    }
-    else _scale_y = local_scale_y;
-
-    return local_scale_y;
+  inline function set_local_scale_y(v:Float):Float {
+    return transform.local_scale_y = v;
   }
 
   static function get_defaults():ShapeOptions return {

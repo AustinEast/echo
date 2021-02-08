@@ -125,6 +125,7 @@ body.entity = new some.package.Entity();
 * [HaxeFlixel](https://haxeflixel.com): https://gist.github.com/AustinEast/524db026a4fea298a0eebf19459131cc
 * [Heaps](https://heaps.io): https://github.com/AustinEast/echo-heaps
 * [Peyote View](https://github.com/maitag/peote-view): https://github.com/maitag/peote-views-samples/tree/master/echo
+* [HaxePunk](https://haxepunk.com): https://github.com/XANOZOID/EchoHaxePunk
 
 ### Basic Example
 ```haxe
@@ -187,10 +188,8 @@ class Main {
 
 ## Roadmap
 ### Sooner
-* Linecast updates 
-  * Endless length Line support
-  * Allow querying World's Quadtree when Linecasting
-* Allow parenting of Body transforms
+* Endless length Line support
+* Update Readme with info on the various utilities (Tilemap, Bezier, etc)
 ### Later
 * Allow Concave Polygons (through Convex Decomposition)
 * Sleeping Body optimations

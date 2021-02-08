@@ -1,7 +1,6 @@
 package echo.shape;
 
 import echo.util.AABB;
-import hxmath.frames.Frame2;
 import echo.shape.*;
 import echo.util.Pool;
 import echo.data.Data;
@@ -11,7 +10,6 @@ using echo.util.SAT;
 using echo.util.Ext;
 using hxmath.math.MathUtil;
 
-// TODO - extend Rect from Polygon to save on matrix calculations when syncing
 class Rect extends Shape implements IPooled {
   public static var pool(get, never):IPool<Rect>;
   static var _pool = new Pool<Rect>(Rect);
@@ -49,7 +47,9 @@ class Rect extends Shape implements IPooled {
   public var max(get, null):Vector2;
 
   public var pooled:Bool;
-
+  /**
+   * If the Rectangle has a rotation, this Polygon is constructed to represent the transformed vertices of the Rectangle.
+   */
   public var transformed_rect(default, null):Null<Polygon>;
   /**
    * Gets a Rect from the pool, or creates a new one if none are available. Call `put()` on the Rect to place it back in the pool.
@@ -89,10 +89,11 @@ class Rect extends Shape implements IPooled {
     ex = 0;
     ey = 0;
     type = RECT;
+    transform.on_dirty = on_dirty;
   }
 
   override function put() {
-    parent = null;
+    super.put();
     if (transformed_rect != null) {
       transformed_rect.put();
       transformed_rect = null;
@@ -111,6 +112,7 @@ class Rect extends Shape implements IPooled {
     local_rotation = rotation;
     local_scale_x = scale_x;
     local_scale_y = scale_y;
+    set_dirty();
     return this;
   }
 
@@ -126,6 +128,7 @@ class Rect extends Shape implements IPooled {
     local_rotation = rect.local_rotation;
     local_scale_x = rect.local_scale_x;
     local_scale_y = rect.local_scale_y;
+    set_dirty();
     return this;
   }
 
@@ -175,17 +178,28 @@ class Rect extends Shape implements IPooled {
 
   override inline function collide_polygon(p:Polygon):Null<CollisionData> return this.rect_and_polygon(p);
 
-  override inline function transform() {
+  override function set_parent(?body:Body) {
+    super.set_parent(body);
+    set_dirty();
+    if (transformed_rect != null) transformed_rect.set_parent(body);
+  }
+
+  function on_dirty(t) {
+    set_dirty();
+  }
+
+  inline function set_dirty() {
     if (transformed_rect == null && rotation != 0) {
       transformed_rect = Polygon.get_from_rect(this);
       transformed_rect.set_parent(parent);
     }
-    else if (transformed_rect != null) transformed_rect.set_from_rect(this);
-  }
-
-  override function set_parent(?body:Body) {
-    super.set_parent(body);
-    if (transformed_rect != null) transformed_rect.set_parent(body);
+    else if (transformed_rect != null) {
+      transformed_rect.local_x = local_x;
+      transformed_rect.local_y = local_y;
+      transformed_rect.local_rotation = local_rotation;
+      transformed_rect.local_scale_x = local_scale_x;
+      transformed_rect.local_scale_y = local_scale_y;
+    }
   }
 
   // getters

@@ -303,6 +303,8 @@ class Bezier implements IDisposable {
    * Cached Array of Lines that represents the current state of the Curve.
    */
   public var lines(get, null):Array<Line> = [];
+
+  public var length(get, null):Float;
   /**
    * The method used to construct `lines` from the Curve.
    */
@@ -400,59 +402,78 @@ class Bezier implements IDisposable {
     };
   }
 
-  function get_lines():Array<Line> {
-    if (dirty) {
-      dirty = false;
-      while (lines.length > 0) lines.pop().put();
-      // optimized for Linear Curves
-      if (curve_mode == Linear) for (j in 0...curve_count) {
-        var i = j * curve_mode;
-        if (i >= control_points.length - 1) break;
-        lines.push(Line.get(control_points[i].x, control_points[i].y, control_points[i + 1].x, control_points[i + 1].y));
-      }
-      else switch line_mode {
-        case Segments(amount):
-          var step = 1 / amount;
-          for (j in 0...curve_count) {
-            var start_index = j * curve_mode;
-            var lp:Vector2 = get_point(0, start_index);
-            for (i in 1...amount - 1) {
-              var t = i * step;
-              var p = get_point(t, start_index);
-              if (lp != null && p != null) {
-                lines.push(Line.get(lp.x, lp.y, p.x, p.y));
-              }
-              lp = p;
-            }
-            var p = get_point(1, start_index);
-            if (lp != null && p != null) {
-              lines.push(Line.get(lp.x, lp.y, p.x, p.y));
-            }
-          }
-        case Subdivisions(options):
-          var points = [];
-          for (j in 0...curve_count) {
-            var start_index = j * curve_mode;
-            var a = get_control_point(start_index);
-            var b = get_control_point(start_index + 1);
-            var c = get_control_point(start_index + 2);
-            if (curve_mode == Quadratic) subdivide_quadratic_bezier_curve(a.x, a.y, b.x, b.y, c.x, c.y, points, options);
-            else {
-              var d = get_control_point(start_index + 3);
-              subdivide_cubic_bezier_curve(a.x, a.y, b.x, b.y, c.x, c.y, d.x, d.y, points, options);
-            }
-          }
-          for (i in 0...points.length) {
-            if (i + 1 < points.length) lines.push(Line.get_from_vectors(points[i], points[i + 1]));
-          }
-      }
-    }
-    return lines;
-  }
-
   public function set_dirty() {
     if (!dirty && on_dirty != null) on_dirty(this);
     dirty = true;
+  }
+
+  function generate() {
+    dirty = false;
+    length = 0;
+
+    while (lines.length > 0) lines.pop().put();
+    // optimized for Linear Curves
+    if (curve_mode == Linear) for (j in 0...curve_count) {
+      var i = j * curve_mode;
+      if (i >= control_points.length - 1) break;
+      var l = Line.get(control_points[i].x, control_points[i].y, control_points[i + 1].x, control_points[i + 1].y);
+      length += l.length;
+      lines.push(l);
+    }
+    else switch line_mode {
+      case Segments(amount):
+        var step = 1 / amount;
+        for (j in 0...curve_count) {
+          var start_index = j * curve_mode;
+          var lp:Vector2 = get_point(0, start_index);
+          for (i in 1...amount - 1) {
+            var t = i * step;
+            var p = get_point(t, start_index);
+            if (lp != null && p != null) {
+              var l = Line.get(lp.x, lp.y, p.x, p.y);
+              length += l.length;
+              lines.push(l);
+            }
+            lp = p;
+          }
+          var p = get_point(1, start_index);
+          if (lp != null && p != null) {
+            var l = Line.get(lp.x, lp.y, p.x, p.y);
+            length += l.length;
+            lines.push(l);
+          }
+        }
+      case Subdivisions(options):
+        var points = [];
+        for (j in 0...curve_count) {
+          var start_index = j * curve_mode;
+          var a = get_control_point(start_index);
+          var b = get_control_point(start_index + 1);
+          var c = get_control_point(start_index + 2);
+          if (curve_mode == Quadratic) subdivide_quadratic_bezier_curve(a.x, a.y, b.x, b.y, c.x, c.y, points, options);
+          else {
+            var d = get_control_point(start_index + 3);
+            subdivide_cubic_bezier_curve(a.x, a.y, b.x, b.y, c.x, c.y, d.x, d.y, points, options);
+          }
+        }
+        for (i in 0...points.length) {
+          if (i + 1 < points.length) {
+            var l = Line.get_from_vectors(points[i], points[i + 1]);
+            length += l.length;
+            lines.push(l);
+          }
+        }
+    }
+  }
+
+  function get_lines():Array<Line> {
+    if (dirty) generate();
+    return lines;
+  }
+
+  function get_length():Float {
+    if (dirty) generate();
+    return length;
   }
 
   inline function get_control_count() return control_points.length;

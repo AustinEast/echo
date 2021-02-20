@@ -29,7 +29,26 @@ class Ext {
     normal.normalizeTo(len);
     return normal;
   }
-  
+  /**
+   * Gets the arc tangent angle between two `Vector2`, in radians.
+   * @param v 
+   * @param o 
+   * @return Float
+   */
+  public static inline function angle_between(v:Vector2, o:Vector2):Float {
+    return Math.atan2(v.x * o.y - v.y * o.x, v.x * o.x + v.y * o.y);
+  }
+  /**
+   * Gets the arc tangent angle between three `Vector2`, in radians.
+   * @param v 
+   * @param left
+   * @param right
+   * @return Float
+   */
+  public static inline function angle_between_2(v:Vector2, left:Vector2, right:Vector2):Float {
+    return angle_between(left - v, right - v);
+  }
+
   public static function dispose_bodies(arr:Array<Body>):Array<Body> {
     for (body in arr) body.dispose();
     return arr;

@@ -24,8 +24,8 @@ class Collisions {
           if (b.quadtree_data.bounds == null) b.quadtree_data.bounds = b.bounds();
           else b.bounds(b.quadtree_data.bounds);
           world.quadtree.update(b.quadtree_data);
+          b.dirty = false;
         }
-        b.dirty = false;
       }
     });
   }

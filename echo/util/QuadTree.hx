@@ -1,5 +1,6 @@
 package echo.util;
 
+import haxe.ds.Vector;
 import echo.data.Data;
 import echo.util.Pool;
 /**
@@ -17,9 +18,9 @@ class QuadTree extends AABB implements IPooled {
    */
   public var max_contents(default, set):Int = 10;
   /**
-   * The child QuadTrees contained in the Quadtree. If this Array is empty, the Quadtree is regarded as a `leaf`.
+   * The child QuadTrees contained in the Quadtree. If this Vector is empty, the Quadtree is regarded as a `leaf`.
    */
-  public var children:Array<QuadTree>;
+  public var children:Vector<QuadTree>;
   /**
    * The QuadTreeData contained in the Quadtree. If the Quadtree is not a `leaf`, all of it's contents will be dispersed to it's children QuadTrees (leaving this aryar emyty).
    */
@@ -33,7 +34,7 @@ class QuadTree extends AABB implements IPooled {
   /**
    * A QuadTree is regarded as a `leaf` if it has **no** QuadTree children (ie `quadtree.children.length == 0`).
    */
-  public var leaf(get, null):Bool;
+  public var leaf(get, never):Bool;
   /**
    * The QuadTree's branch position in it's collection.
    */
@@ -47,7 +48,7 @@ class QuadTree extends AABB implements IPooled {
     super();
     if (aabb != null) load(aabb);
     this.depth = depth;
-    children = [];
+    children = new Vector(4);
     contents = [];
     contents_count = 0;
   }
@@ -64,7 +65,7 @@ class QuadTree extends AABB implements IPooled {
   public static inline function get(x:Float = 0, y:Float = 0, width:Float = 1, height:Float = 1):QuadTree {
     var qt = _pool.get();
     qt.set(x, y, width, height);
-    qt.clear_children();
+    qt.clear();
     qt.pooled = false;
     return qt;
   }
@@ -79,7 +80,7 @@ class QuadTree extends AABB implements IPooled {
   public static inline function get_from_min_max(min_x:Float, min_y:Float, max_x:Float, max_y:Float):QuadTree {
     var qt = _pool.get();
     qt.set_from_min_max(min_x, min_y, max_x, max_y);
-    qt.clear_children();
+    qt.clear();
     qt.pooled = false;
     return qt;
   }
@@ -89,10 +90,7 @@ class QuadTree extends AABB implements IPooled {
   override inline function put() {
     if (!pooled) {
       pooled = true;
-      for (child in children) child.put();
-      children.resize(0);
-      contents.resize(0);
-      contents_count = 0;
+      clear();
       nodes_list.resize(0);
       _pool.put_unsafe(this);
     }
@@ -171,31 +169,30 @@ class QuadTree extends AABB implements IPooled {
    * Note - This works recursively.
    */
   public function shake():Bool {
-    if (!leaf) {
-      var len = count;
-      if (len == 0) {
-        clear_children();
-      }
-      else if (len < max_contents) {
-        nodes_list.resize(0);
-        nodes_list.push(this);
-        while (nodes_list.length > 0) {
-          var node = nodes_list.shift();
-          if (node != this && node.leaf) {
-            for (data in node.contents) {
-              if (contents.indexOf(data) == -1) {
-                var index = get_first_null(contents);
-                if (index == -1) contents.push(data);
-                else contents[index] = data;
-                contents_count++;
-              }
+    if (leaf) return false;
+    var len = count;
+    if (len == 0) {
+      clear_children();
+    }
+    else if (len < max_contents) {
+      nodes_list.resize(0);
+      nodes_list.push(this);
+      while (nodes_list.length > 0) {
+        var node = nodes_list.shift();
+        if (node != this && node.leaf) {
+          for (data in node.contents) {
+            if (contents.indexOf(data) == -1) {
+              var index = get_first_null(contents);
+              if (index == -1) contents.push(data);
+              else contents[index] = data;
+              contents_count++;
             }
           }
-          else for (child in node.children) nodes_list.push(child);
         }
-        clear_children();
-        return true;
+        else for (child in node.children) nodes_list.push(child);
       }
+      clear_children();
+      return true;
     }
     return false;
   }
@@ -224,35 +221,41 @@ class QuadTree extends AABB implements IPooled {
       child.max_depth = max_depth;
       child.max_contents = max_contents;
       for (j in 0...contents.length) if (contents[j] != null) child.insert(contents[j]);
-      children.push(child);
+      children[i] = child;
     }
-    contents.resize(0);
-    contents_count = 0;
+
+    clear_contents();
   }
   /**
    * Clears the Quadtree's `QuadTreeData` contents and all children Quadtrees.
    */
   public inline function clear() {
     clear_children();
-    contents.resize(0);
-    contents_count = 0;
+    clear_contents();
   }
   /**
    * Puts all of the Quadtree's children back in the pool and clears the `children` Array.
    */
   inline function clear_children() {
     for (i in 0...children.length) {
-      children[i].clear_children();
-      children[i].put();
+      if (children[i] != null) {
+        children[i].clear_children();
+        children[i].put();
+        children[i] = null;
+      }
     }
-    children.resize(0);
+  }
+
+  inline function clear_contents() {
+    contents.resize(0);
+    contents_count = 0;
   }
   /**
    * Resets the `flag` value of the QuadTree's `QuadTreeData` contents.
    */
-  inline function reset_data_flags() {
-    if (leaf) for (i in 0...contents.length) if (contents[i] != null) contents[i].flag = false;
-    else for (i in 0...children.length) children[i].reset_data_flags();
+  function reset_data_flags() {
+    for (i in 0...contents.length) if (contents[i] != null) contents[i].flag = false;
+    for (i in 0...children.length) if (children[i] != null) children[i].reset_data_flags();
   }
 
   // getters
@@ -297,19 +300,19 @@ class QuadTree extends AABB implements IPooled {
     return -1;
   }
 
-  inline function get_leaf() return children.length == 0;
+  inline function get_leaf() return children[0] == null;
 
   static inline function get_pool():IPool<QuadTree> return _pool;
 
   // setters
 
   inline function set_max_depth(value:Int) {
-    for (child in children) child.max_depth = value;
+    for (i in 0...children.length) if (children[i] != null) children[i].max_depth = value;
     return max_depth = value;
   }
 
   inline function set_max_contents(value:Int) {
-    for (child in children) child.max_contents = value;
+    for (i in 0...children.length) if (children[i] != null) children[i].max_depth = value;
     max_contents = value;
     shake();
     return max_contents;

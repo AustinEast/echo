@@ -258,6 +258,39 @@ typedef ShapeOptions = {
   var ?offset_y:Float;
 }
 
+typedef VerletOptions = {
+  /**
+   * Width of the Verlet World, extending right from the World's X position.
+   */
+  var width:Float;
+  /**
+   * Height of the Verlet World, extending down from the World's Y position.
+   */
+  var height:Float;
+  /**
+   * The Verlet World's position on the X axis.
+   */
+  var ?x:Float;
+  /**
+   * The Verlet World's position on the Y axis.
+   */
+  var ?y:Float;
+  /**
+   * The amount of acceleration on the X axis applied to each `Dot` every Step.
+   */
+  var ?gravity_x:Float;
+  /**
+   * The amount of acceleration on the Y axis applied to each `Dot` every Step.
+   */
+  var ?gravity_y:Float;
+
+  var ?drag:Float;
+  /**
+   * The amount of iterations that occur each time the World is stepped. The higher the number, the more stable the Physics Simulation will be, at the cost of performance.
+   */
+  var ?iterations:Int;
+}
+
 typedef RectOptions = {
   var x:Float;
   var y:Float;

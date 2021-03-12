@@ -4,8 +4,6 @@ import echo.Body;
 import echo.Listener;
 import echo.data.Data;
 import echo.util.QuadTree;
-
-using Lambda;
 /**
  * Class containing methods for performing Collisions on a World
  */
@@ -24,8 +22,8 @@ class Collisions {
           if (b.quadtree_data.bounds == null) b.quadtree_data.bounds = b.bounds();
           else b.bounds(b.quadtree_data.bounds);
           world.quadtree.update(b.quadtree_data);
+          b.dirty = false;
         }
-        b.dirty = false;
       }
     });
   }
@@ -138,8 +136,17 @@ class Collisions {
       if (listener.enter != null || listener.stay != null) {
         for (c in listener.collisions) {
           if (!c.a.disposed && !c.b.disposed) {
-            if (listener.enter != null
-              && listener.last_collisions.find((f) -> return f.a == c.a && f.b == c.b || f.a == c.b && f.b == c.a) == null) {
+            inline function find_match() {
+              var found = false;
+              for (l in listener.last_collisions) {
+                if (l.a == c.a && l.b == c.b || l.a == c.b && l.b == c.a) {
+                  found = true;
+                  break;
+                }
+              }
+              return found;
+            }
+            if (listener.enter != null && !find_match()) {
               listener.enter(c.a, c.b, c.data);
             }
             else if (listener.stay != null) {
@@ -150,9 +157,17 @@ class Collisions {
       }
       if (listener.exit != null) {
         for (lc in listener.last_collisions) {
-          if (!lc.a.disposed
-            && !lc.b.disposed
-            && listener.collisions.find((f) -> return f.a == lc.a && f.b == lc.b || f.a == lc.b && f.b == lc.a) == null) {
+          inline function find_match() {
+            var found = false;
+            for (c in listener.collisions) {
+              if (c.a == lc.a && c.b == lc.b || c.a == lc.b && c.b == lc.a) {
+                found = true;
+                break;
+              }
+            }
+            return found;
+          }
+          if (!lc.a.disposed && !lc.b.disposed && !find_match()) {
             listener.exit(lc.a, lc.b);
           }
         }

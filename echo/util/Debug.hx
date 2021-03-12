@@ -1,5 +1,6 @@
 package echo.util;
 
+import echo.util.verlet.Verlet;
 import echo.data.Data;
 import echo.shape.*;
 import hxmath.math.Vector2;
@@ -177,7 +178,20 @@ class Debug {
     }
   }
 
+  public function draw_verlet(verlet:Verlet, draw_dots:Bool = true, draw_constraints:Bool = true) {
+    for (composite in verlet.composites) {
+      if (draw_constraints) for (constraint in composite.constraints) {
+        var positions = constraint.get_positions();
+        if (positions.length > 1) for (i in 1...positions.length) {
+          draw_line(positions[i - 1].x, positions[i - 1].y, positions[i].x, positions[i].y, intersection_overlap_color);
+        }
+      }
+      if (draw_dots) for (dot in composite.dots) draw_circle(dot.x, dot.y, 2, shape_fill_color);
+    }
+  }
+
   public function draw_qd(tree:QuadTree) for (child in tree.children) {
+    if (child == null) continue;
     draw_rect(child.min_x, child.min_y, child.width, child.height, quadtree_fill_color, quadtree_color, 0.1);
     draw_qd(child);
   }

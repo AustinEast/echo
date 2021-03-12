@@ -14,13 +14,13 @@ class Main extends BaseApp {
   public var state_text:h2d.Text;
   public var gravity_slider:h2d.Slider;
   public var iterations_slider:h2d.Slider;
+  public var playing:Bool = true;
 
   var width:Int = 640;
   var height:Int = 360;
   var world:World;
   var members_text:h2d.Text;
   var fps_text:h2d.Text;
-  var playing:Bool = true;
 
   override function init() {
     instance = this;
@@ -35,7 +35,7 @@ class Main extends BaseApp {
     // Set up our Sample States
     sample_states = [
       PolygonState, StackingState, MultiShapeState, ShapesState, GroupsState, StaticState, LinecastState, Linecast2State, TileMapState, TileMapState2,
-      BezierState
+      BezierState, VerletState
     ];
     index = 0;
     // Create a State Manager and pass it the World and the first Sample

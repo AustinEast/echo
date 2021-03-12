@@ -29,8 +29,8 @@ class Physics {
       var accel_y = body.acceleration.y;
       // Apply Gravity
       if (!body.kinematic) {
-        if (gravity_x != 0) accel_x += gravity_x * body.gravity_scale;
-        if (gravity_y != 0) accel_y += gravity_y * body.gravity_scale;
+        accel_x += gravity_x * body.gravity_scale;
+        accel_y += gravity_y * body.gravity_scale;
       }
       // Apply Acceleration, Drag, and Max Velocity
       body.velocity.x = compute_velocity(body.velocity.x, accel_x, body.drag.x, body.max_velocity.x, dt);

@@ -50,6 +50,11 @@ class Transform implements IDisposable #if cog implements cog.IComponent #end {
    * The Transform's scale on the Y axis in local coordinates.
    */
   public var local_scale_y(default, set):Float;
+
+  public var right(get, never):Vector2;
+  public var left(get, never):Vector2;
+  public var up(get, never):Vector2;
+  public var down(get, never):Vector2;
   /**
    * Optional callback method that gets called when the Transform is set as dirty.
    */
@@ -453,6 +458,22 @@ class Transform implements IDisposable #if cog implements cog.IComponent #end {
     if (parent == null) return local_scale_y;
     sync();
     return _scale_y;
+  }
+
+  inline function get_right() {
+    return Vector2.fromPolar(rotation.degToRad(), 1);
+  }
+
+  inline function get_left() {
+    return Vector2.fromPolar((rotation + 180).degToRad(), 1);
+  }
+
+  inline function get_up() {
+    return Vector2.fromPolar((rotation + 90).degToRad(), 1);
+  }
+
+  inline function get_down() {
+    return Vector2.fromPolar((rotation - 90).degToRad(), 1);
   }
 
   inline function set_x(v:Float) {

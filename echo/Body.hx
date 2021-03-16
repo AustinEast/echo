@@ -1,5 +1,6 @@
 package echo;
 
+import echo.data.Types.ForceType;
 import echo.Shape;
 import echo.data.Data;
 import echo.data.Options;
@@ -11,6 +12,7 @@ import hxmath.frames.Frame2;
 import hxmath.math.Vector2;
 
 using echo.util.Ext;
+using hxmath.math.MathUtil;
 /**
  * A `Body` is an Object representing a Physical Body in a `World`.
  *
@@ -37,7 +39,7 @@ class Body implements IDisposable #if cog implements cog.IComponent #end {
    */
   public var y(get, set):Float;
   /**
-   * Body's current rotational angle.
+   * Body's current rotational angle as Degrees.
    */
   public var rotation(get, set):Float;
   /**
@@ -210,7 +212,7 @@ class Body implements IDisposable #if cog implements cog.IComponent #end {
    * @param options Optional values to configure the new Body
    */
   public function new(?options:BodyOptions) {
-    this.id = ++ids;
+    id = ++ids;
     active = true;
     shapes = [];
     data = {};
@@ -334,18 +336,32 @@ class Body implements IDisposable #if cog implements cog.IComponent #end {
     this.y = y;
   }
   /**
-   * Adds forces to a Body's acceleration.
+   * Adds forces to a Body. 
+   * 
+   * Options are available to apply the forces relative to the Body's forward, or to configure whether the forces are applied to the Body's acceleration, velocity, or position.
    * @param x
    * @param y
-   * @param forward Set as `true` to apply the forces along the Body's forward (based on the Body's `rotation`).
+   * @param forward Set as `true` to apply the forces relative to the Body's forward (based on the Body's `rotation`).
+   * @param force_type Determines whether the forces are applied to the Body's acceleration, velocity, or position.
    */
-  public function push(x:Float = 0, y:Float = 0, forward:Bool = false) {
+  public function push(x:Float = 0, y:Float = 0, forward:Bool = false, force_type:ForceType = ACCELERATION) {
     if (forward) {
-      x = x * Math.cos(rotation);
-      y = y * Math.sin(rotation);
+      var rotated_acceleration = new Vector2(x, y).rotate(rotation.degToRad());
+      x = rotated_acceleration.x;
+      y = rotated_acceleration.y;
     }
-    acceleration.x += x;
-    acceleration.y += y;
+
+    switch force_type {
+      case ACCELERATION:
+        acceleration.x += x;
+        acceleration.y += y;
+      case VELOCITY:
+        velocity.x += x;
+        velocity.y += y;
+      case POSITION:
+        this.x += x;
+        this.y += y;
+    }
   }
   /**
    * If a Body has shapes, it will return an `AABB` representing the bounds of the Body's shapes relative to its position. If the Body does not have any shapes, this will return `null'.

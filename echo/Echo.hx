@@ -21,13 +21,19 @@ class Echo {
   /**
    * Cache'd `Listeners` collection to help with memory management.
    */
-  static var cached_listeners:Listeners = new Listeners();
+  static var cached_listeners(default, null):Listeners = new Listeners();
   /**
    * Cache'd `Collision` Array to help with memory management.
    */
-  static var cached_collisions:Array<Collision> = [];
-
+  static var cached_collisions(default, null):Array<Collision> = [];
+  /**
+   * Cache'd `Body` to help with memory management.
+   */
   static var cached_body:Body;
+  /**
+   * Cache'd `Vector2` with a value of (0,0) to help with memory management.
+   */
+  static var cached_zero(default, null):Vector2 = Vector2.zero;
   /**
    * Shortcut for creating a new `World`
    * @param options Options for the new `World`

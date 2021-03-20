@@ -345,7 +345,7 @@ class Body implements IDisposable #if cog implements cog.IComponent #end {
    */
   public function push(x:Float = 0, y:Float = 0, forward:Bool = false, force_type:ForceType = ACCELERATION) {
     if (forward) {
-      var rotated_acceleration = new Vector2(x, y).rotate(rotation.degToRad());
+      var rotated_acceleration = new Vector2(x, y).rotate(rotation.degToRad(), @:privateAccess Echo.cached_zero);
       x = rotated_acceleration.x;
       y = rotated_acceleration.y;
     }
@@ -462,7 +462,7 @@ class Body implements IDisposable #if cog implements cog.IComponent #end {
   inline function set_y(value:Float):Float {
     transform.local_y = value;
     if (on_move != null) on_move(transform.local_x, transform.local_y);
-    
+
     return transform.local_y;
   }
 

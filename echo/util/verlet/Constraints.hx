@@ -97,12 +97,12 @@ class RotationConstraint implements IConstraint {
 
     diff *= dt * stiffness;
 
-    a.set_position((a_pos - b_pos).rotate(diff) + b_pos);
-    c.set_position((c_pos - b_pos).rotate(-diff) + b_pos);
+    a.set_position((a_pos - b_pos).rotate(diff, @:privateAccess Echo.cached_zero) + b_pos);
+    c.set_position((c_pos - b_pos).rotate(-diff, @:privateAccess Echo.cached_zero) + b_pos);
     a_pos.set(a.x, a.y);
     c_pos.set(c.x, c.y);
-    b.set_position((b_pos - a_pos).rotate(diff) + a_pos);
-    b.set_position((b.get_position() - c_pos).rotate(-diff) + c_pos);
+    b.set_position((b_pos - a_pos).rotate(diff, @:privateAccess Echo.cached_zero) + a_pos);
+    b.set_position((b.get_position() - c_pos).rotate(-diff, @:privateAccess Echo.cached_zero) + c_pos);
   }
 
   public function get_positions():Array<Vector2> {

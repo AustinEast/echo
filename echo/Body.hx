@@ -332,8 +332,7 @@ class Body implements IDisposable #if cog implements cog.IComponent #end {
   public function get_position(?vec2:Vector2):Vector2 return vec2 == null ? transform.get_local_position() : vec2.set(transform.local_x, transform.local_y);
 
   public function set_position(x:Float = 0, y:Float = 0) {
-    this.x = x;
-    this.y = y;
+    transform.set_local_xy(x, y);
   }
   /**
    * Adds forces to a Body. 
@@ -454,45 +453,32 @@ class Body implements IDisposable #if cog implements cog.IComponent #end {
 
   // setters
   inline function set_x(value:Float):Float {
-    if (value != transform.local_x) {
-      transform.local_x = value;
-      if (on_move != null) on_move(transform.local_x, transform.local_y);
-    }
+    transform.local_x = value;
+    if (on_move != null) on_move(transform.local_x, transform.local_y);
 
     return transform.local_x;
   }
 
   inline function set_y(value:Float):Float {
-    if (value != transform.local_y) {
-      transform.local_y = value;
-      if (on_move != null) on_move(transform.local_x, transform.local_y);
-    }
+    transform.local_y = value;
+    if (on_move != null) on_move(transform.local_x, transform.local_y);
+    
     return transform.local_y;
   }
 
   inline function set_rotation(value:Float):Float {
-    if (value != transform.local_rotation) {
-      transform.local_rotation = value;
-      if (on_rotate != null) on_rotate(transform.local_rotation);
-    }
+    transform.local_rotation = value;
+    if (on_rotate != null) on_rotate(transform.local_rotation);
 
     return transform.local_rotation;
   }
 
   inline function set_scale_x(value:Float) {
-    if (value != transform.local_scale_x) {
-      transform.local_scale_x = value;
-    }
-
-    return transform.local_scale_x;
+    return transform.local_scale_x = value;
   }
 
   inline function set_scale_y(value:Float) {
-    if (value != transform.local_scale_y) {
-      transform.local_scale_y = value;
-    }
-
-    return transform.local_scale_y;
+    return transform.local_scale_y = value;
   }
 
   inline function set_shape(value:Shape) {

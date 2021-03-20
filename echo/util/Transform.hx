@@ -151,7 +151,7 @@ class Transform implements IDisposable #if cog implements cog.IComponent #end {
       this.parent.children.push(this);
     }
 
-    set_dirty();
+    set_dirty(true);
   }
   /**
    * Gets the Matrix representing the local coordinates' transformation.
@@ -420,11 +420,11 @@ class Transform implements IDisposable #if cog implements cog.IComponent #end {
     coordinates_dirty = false;
   }
 
-  function set_dirty() {
-    if (!dirty) {
+  inline function set_dirty(force:Bool = false) {
+    if (force || !dirty) {
       dirty = inverse_dirty = coordinates_dirty = true;
       for (child in children) {
-        child.set_dirty();
+        child.set_dirty(true);
       }
       if (on_dirty != null) on_dirty(this);
     }
@@ -507,27 +507,27 @@ class Transform implements IDisposable #if cog implements cog.IComponent #end {
   }
 
   inline function set_local_x(v:Float) {
-    if (local_x != v) set_dirty();
+    set_dirty();
     return local_x = v;
   }
 
   inline function set_local_y(v:Float) {
-    if (local_y != v) set_dirty();
+    set_dirty();
     return local_y = v;
   }
 
   inline function set_local_rotation(v:Float) {
-    if (local_rotation != v) set_dirty();
+    set_dirty();
     return local_rotation = v;
   }
 
   inline function set_local_scale_x(v:Float) {
-    if (local_scale_x != v) set_dirty();
+    set_dirty();
     return local_scale_x = v;
   }
 
   inline function set_local_scale_y(v:Float) {
-    if (local_scale_y != v) set_dirty();
+    set_dirty();
     return local_scale_y = v;
   }
 }

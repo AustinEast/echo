@@ -74,8 +74,7 @@ class Debug {
   }
 
   public function draw_shape(shape:Shape) {
-    var x = shape.x;
-    var y = shape.y;
+    var shape_pos = shape.get_position();
     switch (shape.type) {
       case RECT:
         var r:Rect = cast shape;
@@ -88,11 +87,11 @@ class Debug {
             b.put();
           }
         }
-        else draw_rect(x - r.width * 0.5, y - r.height * 0.5, r.width, r.height, shape_fill_color, r.collided ? shape_collided_color : shape_color, 0);
+        else draw_rect(shape_pos.x - r.width * 0.5, shape_pos.y - r.height * 0.5, r.width, r.height, shape_fill_color, r.collided ? shape_collided_color : shape_color, 0);
       case CIRCLE:
         var c:Circle = cast shape;
 
-        draw_circle(x, y, c.radius, shape_fill_color, shape.collided ? shape_collided_color : shape_color, shape_fill_alpha);
+        draw_circle(shape_pos.x, shape_pos.y, c.radius, shape_fill_color, shape.collided ? shape_collided_color : shape_color, shape_fill_alpha);
         if (draw_shape_bounds) {
           var b = c.bounds();
           draw_rect(b.min_x, b.min_y, b.width, b.height, shape_fill_color, shape.collided ? shape_collided_color : shape_color, 0);

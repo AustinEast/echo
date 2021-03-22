@@ -91,7 +91,7 @@ typedef BodyOptions = {
    */
   var ?max_velocity_length:Float;
   /**
-   * The maximum rotational velocity range that a `Body` can have. Currently not Implemented.
+   * The maximum rotational velocity range that a `Body` can have.
    *
    * If set to 0, the Body has no restrictions on how fast it can rotate.
    */

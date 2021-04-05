@@ -12,7 +12,7 @@ class Collisions {
    * Updates the World's dynamic QuadTree with any Bodies that have moved.
    */
   public static function update_quadtree(world:World) {
-    world.for_each(b -> {
+    inline function update_body(b:Body) {
       if (!b.disposed) {
         b.collided = false;
         for (shape in b.shapes) {
@@ -21,11 +21,14 @@ class Collisions {
         if (b.active && b.is_dynamic() && b.dirty && b.shapes.length > 0) {
           if (b.quadtree_data.bounds == null) b.quadtree_data.bounds = b.bounds();
           else b.bounds(b.quadtree_data.bounds);
-          world.quadtree.update(b.quadtree_data);
+          world.quadtree.update(b.quadtree_data, false);
           b.dirty = false;
         }
       }
-    });
+    }
+
+    world.for_each(b -> update_body(b));
+    world.quadtree.shake();
   }
   /**
    * Queries a World's Listeners for Collisions.

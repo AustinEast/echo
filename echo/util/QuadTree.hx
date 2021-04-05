@@ -117,7 +117,7 @@ class QuadTree extends AABB implements IPooled {
   /**
    * Attempts to remove the `QuadTreeData` from the QuadTree.
    */
-  public function remove(data:QuadTreeData):Bool {
+  public function remove(data:QuadTreeData, allow_shake:Bool = true):Bool {
     if (leaf) {
       var i = 0;
       while (i < contents.length) {
@@ -133,8 +133,8 @@ class QuadTree extends AABB implements IPooled {
     }
 
     var removed = false;
-    for (child in children) if (child.remove(data)) removed = true;
-    if (removed) shake();
+    for (child in children) if (child != null && child.remove(data)) removed = true;
+    if (allow_shake && removed) shake();
 
     return removed;
   }
@@ -142,8 +142,8 @@ class QuadTree extends AABB implements IPooled {
    * Updates the `QuadTreeData` in the QuadTree by first removing the `QuadTreeData` from the QuadTree, then inserting it.
    * @param data
    */
-  public function update(data:QuadTreeData) {
-    remove(data);
+  public function update(data:QuadTreeData, allow_shake:Bool = true) {
+    remove(data, allow_shake);
     insert(data);
   }
   /**

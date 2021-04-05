@@ -62,7 +62,8 @@ class Collisions {
       }
       // Narrow Phase
       for (collision in listener.last_collisions) collision.put();
-      listener.last_collisions = listener.collisions.copy();
+      listener.last_collisions.resize(listener.collisions.length);
+      for (i in 0...listener.collisions.length) listener.last_collisions[i] = listener.collisions[i];
       listener.collisions.resize(0);
       for (result in listener.quadtree_results) {
         // Filter out disposed bodies

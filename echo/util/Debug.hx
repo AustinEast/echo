@@ -58,10 +58,9 @@ class Debug {
     if (draw_bodies) world.for_each(member -> if (member.shapes.length != 0) {
       if (camera != null) {
         var bounds = member.bounds();
-        if (!bounds.overlaps(camera)) {
-          bounds.put();
-          return;
-        }
+        var onscreen = bounds.overlaps(camera); 
+        bounds.put();
+        if (!onscreen) return;
       }
       if (draw_body_centers) draw_rect(member.x - 1, member.y - 1, 1, 1, quadtree_color);
       for (shape in member.shapes) draw_shape(shape);

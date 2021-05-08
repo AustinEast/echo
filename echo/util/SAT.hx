@@ -20,7 +20,7 @@ class SAT {
   }
 
   public static inline function point_in_circle(p:Vector2, c:Circle):Bool {
-    return p.distanceTo(c.get_position()) < c.radius;
+    return (p - c.get_position()).lengthSq < c.radius * c.radius;
   }
 
   public static inline function point_in_polygon(point:Vector2, polygon:Polygon):Bool {

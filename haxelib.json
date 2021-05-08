@@ -10,8 +10,8 @@
     "austineast"
   ],
   "url": "https://austineast.dev/echo",
-  "releasenote": "Transforms and Bezier Curves",
-  "version": "3.0.0",
+  "releasenote": "Verlet module & Optimizations",
+  "version": "3.1.0",
   "dependencies": {
     "hxmath": ""
   }

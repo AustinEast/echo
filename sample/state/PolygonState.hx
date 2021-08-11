@@ -1,11 +1,13 @@
 package state;
 
+import hxd.Key;
 import echo.Body;
 import echo.World;
 import util.Random;
 
 class PolygonState extends BaseState {
   var body_count:Int = 100;
+  var boi:Body;
 
   override public function enter(world:World) {
     Main.instance.state_text.text = "Sample: Stacking Polygons";
@@ -58,11 +60,34 @@ class PolygonState extends BaseState {
       }
     }));
 
+    boi = world.add(new Body({
+      kinematic: true,
+      drag_length: 50,
+      max_velocity_length: 30,
+      shape: {
+        type: RECT,
+        width: 32
+      }
+    }));
+
     // Create a listener for collisions between the Physics Bodies
     world.listen();
   }
 
   override function step(world:World, dt:Float) {
+    boi.acceleration.set(0, 0);
+    if (Key.isDown(Key.W)) {
+      boi.push(10, 0, true, POSITION);
+    }
+
+    if (Key.isDown(Key.A)) {
+      boi.rotation += 20 * dt;
+    }
+
+    if (Key.isDown(Key.D)) {
+      boi.rotation -= 20 * dt;
+    }
+
     // Reset any off-screen Bodies
     world.for_each((member) -> {
       if (offscreen(member, world)) {

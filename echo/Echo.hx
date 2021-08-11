@@ -164,21 +164,23 @@ class Echo {
 
     switch (cast test : Either<Body, Array<Body>>) {
       case Left(body):
-        var bb = body.bounds();
-        if (lb.overlaps(bb)) {
-          for (i in 0...body.shapes.length) {
-            var result = line.intersect(body.shapes[i]);
-            if (result != null) {
-              if (closest == null) closest = Intersection.get(line, body);
-              closest.data.push(result);
+        if (!body.disposed && body.active) {
+          var bb = body.bounds();
+          if (lb.overlaps(bb)) {
+            for (i in 0...body.shapes.length) {
+              var result = line.intersect(body.shapes[i]);
+              if (result != null) {
+                if (closest == null) closest = Intersection.get(line, body);
+                closest.data.push(result);
+              }
             }
           }
+          bb.put();
         }
-        bb.put();
       case Right(arr):
         if (world == null) {
           for (body in arr) {
-            if (body == null) continue;
+            if (body == null || body.disposed || !body.active) continue;
             var bb = body.bounds();
             var temp = Intersection.get(line, body);
             if (lb.overlaps(bb)) {

@@ -4,7 +4,8 @@ import echo.util.Disposable;
 import hxmath.math.Vector2;
 
 using Math;
-using hxmath.math.MathUtil;
+using echo.util.ext.FloatExt;
+using echo.util.ext.IntExt;
 
 class Bezier implements IDisposable {
   /**
@@ -560,7 +561,7 @@ class Bezier implements IDisposable {
   inline function get_looped_index(index:Int) return (index + control_count) % control_count;
 
   inline function update_curve_count() {
-    curve_count = Math.floor((control_points.length - 1) / curve_mode).intMax(0);
+    curve_count = Math.floor((control_points.length - 1) / curve_mode).max(0);
     if (closed) curve_count++;
   }
 

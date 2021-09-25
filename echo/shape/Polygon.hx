@@ -4,11 +4,8 @@ import echo.data.Data;
 import echo.shape.*;
 import echo.util.AABB;
 import echo.util.Pool;
-import hxmath.frames.Frame2;
-import hxmath.math.MathUtil;
 
 using echo.util.SAT;
-using hxmath.math.MathUtil;
 using hxmath.math.Vector2;
 
 class Polygon extends Shape implements IPooled {

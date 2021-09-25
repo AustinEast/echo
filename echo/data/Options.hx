@@ -188,7 +188,7 @@ typedef ListenerOptions = {
   /**
    * A callback function that allows extra logic to be run on a potential collision.
    *
-   * If it returns true, the collision is valid. Otherwise the collision is discarded and no physics resolution/collision callbacks occur
+   * If it returns true, the collision is valid. Otherwise the collision is discarded and no physics resolution/collision callbacks occur.
    */
   var ?condition:Body->Body->Array<CollisionData>->Bool;
   /**
@@ -199,6 +199,15 @@ typedef ListenerOptions = {
    * Threshold determining how close two separating bodies must be before position correction occurs. Helps reduce jitter.
    */
   var ?correction_threshold:Float;
+}
+
+typedef LinecastOptions = {
+  /**
+   * A callback function that allows extra logic to be run before a potential linecast.
+   *
+   * If it returns false, the linecast will not occur.
+   */
+  var ?filter:Line->Body->Bool;
 }
 
 typedef ShapeOptions = {

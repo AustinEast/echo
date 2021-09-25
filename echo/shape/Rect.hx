@@ -7,8 +7,6 @@ import echo.data.Data;
 import hxmath.math.Vector2;
 
 using echo.util.SAT;
-using echo.util.Ext;
-using hxmath.math.MathUtil;
 
 class Rect extends Shape implements IPooled {
   public static var pool(get, never):IPool<Rect>;

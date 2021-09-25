@@ -6,8 +6,7 @@ import hxmath.math.Vector2;
 import hxmath.math.Vector3;
 
 using Math;
-using echo.util.Ext;
-using hxmath.math.MathUtil;
+using echo.util.ext.FloatExt;
 
 class Transform implements IDisposable #if cog implements cog.IComponent #end {
   /**
@@ -158,8 +157,8 @@ class Transform implements IDisposable #if cog implements cog.IComponent #end {
    * @return Matrix3x3
    */
   public inline function get_local_matrix():Matrix3x3 {
-    // translate(local_x, local_y) * rotate(local_rotation.degToRad()) * scale(local_scale_x, local_scale_y);
-    var radians = local_rotation.degToRad();
+    // translate(local_x, local_y) * rotate(local_rotation.deg_to_rad()) * scale(local_scale_x, local_scale_y);
+    var radians = local_rotation.deg_to_rad();
     var s = Math.sin(radians);
     var c = Math.cos(radians);
     return new Matrix3x3(c * local_scale_x, -s * local_scale_y, local_x, s * local_scale_x, c * local_scale_y, local_y, 0, 0, 1);
@@ -266,9 +265,9 @@ class Transform implements IDisposable #if cog implements cog.IComponent #end {
    * @return Float
    */
   public inline function rotation_to_world(degrees:Float = 0):Float {
-    var radians = degrees.degToRad();
+    var radians = degrees.deg_to_rad();
     var result = multiply_transposed_matrix(new Vector3(Math.cos(radians), Math.sin(radians), 0), get_world_to_local_matrix());
-    return Math.atan2(result.y, result.x).radToDeg();
+    return Math.atan2(result.y, result.x).rad_to_deg();
   }
   /**
    * Transforms an angle (in degrees) from world rotation to local rotation.
@@ -276,9 +275,9 @@ class Transform implements IDisposable #if cog implements cog.IComponent #end {
    * @return Float
    */
   public inline function rotation_to_local(degrees:Float = 0):Float {
-    var radians = degrees.degToRad();
+    var radians = degrees.deg_to_rad();
     var result = multiply_transposed_matrix(new Vector3(Math.cos(radians), Math.sin(radians), 0), get_local_to_world_matrix());
-    return Math.atan2(result.y, result.x).radToDeg();
+    return Math.atan2(result.y, result.x).rad_to_deg();
   }
   /**
    * Transforms a scale vector from local coordinates to world coordinates.
@@ -414,7 +413,7 @@ class Transform implements IDisposable #if cog implements cog.IComponent #end {
       _y = m.m21;
       _scale_x = Math.sqrt(a * a + b * b);
       _scale_y = Math.sqrt(c * c + d * d);
-      _rotation = Math.atan2(-c / _scale_y, a / _scale_x).radToDeg();
+      _rotation = Math.atan2(-c / _scale_y, a / _scale_x).rad_to_deg();
     }
 
     coordinates_dirty = false;
@@ -461,19 +460,19 @@ class Transform implements IDisposable #if cog implements cog.IComponent #end {
   }
 
   inline function get_right() {
-    return Vector2.fromPolar(rotation.degToRad(), 1);
+    return Vector2.fromPolar(rotation.deg_to_rad(), 1);
   }
 
   inline function get_left() {
-    return Vector2.fromPolar((rotation + 180).degToRad(), 1);
+    return Vector2.fromPolar((rotation + 180).deg_to_rad(), 1);
   }
 
   inline function get_up() {
-    return Vector2.fromPolar((rotation + 90).degToRad(), 1);
+    return Vector2.fromPolar((rotation + 90).deg_to_rad(), 1);
   }
 
   inline function get_down() {
-    return Vector2.fromPolar((rotation - 90).degToRad(), 1);
+    return Vector2.fromPolar((rotation - 90).deg_to_rad(), 1);
   }
 
   inline function set_x(v:Float) {

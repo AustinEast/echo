@@ -4,9 +4,8 @@ import echo.data.Data;
 import echo.shape.*;
 import hxmath.math.Vector2;
 
-using echo.util.Ext;
+using echo.util.ext.FloatExt;
 using echo.util.SAT;
-using hxmath.math.MathUtil;
 /**
  * Class containing methods to perform collision checks using the Separating Axis Thereom
  */

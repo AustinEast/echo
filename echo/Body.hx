@@ -8,11 +8,9 @@ import echo.util.AABB;
 import echo.util.BitMask;
 import echo.util.Disposable;
 import echo.util.Transform;
-import hxmath.frames.Frame2;
 import hxmath.math.Vector2;
 
-using echo.util.Ext;
-using hxmath.math.MathUtil;
+using echo.util.ext.FloatExt;
 /**
  * A `Body` is an Object representing a Physical Body in a `World`.
  *
@@ -345,7 +343,7 @@ class Body implements IDisposable #if cog implements cog.IComponent #end {
    */
   public function push(x:Float = 0, y:Float = 0, forward:Bool = false, force_type:ForceType = ACCELERATION) {
     if (forward) {
-      var rotated_acceleration = new Vector2(x, y).rotate(rotation.degToRad(), @:privateAccess Echo.cached_zero);
+      var rotated_acceleration = new Vector2(x, y).rotate(rotation.deg_to_rad(), @:privateAccess Echo.cached_zero);
       x = rotated_acceleration.x;
       y = rotated_acceleration.y;
     }

@@ -183,9 +183,20 @@ class Shape #if cog implements cog.IComponent #end {
    * @return Shape return new Shape(x, y)
    */
   public function clone():Shape return new Shape(x, y, rotation);
+  /**
+   * TODO
+   */
+  @:dox(hide)
+  @:noCompletion
+  public function scale(v:Float) {}
 
-  // public function scale(v:Float) {}
   public function contains(v:Vector2):Bool return get_position() == v;
+  /**
+   * TODO
+   */
+  @:dox(hide)
+  @:noCompletion
+  public function closest_point_on_edge(v:Vector2):Vector2 return get_position();
 
   public function intersect(l:Line):Null<IntersectionData> return null;
 

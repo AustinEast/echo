@@ -4,8 +4,7 @@ import echo.Listener;
 import echo.data.Data;
 import hxmath.math.Vector2;
 
-using echo.util.Ext;
-using hxmath.math.MathUtil;
+using echo.util.ext.FloatExt;
 /**
  * Class containing methods for performing Physics simulations on a World
  */

@@ -11,8 +11,6 @@ import echo.World;
 import echo.data.Options;
 import echo.util.BodyOrBodies;
 
-using echo.util.Ext;
-
 @:expose
 /**
  * Echo holds helpful utility methods to help streamline the creation and management of Physics Simulations.

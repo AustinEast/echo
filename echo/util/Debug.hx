@@ -5,8 +5,7 @@ import echo.data.Data;
 import echo.shape.*;
 import hxmath.math.Vector2;
 
-using echo.util.Ext;
-using hxmath.math.MathUtil;
+using echo.util.ext.FloatExt;
 
 #if haxepunk
 import haxepunk.utils.Draw;
@@ -58,7 +57,7 @@ class Debug {
     if (draw_bodies) world.for_each(member -> if (member.shapes.length != 0) {
       if (camera != null) {
         var bounds = member.bounds();
-        var onscreen = bounds.overlaps(camera); 
+        var onscreen = bounds.overlaps(camera);
         bounds.put();
         if (!onscreen) return;
       }
@@ -86,7 +85,8 @@ class Debug {
             b.put();
           }
         }
-        else draw_rect(shape_pos.x - r.width * 0.5, shape_pos.y - r.height * 0.5, r.width, r.height, shape_fill_color, r.collided ? shape_collided_color : shape_color, 0);
+        else draw_rect(shape_pos.x - r.width * 0.5, shape_pos.y - r.height * 0.5, r.width, r.height, shape_fill_color,
+          r.collided ? shape_collided_color : shape_color, 0);
       case CIRCLE:
         var c:Circle = cast shape;
 
@@ -120,7 +120,7 @@ class Debug {
     draw_line(data.line.start.x, data.line.start.y, data.hit.x, data.hit.y, intersection_color);
     if (draw_overlap) draw_line(data.hit.x, data.hit.y, data.line.end.x, data.line.end.y, intersection_overlap_color);
     if (draw_normal) {
-      var normal = Line.get_from_vector(data.hit, data.normal.angle.radToDeg(), 10);
+      var normal = Line.get_from_vector(data.hit, data.normal.angle.rad_to_deg(), 10);
       draw_line(normal.x, normal.y, normal.dx, normal.dy, intersection_overlap_color);
       normal.put();
     }
@@ -163,7 +163,7 @@ class Debug {
 
       if (draw_segment_markers) {
         var p = l.point_along_ratio(.5);
-        var edge = Line.get_from_vector(p, l.radians.radToDeg() - 90, 5);
+        var edge = Line.get_from_vector(p, l.radians.rad_to_deg() - 90, 5);
         draw_line(edge.start.x, edge.start.y, edge.end.x, edge.end.y, intersection_overlap_color);
         edge.put();
       }

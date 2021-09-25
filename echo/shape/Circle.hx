@@ -7,7 +7,6 @@ import echo.util.Pool;
 import hxmath.math.Vector2;
 
 using echo.util.SAT;
-using hxmath.math.MathUtil;
 
 class Circle extends Shape implements IPooled {
   public static var pool(get, never):IPool<Circle>;

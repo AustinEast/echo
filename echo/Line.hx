@@ -6,8 +6,7 @@ import echo.util.Pool;
 import echo.util.Proxy;
 import hxmath.math.Vector2;
 
-using echo.util.Ext;
-using hxmath.math.MathUtil;
+using echo.util.ext.FloatExt;
 
 @:using(echo.Echo)
 class Line implements IProxy implements IPooled {
@@ -69,7 +68,7 @@ class Line implements IProxy implements IPooled {
    * @param length The length of the Line.
    */
   public function set_from_vector(start:Vector2, degrees:Float, length:Float) {
-    var rad = MathUtil.degToRad(degrees);
+    var rad = degrees.deg_to_rad();
     var end = new Vector2(start.x + (length * Math.cos(rad)), start.y + (length * Math.sin(rad)));
     return set(start.x, start.y, end.x, end.y);
   }

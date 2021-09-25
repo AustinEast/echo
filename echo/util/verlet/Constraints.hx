@@ -2,7 +2,7 @@ package echo.util.verlet;
 
 import hxmath.math.Vector2;
 
-using echo.util.Ext;
+using echo.util.ext.Vector2Ext;
 
 interface IConstraint {
   public var active:Bool;

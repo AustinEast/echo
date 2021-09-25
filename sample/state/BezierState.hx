@@ -52,7 +52,7 @@ class BezierState extends BaseState {
       interactive.setPosition(p.x - interactive.width * 0.5, p.y - interactive.height * 0.5);
       interactive.isEllipse = true;
       interactive.onPush = (e) -> {
-        interactive.startDrag((e) -> {
+        interactive.startCapture((e) -> {
           var x = Main.instance.scene.mouseX;
           var y = Main.instance.scene.mouseY;
           interactive.x = x - interactive.width * 0.5;
@@ -61,8 +61,9 @@ class BezierState extends BaseState {
         });
       };
       interactive.onRelease = (e) -> {
-        interactive.stopDrag();
+        interactive.stopCapture();
       };
+      controls.push(interactive);
     }
 
     // Create a line to linecast again the Bezier Curve
@@ -75,6 +76,12 @@ class BezierState extends BaseState {
 
     t += dt;
     qt += dt * 0.25;
+
+    // update control handles
+    for (i in 0...controls.length) {
+      var c = bezier.get_control_point(i);
+      controls[i].setPosition(c.x - controls[i].width * 0.5, c.y - controls[i].height * 0.5);
+    }
 
     // Draw the Bezier Curve
     Main.instance.debug.draw_bezier(bezier, true, true);

@@ -303,6 +303,10 @@ class Bezier implements IDisposable {
    * Cached Array of Lines that represents the current state of the Curve.
    */
   public var lines(get, null):Array<Line> = [];
+  /**
+   * Cached Array of Points that represents the current state of the Curve.
+   */
+  public var points(get, null):Array<Vector2> = [];
 
   public var length(get, null):Float;
   /**
@@ -317,6 +321,8 @@ class Bezier implements IDisposable {
   public var curve_mode(default, set):BezierCurve;
 
   public var curve_count(default, null):Int = 0;
+
+  public var closed(default, set):Bool;
 
   public var on_dirty:Bezier->Void;
 
@@ -334,6 +340,24 @@ class Bezier implements IDisposable {
   public function dispose() {
     control_points = null;
     lines = null;
+    points = null;
+  }
+
+  public function add_curve(x:Float, y:Float) {
+    if (curve_count < 1) throw 'Bezier curve must have at least 1 curve to add another curve';
+
+    switch (curve_mode) {
+      case Linear:
+        add_control_point(x, y);
+      case Quadratic:
+        throw 'Bezier.add_curve() is not implemented for Quadratic curves.';
+      case Cubic:
+        var a = control_points[control_count - 1] * 2 - control_points[control_count - 2];
+        var b = (control_points[control_count - 1] + new Vector2(x, y)) * 0.5;
+        add_control_point(a.x, a.y);
+        add_control_point(b.x, b.y);
+        add_control_point(x, y);
+    }
   }
 
   public function add_control_point(x:Float, y:Float) {
@@ -347,13 +371,52 @@ class Bezier implements IDisposable {
     return control_points[index].clone();
   }
 
-  public function set_control_point(index:Int, x:Float, y:Float) {
+  public inline function get_control_points():Array<Vector2> {
+    return [for (c in control_points) c.clone()];
+  }
+
+  // TODO - test for accuracy on all curve modes
+  public inline function get_control_points_in_curve(index:Int):Array<Vector2> {
+    return [
+      for (i in 0...curve_mode) control_points[get_looped_index(index * curve_mode + i)].clone()
+    ];
+  }
+
+  public function set_control_point(index:Int, x:Float, y:Float, move_neighbors:Bool = true) {
     if (index < 0) return;
-    if (index >= control_points.length) {
-      while (index >= control_points.length) control_points.push(new Vector2(0, 0));
-      update_curve_count();
+
+    if (curve_mode == Cubic && move_neighbors) {
+      var pos = new Vector2(x, y);
+      var delta = pos - control_points[index];
+
+      // moving an "anchor" point
+      if (index % curve_mode == 0) {
+        if (index + 1 < control_count || closed) control_points[get_looped_index(index + 1)] += delta;
+        if (index - 1 >= 0 || closed) control_points[get_looped_index(index - 1)] += delta;
+      }
+      // moving a control point
+      else {
+        var next_is_anchor = (index + 1) % curve_mode == 0;
+        var other_control_index = index + (next_is_anchor ? 2 : -2);
+        var anchor_index = index + (next_is_anchor ? 1 : -1);
+
+        if (other_control_index >= 0 && other_control_index < control_count || closed) {
+          var lai = get_looped_index(anchor_index);
+          var loci = get_looped_index(other_control_index);
+          var len = (control_points[lai] - control_points[loci]).length;
+          var dir = (control_points[lai] - pos).normalize();
+          control_points[loci] = control_points[lai] + dir * len;
+        }
+      }
     }
+
     control_points[index].set(x, y);
+    set_dirty();
+  }
+
+  public function set_control_points(?control_points:Array<Vector2>) {
+    this.control_points = control_points != null ? control_points : [];
+    update_curve_count();
     set_dirty();
   }
 
@@ -402,6 +465,10 @@ class Bezier implements IDisposable {
     };
   }
 
+  public function get_point_at_length(length:Float):Null<Vector2> {
+    return get_point((length / this.length).clamp(0, 1));
+  }
+
   public function set_dirty() {
     if (!dirty && on_dirty != null) on_dirty(this);
     dirty = true;
@@ -412,10 +479,14 @@ class Bezier implements IDisposable {
     length = 0;
 
     while (lines.length > 0) lines.pop().put();
+    points.resize(0);
+
     // optimized for Linear Curves
     if (curve_mode == Linear) for (j in 0...curve_count) {
       var i = j * curve_mode;
       if (i >= control_points.length - 1) break;
+      points.push(control_points[i].clone());
+      points.push(control_points[i + 1].clone());
       var l = Line.get(control_points[i].x, control_points[i].y, control_points[i + 1].x, control_points[i + 1].y);
       length += l.length;
       lines.push(l);
@@ -430,6 +501,8 @@ class Bezier implements IDisposable {
             var t = i * step;
             var p = get_point(t, start_index);
             if (lp != null && p != null) {
+              points.push(lp);
+              points.push(p);
               var l = Line.get(lp.x, lp.y, p.x, p.y);
               length += l.length;
               lines.push(l);
@@ -438,13 +511,14 @@ class Bezier implements IDisposable {
           }
           var p = get_point(1, start_index);
           if (lp != null && p != null) {
+            points.push(lp);
+            points.push(p);
             var l = Line.get(lp.x, lp.y, p.x, p.y);
             length += l.length;
             lines.push(l);
           }
         }
       case Subdivisions(options):
-        var points = [];
         for (j in 0...curve_count) {
           var start_index = j * curve_mode;
           var a = get_control_point(start_index);
@@ -452,7 +526,7 @@ class Bezier implements IDisposable {
           var c = get_control_point(start_index + 2);
           if (curve_mode == Quadratic) subdivide_quadratic_bezier_curve(a.x, a.y, b.x, b.y, c.x, c.y, points, options);
           else {
-            var d = get_control_point(start_index + 3);
+            var d = get_control_point(get_looped_index(start_index + 3));
             subdivide_cubic_bezier_curve(a.x, a.y, b.x, b.y, c.x, c.y, d.x, d.y, points, options);
           }
         }
@@ -471,6 +545,11 @@ class Bezier implements IDisposable {
     return lines;
   }
 
+  function get_points():Array<Vector2> {
+    if (dirty) generate();
+    return points;
+  }
+
   function get_length():Float {
     if (dirty) generate();
     return length;
@@ -478,8 +557,11 @@ class Bezier implements IDisposable {
 
   inline function get_control_count() return control_points.length;
 
+  inline function get_looped_index(index:Int) return (index + control_count) % control_count;
+
   inline function update_curve_count() {
     curve_count = Math.floor((control_points.length - 1) / curve_mode).intMax(0);
+    if (closed) curve_count++;
   }
 
   inline function set_line_mode(v:BezierLineMode) {
@@ -494,6 +576,26 @@ class Bezier implements IDisposable {
       set_dirty();
     }
     return curve_mode;
+  }
+
+  function set_closed(v) {
+    if (curve_count < 1 || curve_mode != Cubic) v = false;
+
+    if (closed != v) {
+      closed = v;
+      if (closed) {
+        var a = control_points[control_count - 1] * 2 - control_points[control_count - 2];
+        var b = control_points[0] * 2 - control_points[1];
+        add_control_point(a.x, a.y);
+        add_control_point(b.x, b.y);
+      }
+      else {
+        remove_control_point(control_count - 1);
+        remove_control_point(control_count - 1);
+      }
+    }
+
+    return closed;
   }
 }
 

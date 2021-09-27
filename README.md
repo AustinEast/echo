@@ -13,7 +13,7 @@ Try the [Samples 🎮](https://austineast.dev/echo)!
 
 Check out the [API 📖](https://austineast.dev/echo/api/)!
 
-## Features
+# Features
 * Semi-implicit euler integration physics
 * SAT-powered collision detection
 * Quadtree for broadphase collision querying
@@ -21,7 +21,7 @@ Check out the [API 📖](https://austineast.dev/echo/api/)!
 * Physics State History Management with Built-in Undo/Redo functionality
 * Extendable debug drawing
 
-## Getting Started
+# Getting Started
 
 Echo requires [Haxe 4.2+](https://haxe.org/download/) to run.
 
@@ -51,23 +51,23 @@ For Kha users (who don't use haxelib), clone echo to thee `Libraries` folder in 
 project.addLibrary('echo');
 ```
 
-## Usage
+# Usage
 
-### Concepts
+## Concepts
 
-#### Echo
+### Echo
 
 The `Echo` Class holds helpful utility methods to help streamline the creation and management of Physics Simulations.
 
-#### World
+### World
 
 A `World` is an Object representing the state of a Physics simulation and it configurations. 
 
-#### Bodies
+### Bodies
 
 A `Body` is an Object representing a Physical Body in a `World`. A `Body` has a position, velocity, mass, optional collider shapes, and many other properties that are used in a `World` simulation.
 
-#### Shapes
+### Shapes
 
 A Body's collider is represented by different Shapes. Without a `Shape` to define it's form, a `Body` can be thought of a just a point in the `World` that cant collide with anything.
 
@@ -80,17 +80,17 @@ When a Shape is added to a Body, it's transform (x, y, rotation) becomes relativ
 
 It's important to note that all Shapes (including Rectangles) have their origins centered.
 
-#### Lines
+### Lines
 
 Use Lines to perform Linecasts against other Lines, Bodies, and Shapes. Check out the `Echo` class for various methods to preform Linecasts.
 
-#### Listeners
+### Listeners
 
 Listeners keep track of collisions between Bodies - enacting callbacks and physics responses depending on their configurations. Once you add a `Listener` to a `World`, it will automatically update itself as the `World` is stepped forward.
 
-### Integration
+## Integration
 
-#### Codebase Integration
+### Codebase Integration
 Echo has a couple of ways to help integrate itself into codebases through the `Body` class. 
 
 First, the `Body` class has two public fields named `on_move` and `on_rotate`. If these are set on a body, they'll be called any time the body moves or rotates. This is useful for things such as syncing the Body's transform with external objects:
@@ -113,7 +113,7 @@ var body = new echo.Body();
 body.entity = new some.package.Entity();
 ```
 
-#### Other Math Library Integration
+### Other Math Library Integration
 
 Echo comes with basic implementations of common math structures (Vector2, Vector3, Matrix3), but also allows these structures can be extended and used seamlessly with other popular Haxe math libraries. 
 
@@ -166,16 +166,16 @@ project.addLibrary('zerolib');
 project.addDefine('ECHO_USE_ZEROLIB');
 ```
 
-## Examples
+# Examples
 
-### Engine/Framework Examples
+## Engine/Framework Examples
 
 * [HaxeFlixel](https://haxeflixel.com): https://github.com/AustinEast/echo-flixel
 * [Heaps](https://heaps.io): https://github.com/AustinEast/echo-heaps
 * [Peyote View](https://github.com/maitag/peote-view): https://github.com/maitag/peote-views-samples/tree/master/echo
 * [HaxePunk](https://haxepunk.com): https://github.com/XANOZOID/EchoHaxePunk
 
-### Basic Example
+## Basic Example
 ```haxe
 import echo.Echo;
 
@@ -234,11 +234,11 @@ class Main {
 }
 ```
 
-## Roadmap
-### Sooner
+# Roadmap
+## Sooner
 * Endless length Line support
 * Update Readme with info on the various utilities (Tilemap, Bezier, etc)
-### Later
+## Later
 * Allow Concave Polygons (through Convex Decomposition)
 * Sleeping Body optimations
 * Constraints

@@ -34,11 +34,6 @@ Alternatively the dev version of the library can be installed from github:
 haxelib git echo https://github.com/AustinEast/echo.git
 ```
 
-<!-- Install echo's dependency, [hxmath](https://lib.haxe.org/p/hxmath). At the moment, installing the github version is recommended for performance reasons:
-```
-haxelib git hxmath https://github.com/tbrosman/hxmath.git
-``` -->
-
 Then for standard Haxe applications, include the library in your project's `.hxml`:
 ```hxml
 -lib echo
@@ -50,11 +45,10 @@ For OpenFL users, add the library into your `Project.xml`:
 <haxelib name="echo" />
 ```
 
-For Kha users (who don't use haxelib), clone echo and [hxmath](https://github.com/tbrosman/hxmath) to `Libraries` folder in your project root, and then add the following to your `khafile.js`:
+For Kha users (who don't use haxelib), clone echo to thee `Libraries` folder in your project root, and then add the following to your `khafile.js`:
 
 ```js
 project.addLibrary('echo');
-project.addLibrary('hxmath');
 ```
 
 ## Usage
@@ -96,16 +90,17 @@ Listeners keep track of collisions between Bodies - enacting callbacks and physi
 
 ### Integration
 
+#### Codebase Integration
 Echo has a couple of ways to help integrate itself into codebases through the `Body` class. 
 
-First, the `Body` class has two public fields named `on_move` and `on_rotate`. If these are set on a body, they'll be called any time the body moves or rotates:
+First, the `Body` class has two public fields named `on_move` and `on_rotate`. If these are set on a body, they'll be called any time the body moves or rotates. This is useful for things such as syncing the Body's transform with external objects:
 ```haxe
 var body = new echo.Body();
 body.on_move = (x,y) -> entity.position.set(x,y);
 body.on_rotate = (rotation) -> entity.rotation = rotation;
 ```
 
-Second, a build macro is available to add custom fields to the `Body` class, such as an `Entity` class:
+Second, a build macro is available to add custom fields to the `Body` class, such as a reference to an `Entity` class:
 
 in build.hxml:
 ```hxml
@@ -116,6 +111,59 @@ in Main.hx
 ```haxe
 var body = new echo.Body();
 body.entity = new some.package.Entity();
+```
+
+#### Other Math Library Integration
+
+Echo comes with basic implementations of common math structures (Vector2, Vector3, Matrix3), but also allows these structures can be extended and used seamlessly with other popular Haxe math libraries. 
+
+Support is currently available for [hxmath](https://github.com/tbrosman/hxmath), [vector-math](https://github.com/haxiomic/vector-math), and [zerolib](https://github.com/01010111/zerolib).
+
+(pull requests for other libraries happily accepted!)
+
+If you compile your project with a standard `.hxml`, add one of these to your file:
+```hxml
+# hxmath support
+-lib hxmath
+-D ECHO_USE_HXMATH
+
+# vector-math support
+-lib vector-math
+-D ECHO_USE_VECTORMATH
+
+# zerolib support
+-lib zerolib
+-D ECHO_USE_ZEROLIB
+```
+
+For OpenFL users, add one of the following into your `Project.xml`:
+```xml
+<!-- hxmath support -->
+<haxelib name="hxmath" />
+<haxedef name="ECHO_USE_HXMATH" />
+
+<!-- vector-math support -->
+<haxelib name="vector-math" />
+<haxedef name="ECHO_USE_VECTORMATH" />
+
+<!-- zerolib support -->
+<haxelib name="zerolib" />
+<haxedef name="ECHO_USE_ZEROLIB" />
+```
+
+For Kha users, add one of the following into your `khafile.js`:
+```js
+// hxmath support
+project.addLibrary('hxmath');
+project.addDefine('ECHO_USE_HXMATH');
+
+// vector-math support
+project.addLibrary('vector-math');
+project.addDefine('ECHO_USE_VECTORMATH');
+
+// zerolib support
+project.addLibrary('zerolib');
+project.addDefine('ECHO_USE_ZEROLIB');
 ```
 
 ## Examples

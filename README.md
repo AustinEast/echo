@@ -115,7 +115,7 @@ body.entity = new some.package.Entity();
 
 ### Other Math Library Integration
 
-Echo comes with basic implementations of common math structures (Vector2, Vector3, Matrix3), but also allows these structures can be extended and used seamlessly with other popular Haxe math libraries. 
+Echo comes with basic implementations of common math structures (Vector2, Vector3, Matrix3), but also allows these structures to be extended and used seamlessly with other popular Haxe math libraries. 
 
 Support is currently available for [hxmath](https://github.com/tbrosman/hxmath), [vector-math](https://github.com/haxiomic/vector-math), and [zerolib](https://github.com/01010111/zerolib).
 

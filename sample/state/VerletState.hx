@@ -3,7 +3,7 @@ package state;
 import util.Random;
 import echo.util.verlet.Constraints;
 import echo.util.verlet.Composite;
-import hxmath.math.Vector2;
+import echo.math.Vector2;
 import echo.util.verlet.Verlet;
 import echo.World;
 

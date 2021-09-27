@@ -1,6 +1,6 @@
 package echo;
 
-import echo.data.Types.ForceType;
+import echo.data.Types;
 import echo.Shape;
 import echo.data.Data;
 import echo.data.Options;
@@ -8,7 +8,7 @@ import echo.util.AABB;
 import echo.util.BitMask;
 import echo.util.Disposable;
 import echo.util.Transform;
-import hxmath.math.Vector2;
+import echo.math.Vector2;
 
 using echo.util.ext.FloatExt;
 /**
@@ -343,7 +343,7 @@ class Body implements IDisposable #if cog implements cog.IComponent #end {
    */
   public function push(x:Float = 0, y:Float = 0, forward:Bool = false, force_type:ForceType = ACCELERATION) {
     if (forward) {
-      var rotated_acceleration = new Vector2(x, y).rotate(rotation.deg_to_rad(), @:privateAccess Echo.cached_zero);
+      var rotated_acceleration = new Vector2(x, y).rotate(rotation.deg_to_rad());
       x = rotated_acceleration.x;
       y = rotated_acceleration.y;
     }

@@ -23,7 +23,7 @@ Check out the [API 📖](https://austineast.dev/echo/api/)!
 
 ## Getting Started
 
-Echo requires [Haxe 4](https://haxe.org/download/) to run.
+Echo requires [Haxe 4.2+](https://haxe.org/download/) to run.
 
 Install the library from haxelib:
 ```
@@ -34,10 +34,10 @@ Alternatively the dev version of the library can be installed from github:
 haxelib git echo https://github.com/AustinEast/echo.git
 ```
 
-Install echo's dependency, [hxmath](https://lib.haxe.org/p/hxmath). At the moment, installing the github version is recommended for performance reasons:
+<!-- Install echo's dependency, [hxmath](https://lib.haxe.org/p/hxmath). At the moment, installing the github version is recommended for performance reasons:
 ```
 haxelib git hxmath https://github.com/tbrosman/hxmath.git
-```
+``` -->
 
 Then for standard Haxe applications, include the library in your project's `.hxml`:
 ```hxml

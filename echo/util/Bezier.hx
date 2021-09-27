@@ -1,7 +1,7 @@
 package echo.util;
 
 import echo.util.Disposable;
-import hxmath.math.Vector2;
+import echo.math.Vector2;
 
 using Math;
 using echo.util.ext.FloatExt;
@@ -405,7 +405,7 @@ class Bezier implements IDisposable {
           var lai = get_looped_index(anchor_index);
           var loci = get_looped_index(other_control_index);
           var len = (control_points[lai] - control_points[loci]).length;
-          var dir = (control_points[lai] - pos).normalize();
+          var dir = (control_points[lai] - pos).normal;
           control_points[loci] = control_points[lai] + dir * len;
         }
       }

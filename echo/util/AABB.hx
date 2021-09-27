@@ -2,7 +2,7 @@ package echo.util;
 
 import echo.shape.Rect;
 import echo.util.Pool;
-import hxmath.math.Vector2;
+import echo.math.Vector2;
 
 class AABB implements IPooled {
   public static var pool(get, never):IPool<AABB>;

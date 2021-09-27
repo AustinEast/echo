@@ -3,7 +3,7 @@ package echo;
 import echo.util.AABB;
 import haxe.ds.Either;
 import echo.data.Data;
-import hxmath.math.Vector2;
+import echo.math.Vector2;
 import echo.Body;
 import echo.Listener;
 import echo.Collisions;
@@ -19,19 +19,19 @@ class Echo {
   /**
    * Cache'd `Listeners` collection to help with memory management.
    */
-  static var cached_listeners(default, null):Listeners = new Listeners();
+  static final cached_listeners:Listeners = new Listeners();
   /**
    * Cache'd `Collision` Array to help with memory management.
    */
-  static var cached_collisions(default, null):Array<Collision> = [];
+  static final cached_collisions:Array<Collision> = [];
   /**
    * Cache'd `Body` to help with memory management.
    */
-  static var cached_body:Body;
+  static final cached_body:Body = new Body();
   /**
    * Cache'd `Vector2` with a value of (0,0) to help with memory management.
    */
-  static var cached_zero(default, null):Vector2 = Vector2.zero;
+  static final cached_zero:Vector2 = Vector2.zero;
   /**
    * Shortcut for creating a new `World`
    * @param options Options for the new `World`
@@ -90,8 +90,10 @@ class Echo {
         x: b.x,
         y: b.y,
         rotation: b.rotation,
-        velocity: b.velocity,
-        acceleration: b.acceleration,
+        velocity_x: b.velocity.x,
+        velocity_y: b.velocity.y,
+        acceleration_x: b.acceleration.x,
+        acceleration_y: b.acceleration.y,
         rotational_velocity: b.rotational_velocity
       }
     ]);
@@ -160,8 +162,6 @@ class Echo {
     var closest:Null<Intersection> = null;
     var lb = AABB.get_from_min_max(Math.min(line.start.x, line.end.x), Math.min(line.start.y, line.end.y), Math.max(line.start.x, line.end.x),
       Math.max(line.start.y, line.end.y));
-
-    if (world != null && cached_body == null) cached_body = new Body();
 
     switch (cast test : Either<Body, Array<Body>>) {
       case Left(body):
@@ -234,8 +234,6 @@ class Echo {
     var lb = AABB.get_from_min_max(Math.min(line.start.x, line.end.x), Math.min(line.start.y, line.end.y), Math.max(line.start.x, line.end.x),
       Math.max(line.start.y, line.end.y));
 
-    if (world != null && cached_body == null) cached_body = new Body();
-
     switch (cast test : Either<Body, Array<Body>>) {
       case Left(body):
         var temp = Intersection.get(line, body);
@@ -304,7 +302,9 @@ class Echo {
               body.x = item.x;
               body.y = item.y;
               body.rotation = item.rotation;
-              body.velocity = item.velocity;
+              body.velocity.set(item.velocity_x, item.velocity_y);
+              body.acceleration.set(item.acceleration_x, item.acceleration_y);
+              body.rotational_velocity = item.rotational_velocity;
             }
           }
         }
@@ -328,8 +328,8 @@ class Echo {
               body.x = item.x;
               body.y = item.y;
               body.rotation = item.rotation;
-              body.velocity = item.velocity;
-              body.acceleration = item.acceleration;
+              body.velocity.set(item.velocity_x, item.velocity_y);
+              body.acceleration.set(item.acceleration_x, item.acceleration_y);
               body.rotational_velocity = item.rotational_velocity;
             }
           }

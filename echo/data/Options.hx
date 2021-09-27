@@ -3,7 +3,7 @@ package echo.data;
 import echo.Body;
 import echo.data.Data;
 import echo.data.Types;
-import hxmath.math.Vector2;
+import echo.math.Vector2;
 
 typedef BodyOptions = {
   /**

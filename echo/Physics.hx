@@ -2,14 +2,12 @@ package echo;
 
 import echo.Listener;
 import echo.data.Data;
-import hxmath.math.Vector2;
 
 using echo.util.ext.FloatExt;
 /**
  * Class containing methods for performing Physics simulations on a World
  */
 class Physics {
-  static final zero = Vector2.zero;
   /**
    * Applies movement forces to a World's Bodies
    * @param world World to step forward
@@ -35,12 +33,13 @@ class Physics {
       body.velocity.x = compute_velocity(body.velocity.x, accel_x, body.drag.x, body.max_velocity.x, dt);
       body.velocity.y = compute_velocity(body.velocity.y, accel_y, body.drag.y, body.max_velocity.y, dt);
       // Apply Linear Drag
-      if (body.drag_length > 0 && body.acceleration == zero && body.velocity != zero) {
-        body.velocity.normalizeTo(body.velocity.length - body.drag_length * dt);
+      @:privateAccess
+      if (body.drag_length > 0 && body.acceleration == Echo.cached_zero && body.velocity != Echo.cached_zero) {
+        body.velocity.length = body.velocity.length - body.drag_length * dt;
       }
       // Apply Linear Max Velocity
       if (body.max_velocity_length > 0 && body.velocity.length > body.max_velocity_length) {
-        body.velocity.normalizeTo(body.max_velocity_length);
+        body.velocity.length = body.max_velocity_length;
       }
       // Apply Velocity
       body.x += body.velocity.x * body.inverse_mass * dt;

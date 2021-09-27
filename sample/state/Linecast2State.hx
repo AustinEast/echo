@@ -1,7 +1,7 @@
 package state;
 
 import echo.Echo;
-import hxmath.math.Vector2;
+import echo.math.Vector2;
 import echo.Line;
 import echo.Body;
 import echo.World;

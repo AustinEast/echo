@@ -2,7 +2,7 @@ package echo.util;
 
 import echo.data.Data;
 import echo.shape.*;
-import hxmath.math.Vector2;
+import echo.math.Vector2;
 
 using echo.util.ext.FloatExt;
 using echo.util.SAT;
@@ -19,7 +19,7 @@ class SAT {
   }
 
   public static inline function point_in_circle(p:Vector2, c:Circle):Bool {
-    return (p - c.get_position()).lengthSq < c.radius * c.radius;
+    return (p - c.get_position()).length_sq < c.radius * c.radius;
   }
 
   public static inline function point_in_polygon(point:Vector2, polygon:Polygon):Bool {
@@ -59,7 +59,7 @@ class SAT {
     if ((ua < 0) || (ua > 1) || (ub < 0) || (ub > 1)) return null;
 
     var hit = line1.start + ua * (line1.end - line1.start);
-    var distance = line1.start.distanceTo(hit);
+    var distance = line1.start.distance(hit);
     var overlap = line1.length - distance;
     var inverse = d >= 0;
     var l2l = line2.length * (inverse ? -1 : 1);
@@ -108,9 +108,9 @@ class SAT {
     var f = l.start - c.get_position();
     var r = c.radius;
 
-    var a = d * d;
-    var b = 2 * (f * d);
-    var e = (f * f) - (r * r);
+    var a = d.dot(d);
+    var b = 2 * f.dot(d);
+    var e = f.dot(f) - (r * r);
 
     var discriminant = b * b - 4 * a * e;
     if (discriminant < 0) return null;
@@ -122,9 +122,10 @@ class SAT {
 
     if (t1 >= 0 && t1 <= 1) {
       var hit = l.point_along_ratio(t1);
-      var distance = l.start.distanceTo(hit);
+      var distance = l.start.distance(hit);
       var overlap = l.length - distance;
-      norm.set(hit.x - c.x, hit.y - c.y).divideWith(r);
+      norm.set(hit.x - c.x, hit.y - c.y);
+      norm /= r;
 
       var i = IntersectionData.get(distance, overlap, hit.x, hit.y, norm.x, norm.y);
       i.line = l;
@@ -134,9 +135,10 @@ class SAT {
 
     if (t2 >= 0 && t2 <= 1) {
       var hit = l.point_along_ratio(t2);
-      var distance = l.start.distanceTo(hit);
+      var distance = l.start.distance(hit);
       var overlap = l.length - distance;
-      norm.set(hit.x - c.x, hit.y - c.y).applyNegate().divideWith(r);
+      norm.set(hit.x - c.x, hit.y - c.y);
+      norm.copy_from(-norm / r);
 
       var i = IntersectionData.get(distance, overlap, hit.x, hit.y, norm.x, norm.y, true);
       i.line = l;
@@ -424,7 +426,7 @@ class SAT {
     var c_rad = c.radius;
 
     for (i in 0...p.count) {
-      distance = (c_pos - p.vertices[i]).lengthSq;
+      distance = (c_pos - p.vertices[i]).length_sq;
 
       if (distance < testDistance) {
         testDistance = distance;
@@ -432,15 +434,15 @@ class SAT {
       }
     }
 
-    var normal = (closest - c_pos).normalize();
+    var normal = (closest - c_pos).normal;
 
     // Project the polygon's points
     var test:Float = 0;
-    var min1 = normal * p.vertices[0];
+    var min1 = normal.dot(p.vertices[0]);
     var max1 = min1;
 
     for (j in 1...p.count) {
-      test = normal * p.vertices[j];
+      test = normal.dot(p.vertices[j]);
       if (test < min1) min1 = test;
       if (test > max1) max1 = test;
     }
@@ -448,7 +450,7 @@ class SAT {
     // Project the circle
     var max2 = c_rad;
     var min2 = -c_rad;
-    var offset = normal * -c_pos;
+    var offset = normal.dot(-c_pos);
 
     min1 += offset;
     max1 += offset;
@@ -471,12 +473,12 @@ class SAT {
       normal.set(p.normals[i].x, p.normals[i].y);
 
       // Project the polygon
-      min1 = normal * p.vertices[0];
+      min1 = normal.dot(p.vertices[0]);
       max1 = min1;
 
       // Project all other points
       for (j in 1...p.count) {
-        test = normal * p.vertices[j];
+        test = normal.dot(p.vertices[j]);
         if (test < min1) min1 = test;
         if (test > max1) max1 = test;
       }
@@ -486,7 +488,7 @@ class SAT {
       min2 = -c_rad;
 
       // Offset points
-      offset = normal * -c_pos;
+      offset = normal.dot(-c_pos);
       min1 += offset;
       max1 += offset;
 
@@ -517,7 +519,7 @@ class SAT {
     col.overlap = Math.abs(col.overlap);
 
     if (flip) {
-      col.normal.applyNegate();
+      col.normal.negate();
     }
 
     return col;
@@ -540,19 +542,19 @@ class SAT {
       normal.set(polygon1.normals[i].x, polygon1.normals[i].y);
 
       // project polygon1
-      max1 = min1 = normal * polygon1.vertices[0];
+      max1 = min1 = normal.dot(polygon1.vertices[0]);
 
       for (j in 1...polygon1.count) {
-        testNum = normal * polygon1.vertices[j];
+        testNum = normal.dot(polygon1.vertices[j]);
         if (testNum < min1) min1 = testNum;
         if (testNum > max1) max1 = testNum;
       }
 
       // project polygon2
-      max2 = min2 = normal * polygon2.vertices[0];
+      max2 = min2 = normal.dot(polygon2.vertices[0]);
 
       for (j in 1...polygon2.count) {
-        testNum = normal * polygon2.vertices[j];
+        testNum = normal.dot(polygon2.vertices[j]);
         if (testNum < min2) min2 = testNum;
         if (testNum > max2) max2 = testNum;
       }
@@ -578,7 +580,7 @@ class SAT {
     col.sb = flip ? polygon1 : polygon2;
 
     if (flip) {
-      col.normal.applyNegate();
+      col.normal.negate();
     }
 
     return col;

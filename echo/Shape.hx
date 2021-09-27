@@ -6,7 +6,7 @@ import echo.data.Types;
 import echo.shape.*;
 import echo.util.AABB;
 import echo.util.Transform;
-import hxmath.math.Vector2;
+import echo.math.Vector2;
 /**
  * Base Shape Class. Acts as a Body's collider. Check out `echo.shapes` for all available shapes.
  */

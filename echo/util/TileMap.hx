@@ -3,7 +3,7 @@ package echo.util;
 import echo.Shape;
 import echo.data.Options.ShapeOptions;
 import echo.shape.Polygon;
-import hxmath.math.Vector2;
+import echo.math.Vector2;
 
 typedef TileShape = {
   index:Int,

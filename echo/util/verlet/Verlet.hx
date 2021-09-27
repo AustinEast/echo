@@ -3,7 +3,7 @@ package echo.util.verlet;
 import echo.util.verlet.Composite;
 import echo.util.Disposable;
 import echo.util.verlet.Constraints;
-import hxmath.math.Vector2;
+import echo.math.Vector2;
 import echo.data.Options.VerletOptions;
 /**
  * A Verlet physics simulation, using Dots, Constraints, and Composites. Useful for goofy Softbody visuals and effects!

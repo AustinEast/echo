@@ -4,7 +4,7 @@ import echo.util.AABB;
 import echo.shape.*;
 import echo.util.Pool;
 import echo.data.Data;
-import hxmath.math.Vector2;
+import echo.math.Vector2;
 
 using echo.util.SAT;
 

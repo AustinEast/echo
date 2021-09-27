@@ -7,7 +7,7 @@ import echo.shape.Rect;
 import echo.util.Disposable;
 import echo.util.History;
 import echo.util.QuadTree;
-import hxmath.math.Vector2;
+import echo.math.Vector2;
 /**
  * A `World` is an Object representing the state of a Physics simulation and it configurations. 
  */

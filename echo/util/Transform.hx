@@ -1,9 +1,9 @@
 package echo.util;
 
 import echo.util.Disposable;
-import hxmath.math.Matrix3x3;
-import hxmath.math.Vector2;
-import hxmath.math.Vector3;
+import echo.math.Matrix3;
+import echo.math.Vector2;
+import echo.math.Vector3;
 
 using Math;
 using echo.util.ext.FloatExt;
@@ -67,33 +67,33 @@ class Transform implements IDisposable #if cog implements cog.IComponent #end {
 
   var parent:Null<Transform>;
   var children:Array<Transform> = [];
-  var local_to_world_matrix = Matrix3x3.identity;
-  var world_to_local_matrix = Matrix3x3.identity;
+  var local_to_world_matrix = Matrix3.identity;
+  var world_to_local_matrix = Matrix3.identity;
   var dirty = false;
   var inverse_dirty = false;
   var coordinates_dirty:Bool = false;
   /**
-   * Gets the translated `Matrix3x3 representing the defined `x` and `y`.
+   * Gets the translated `Matrix3 representing the defined `x` and `y`.
    */
-  public static inline function translate(x:Float, y:Float):Matrix3x3 {
-    return new Matrix3x3(1, 0, x, 0, 1, y, 0, 0, 1);
+  public static inline function translate(x:Float, y:Float):Matrix3 {
+    return new Matrix3(1, 0, x, 0, 1, y, 0, 0, 1);
   }
   /**
-   * Gets the rotated `Matrix3x3` representing the defined `radians`.
+   * Gets the rotated `Matrix3` representing the defined `radians`.
    */
-  public static inline function rotate(radians:Float):Matrix3x3 {
+  public static inline function rotate(radians:Float):Matrix3 {
     var s = Math.sin(radians);
     var c = Math.cos(radians);
-    return new Matrix3x3(c, -s, 0, s, c, 0, 0, 0, 1);
+    return new Matrix3(c, -s, 0, s, c, 0, 0, 0, 1);
   }
   /**
-   * Gets the scaled `Matrix3x3` representing the defined `scale_x` and `scale_y`.
+   * Gets the scaled `Matrix3` representing the defined `scale_x` and `scale_y`.
    */
-  public static inline function scale(scale_x:Float, scale_y:Float):Matrix3x3 {
-    return new Matrix3x3(scale_x, 0, 0, 0, scale_y, 0, 0, 0, 1);
+  public static inline function scale(scale_x:Float, scale_y:Float):Matrix3 {
+    return new Matrix3(scale_x, 0, 0, 0, scale_y, 0, 0, 0, 1);
   }
   /**
-   * Multiplies the `Vector3` by a transposed form of the `Matrix3x3`.
+   * Multiplies the `Vector3` by a transposed form of the `Matrix3`.
    *
    * Transposed form:
    * ```
@@ -106,7 +106,7 @@ class Transform implements IDisposable #if cog implements cog.IComponent #end {
    * @return Vector3
    */
   @:op(A * B)
-  public static inline function multiply_transposed_matrix(v:Vector3, a:Matrix3x3):Vector3 {
+  public static inline function multiply_transposed_matrix(v:Vector3, a:Matrix3):Vector3 {
     return new Vector3(a.m00 * v.x
       + a.m01 * v.y
       + a.m02 * v.z, a.m10 * v.x
@@ -150,27 +150,27 @@ class Transform implements IDisposable #if cog implements cog.IComponent #end {
       this.parent.children.push(this);
     }
 
-    set_dirty(true);
+    set_dirty();
   }
   /**
    * Gets the Matrix representing the local coordinates' transformation.
-   * @return Matrix3x3
+   * @return Matrix3
    */
-  public inline function get_local_matrix():Matrix3x3 {
+  public inline function get_local_matrix():Matrix3 {
     // translate(local_x, local_y) * rotate(local_rotation.deg_to_rad()) * scale(local_scale_x, local_scale_y);
     var radians = local_rotation.deg_to_rad();
     var s = Math.sin(radians);
     var c = Math.cos(radians);
-    return new Matrix3x3(c * local_scale_x, -s * local_scale_y, local_x, s * local_scale_x, c * local_scale_y, local_y, 0, 0, 1);
+    return new Matrix3(c * local_scale_x, -s * local_scale_y, local_x, s * local_scale_x, c * local_scale_y, local_y, 0, 0, 1);
   }
   /**
    * Gets the Matrix that converts from local coordinates to world coordinates.
-   * @return Matrix3x3
+   * @return Matrix3
    */
-  public function get_local_to_world_matrix():Matrix3x3 {
+  public function get_local_to_world_matrix():Matrix3 {
     if (dirty) {
-      if (parent == null) get_local_matrix().copyTo(local_to_world_matrix);
-      else (parent.get_local_to_world_matrix() * get_local_matrix()).copyTo(local_to_world_matrix);
+      if (parent == null) local_to_world_matrix.copy_from(get_local_matrix());
+      else local_to_world_matrix.copy_from(parent.get_local_to_world_matrix() * get_local_matrix());
       dirty = false;
     }
     return local_to_world_matrix;
@@ -178,7 +178,7 @@ class Transform implements IDisposable #if cog implements cog.IComponent #end {
   /**
    * Gets the Inversed Matrix based on the `local_to_world_matrix`.
    */
-  public function get_world_to_local_matrix():Matrix3x3 {
+  public function get_world_to_local_matrix():Matrix3 {
     if (inverse_dirty) {
       var m = get_local_to_world_matrix();
       var a = m.m00;
@@ -419,14 +419,15 @@ class Transform implements IDisposable #if cog implements cog.IComponent #end {
     coordinates_dirty = false;
   }
 
-  inline function set_dirty(force:Bool = false) {
-    if (force || !dirty) {
-      dirty = inverse_dirty = coordinates_dirty = true;
-      for (child in children) {
-        child.set_dirty(true);
-      }
-      if (on_dirty != null) on_dirty(this);
-    }
+  public function set_dirty() {
+    dirty = inverse_dirty = coordinates_dirty = true;
+    for (child in children) child.set_dirty();
+
+    if (on_dirty != null) on_dirty(this);
+  }
+
+  inline function try_set_dirty(force:Bool = false) {
+    if (force || !dirty) set_dirty();
   }
 
   inline function get_x() {
@@ -460,19 +461,19 @@ class Transform implements IDisposable #if cog implements cog.IComponent #end {
   }
 
   inline function get_right() {
-    return Vector2.fromPolar(rotation.deg_to_rad(), 1);
+    return Vector2.from_radians(rotation.deg_to_rad(), 1);
   }
 
   inline function get_left() {
-    return Vector2.fromPolar((rotation + 180).deg_to_rad(), 1);
+    return Vector2.from_radians((rotation + 180).deg_to_rad(), 1);
   }
 
   inline function get_up() {
-    return Vector2.fromPolar((rotation + 90).deg_to_rad(), 1);
+    return Vector2.from_radians((rotation + 90).deg_to_rad(), 1);
   }
 
   inline function get_down() {
-    return Vector2.fromPolar((rotation - 90).deg_to_rad(), 1);
+    return Vector2.from_radians((rotation - 90).deg_to_rad(), 1);
   }
 
   inline function set_x(v:Float) {
@@ -506,27 +507,27 @@ class Transform implements IDisposable #if cog implements cog.IComponent #end {
   }
 
   inline function set_local_x(v:Float) {
-    set_dirty();
+    try_set_dirty();
     return local_x = v;
   }
 
   inline function set_local_y(v:Float) {
-    set_dirty();
+    try_set_dirty();
     return local_y = v;
   }
 
   inline function set_local_rotation(v:Float) {
-    set_dirty();
+    try_set_dirty();
     return local_rotation = v;
   }
 
   inline function set_local_scale_x(v:Float) {
-    set_dirty();
+    try_set_dirty();
     return local_scale_x = v;
   }
 
   inline function set_local_scale_y(v:Float) {
-    set_dirty();
+    try_set_dirty();
     return local_scale_y = v;
   }
 }

@@ -3,7 +3,7 @@ package echo.util;
 import echo.util.verlet.Verlet;
 import echo.data.Data;
 import echo.shape.*;
-import hxmath.math.Vector2;
+import echo.math.Vector2;
 
 using echo.util.ext.FloatExt;
 
@@ -120,7 +120,7 @@ class Debug {
     draw_line(data.line.start.x, data.line.start.y, data.hit.x, data.hit.y, intersection_color);
     if (draw_overlap) draw_line(data.hit.x, data.hit.y, data.line.end.x, data.line.end.y, intersection_overlap_color);
     if (draw_normal) {
-      var normal = Line.get_from_vector(data.hit, data.normal.angle.rad_to_deg(), 10);
+      var normal = Line.get_from_vector(data.hit, data.normal.radians.rad_to_deg(), 10);
       draw_line(normal.x, normal.y, normal.dx, normal.dy, intersection_overlap_color);
       normal.put();
     }

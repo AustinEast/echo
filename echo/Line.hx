@@ -4,7 +4,7 @@ import echo.data.Data.IntersectionData;
 import echo.util.AABB;
 import echo.util.Pool;
 import echo.util.Proxy;
-import hxmath.math.Vector2;
+import echo.math.Vector2;
 
 using echo.util.ext.FloatExt;
 
@@ -106,7 +106,7 @@ class Line implements IProxy implements IPooled {
   public inline function ratio_of_point(point:Vector2, clamp:Bool = true):Float {
     var ab = end - start;
     var ap = point - start;
-    var t = ((ab * ap) / ab.lengthSq);
+    var t = (ab.dot(ap) / ab.length_sq);
     if (clamp) t = t.clamp(0, 1);
     return t;
   }
@@ -120,11 +120,11 @@ class Line implements IProxy implements IPooled {
   public inline function side(point:Vector2, ?set:Vector2) {
     var rad = (dx - x) * (point.y - y) - (dy - y) * (point.x - x);
     var dir = start - end;
-    var normal = set == null ? new Vector2(0, 0) : set;
+    var n = set == null ? new Vector2(0, 0) : set;
 
-    if (rad > 0) normal.set(dir.y, -dir.x);
-    else normal.set(-dir.y, dir.x);
-    return normal.normalize();
+    if (rad > 0) n.set(dir.y, -dir.x);
+    else n.set(-dir.y, dir.x);
+    return n.normal;
   }
 
   public inline function to_aabb(put_self:Bool = false) {
@@ -164,7 +164,7 @@ class Line implements IProxy implements IPooled {
     return (aabb == null) ? AABB.get_from_min_max(min_x, min_y, max_x, max_y) : aabb.set_from_min_max(min_x, min_y, max_x, max_y);
   }
 
-  inline function get_length() return start.distanceTo(end);
+  inline function get_length() return start.distance(end);
 
   inline function get_radians() return Math.atan2(dy - y, dx - x);
 

@@ -1,6 +1,6 @@
 package echo.util.verlet;
 
-import hxmath.math.Vector2;
+import echo.math.Vector2;
 /**
  * The Dot is the basic building block of the Verlet simulation, representing a single moving point.
  * 

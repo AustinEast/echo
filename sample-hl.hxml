@@ -10,13 +10,23 @@
 -lib hlsdl
 # -lib hldx
 
+# math lib integrations
+# -lib hxmath
+# -D ECHO_USE_HXMATH
+
+# -lib zerolib
+# -D ECHO_USE_ZEROLIB
+
+# -lib vector-math
+# -D ECHO_USE_VECTORMATH
+
 #flags
 -dce full
 -D windowSize=1280x720
 # -D HXMATH_USE_HEAPS_STRUCTURES
 # -D hl-profile
 # -D hl-ver=1.11.0
-# -D dump=pretty
+-D dump=pretty
 
 # output
 -hl bin/sample.hl

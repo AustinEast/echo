@@ -1,8 +1,8 @@
 package echo.data;
 
+import echo.math.Vector2;
 import echo.util.AABB;
 import echo.util.Pool;
-import hxmath.math.Vector2;
 
 @:structInit
 class BodyState {
@@ -10,17 +10,22 @@ class BodyState {
   public final x:Float;
   public final y:Float;
   public final rotation:Float;
-  public final velocity:Vector2;
-  public final acceleration:Vector2;
+  public final velocity_x:Float;
+  public final velocity_y:Float;
+  public final acceleration_x:Float;
+  public final acceleration_y:Float;
   public final rotational_velocity:Float;
 
-  public function new(id:Int, x:Float, y:Float, rotation:Float, velocity:Vector2, acceleration:Vector2, rotational_velocity:Float) {
+  public function new(id:Int, x:Float, y:Float, rotation:Float, velocity_x:Float, velocity_y:Float, acceleration_x:Float, acceleration_y:Float,
+      rotational_velocity:Float) {
     this.id = id;
     this.x = x;
     this.y = y;
     this.rotation = rotation;
-    this.velocity = velocity.clone();
-    this.acceleration = velocity.clone();
+    this.velocity_x = velocity_x;
+    this.velocity_y = velocity_y;
+    this.acceleration_x = acceleration_x;
+    this.acceleration_y = acceleration_y;
     this.rotational_velocity = rotational_velocity;
   }
 }

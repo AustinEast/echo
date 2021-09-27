@@ -6,7 +6,7 @@ import echo.util.AABB;
 import echo.util.Pool;
 
 using echo.util.SAT;
-using hxmath.math.Vector2;
+using echo.math.Vector2;
 
 class Polygon extends Shape implements IPooled {
   public static var pool(get, never):IPool<Polygon>;
@@ -283,8 +283,8 @@ class Polygon extends Shape implements IPooled {
    */
   inline function compute_normals():Void {
     for (i in 0...count) {
-      _vertices[(i + 1) % count].copyTo(sync_pos);
-      sync_pos.subtractWith(_vertices[i]);
+      sync_pos.copy_from(_vertices[(i + 1) % count]);
+      sync_pos -= _vertices[i];
 
       // Calculate normal with 2D cross product between vector and scalar
       if (_normals[i] == null) _normals[i] = new Vector2(-sync_pos.y, sync_pos.x);

@@ -10,9 +10,6 @@
     "austineast"
   ],
   "url": "https://austineast.dev/echo",
-  "releasenote": "Verlet module & Optimizations",
-  "version": "3.1.0",
-  "dependencies": {
-    "hxmath": ""
-  }
+  "releasenote": "Abstract Math Types",
+  "version": "4.0.0"
 }

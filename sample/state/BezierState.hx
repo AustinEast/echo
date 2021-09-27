@@ -7,9 +7,7 @@ import h2d.Interactive;
 import hxd.Key;
 import echo.util.Bezier;
 import echo.World;
-import hxmath.math.Vector2;
-
-using hxmath.math.MathUtil;
+import echo.math.Vector2;
 
 class BezierState extends BaseState {
   final segments = 100;

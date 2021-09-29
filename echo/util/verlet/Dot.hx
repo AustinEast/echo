@@ -32,7 +32,7 @@ class Dot {
    */
   public var ay:Float;
 
-  public function new(x:Float = 0, y:Float = 0) {
+  public inline function new(x:Float = 0, y:Float = 0) {
     dx = this.x = x;
     dy = this.y = y;
     ax = ay = 0;

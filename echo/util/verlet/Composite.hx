@@ -2,11 +2,11 @@ package echo.util.verlet;
 
 import echo.util.verlet.Constraints;
 /**
- * A Composite contains Dots and Constraints.
+ * A Composite contains Dots and Constraints. It can be thought of as a "Body" in the Verlet simulation.
  */
 class Composite {
   public var dots:Array<Dot> = [];
-  public var constraints:Array<IConstraint> = [];
+  public var constraints:Array<Constraint> = [];
 
   public function new() {}
 
@@ -20,12 +20,12 @@ class Composite {
     return dots.remove(dot);
   }
 
-  public function add_constraint(constraint:IConstraint):IConstraint {
+  public function add_constraint(constraint:Constraint):Constraint {
     constraints.push(constraint);
     return constraint;
   }
 
-  public inline function remove_constraint(constraint:IConstraint):Bool {
+  public inline function remove_constraint(constraint:Constraint):Bool {
     return constraints.remove(constraint);
   }
 

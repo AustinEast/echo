@@ -2,16 +2,43 @@ package echo.util.verlet;
 
 import echo.math.Vector2;
 
-interface IConstraint {
-  public var active:Bool;
+abstract class Constraint {
+  public var active:Bool = true;
 
-  public function step(dt:Float):Void;
+  public abstract function step(dt:Float):Void;
 
-  public function get_positions():Array<Vector2>;
+  public abstract function position_count():Int;
+
+  public abstract function get_position(i:Int):Vector2;
+
+  public inline function iterator() {
+    return new ConstraintIterator(this);
+  }
+
+  public inline function get_positions():Array<Vector2> {
+    return [for (p in iterator()) p];
+  }
 }
 
-class DistanceConstraint implements IConstraint {
-  public var active = true;
+class ConstraintIterator {
+  var c:Constraint;
+  var i:Int;
+
+  public inline function new(c:Constraint) {
+    this.c = c;
+    i = 0;
+  }
+
+  public inline function hasNext() {
+    return i < c.position_count();
+  }
+
+  public inline function next() {
+    return c.get_position(i++);
+  }
+}
+
+class DistanceConstraint extends Constraint {
   public var a:Dot;
   public var b:Dot;
   public var stiffness:Float;
@@ -40,13 +67,20 @@ class DistanceConstraint implements IConstraint {
     b.set_position(bp - n);
   }
 
-  public function get_positions():Array<Vector2> {
-    return [a.get_position(), b.get_position()];
+  public inline function position_count() return 2;
+
+  public inline function get_position(i:Int):Vector2 {
+    switch (i) {
+      case 0:
+        return a.get_position();
+      case 1:
+        return b.get_position();
+    }
+    throw 'Constraint has no position at index $i.';
   }
 }
 
-class PinConstraint implements IConstraint {
-  public var active = true;
+class PinConstraint extends Constraint {
   public var a:Dot;
   public var x:Float;
   public var y:Float;
@@ -62,13 +96,20 @@ class PinConstraint implements IConstraint {
     a.y = y;
   }
 
-  public function get_positions():Array<Vector2> {
-    return [a.get_position(), new Vector2(x, y)];
+  public inline function position_count():Int return 2;
+
+  public inline function get_position(i:Int):Vector2 {
+    switch (i) {
+      case 0:
+        return a.get_position();
+      case 1:
+        return new Vector2(x, y);
+    }
+    throw 'Constraint has no position at index $i.';
   }
 }
 
-class RotationConstraint implements IConstraint {
-  public var active = true;
+class RotationConstraint extends Constraint {
   public var a:Dot;
   public var b:Dot;
   public var c:Dot;
@@ -95,15 +136,25 @@ class RotationConstraint implements IConstraint {
 
     diff *= dt * stiffness;
 
-    a.set_position((a_pos - b_pos).rotate(diff, @:privateAccess Echo.cached_zero) + b_pos);
-    c.set_position((c_pos - b_pos).rotate(-diff, @:privateAccess Echo.cached_zero) + b_pos);
+    a.set_position((a_pos - b_pos).rotate(diff) + b_pos);
+    c.set_position((c_pos - b_pos).rotate(-diff) + b_pos);
     a_pos.set(a.x, a.y);
     c_pos.set(c.x, c.y);
-    b.set_position((b_pos - a_pos).rotate(diff, @:privateAccess Echo.cached_zero) + a_pos);
-    b.set_position((b.get_position() - c_pos).rotate(-diff, @:privateAccess Echo.cached_zero) + c_pos);
+    b.set_position((b_pos - a_pos).rotate(diff) + a_pos);
+    b.set_position((b.get_position() - c_pos).rotate(-diff) + c_pos);
   }
 
-  public function get_positions():Array<Vector2> {
-    return [a.get_position(), b.get_position(), c.get_position()];
+  public inline function position_count() return 3;
+
+  public inline function get_position(i:Int):Vector2 {
+    switch (i) {
+      case 0:
+        return a.get_position();
+      case 1:
+        return b.get_position();
+      case 2:
+        return c.get_position();
+    }
+    throw 'Constraint has no position at index $i.';
   }
 }

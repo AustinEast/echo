@@ -36,9 +36,13 @@ class Verlet implements IDisposable {
 
   public var composites(default, null):Array<Composite> = [];
   /**
-   * The amount of iterations that occur each time the Verlet World is stepped. The higher the number, the more stable the Physics Simulation will be, at the cost of performance.
+   * The amount of iterations that occur on Constraints each time the Verlet World is stepped. The higher the number, the more stable the Physics Simulation will be, at the cost of performance.
    */
   public var iterations:Int;
+  /**
+   * The fixed Step rate of the Verlet World. The Verlet simulation must be stepped forward at a consistent rate, or it's stability will quickly deteriorate.
+   */
+  public var fixed_framerate(default, set):Float;
 
   public var bounds_left:Bool = true;
 
@@ -47,6 +51,9 @@ class Verlet implements IDisposable {
   public var bounds_top:Bool = true;
 
   public var bounds_bottom:Bool = true;
+
+  var fixed_accumulator:Float = 0;
+  var fixed_dt:Float;
 
   public static function rect(x:Float, y:Float, width:Float, height:Float, stiffness:Float, ?distance:Float):Composite {
     var r = new Composite();
@@ -111,39 +118,59 @@ class Verlet implements IDisposable {
     gravity = new Vector2(options.gravity_x == null ? 0 : options.gravity_x, options.gravity_y == null ? 0 : options.gravity_y);
     drag = options.drag == null ? .98 : options.drag;
     iterations = options.iterations == null ? 5 : options.iterations;
+    fixed_framerate = options.fixed_framerate == null ? 60 : options.fixed_framerate;
   }
 
   public function step(dt:Float, ?colliders:Array<Shape>) {
-    for (composite in composites) {
-      for (d in composite.dots) {
-        // Integrate
-        var pos = d.get_position();
-        var vel:Vector2 = (pos - d.get_last_position()) * drag;
-        d.set_last_position(pos);
-        d.set_position(pos + vel + (gravity + d.get_acceleration()) * dt);
+    fixed_accumulator += dt;
+    while (fixed_accumulator > fixed_dt) {
+      for (composite in composites) {
+        for (d in composite.dots) {
+          // Integrate
+          var pos = d.get_position();
+          var vel:Vector2 = (pos - d.get_last_position()) * drag;
+          d.set_last_position(pos);
+          d.set_position(pos + vel + (gravity + d.get_acceleration()) * fixed_dt);
 
-        // Check bounds
-        if (bounds_bottom && d.y > height + y) d.y = height + y;
-        else if (bounds_top && d.y < y) d.y = y;
-        if (bounds_left && d.x < x) d.x = x;
-        else if (bounds_right && d.x > width + x) d.x = width + x;
+          // Check bounds
+          if (bounds_bottom && d.y > height + y) d.y = height + y;
+          else if (bounds_top && d.y < y) d.y = y;
+          if (bounds_left && d.x < x) d.x = x;
+          else if (bounds_right && d.x > width + x) d.x = width + x;
 
-        // Check collisions
-        if (colliders != null) for (c in colliders) {}
-      }
+          // Check collisions
+          if (colliders != null) for (c in colliders) {}
+        }
 
-      // Constraints
-      var fdt = 1 / iterations;
-      for (i in 0...iterations) {
-        for (c in composite.constraints) {
-          if (c.active) c.step(fdt);
+        // Constraints
+        var fdt = 1 / iterations;
+        for (i in 0...iterations) {
+          for (c in composite.constraints) {
+            if (c.active) c.step(fdt);
+          }
         }
       }
+      fixed_accumulator -= fixed_dt;
     }
   }
 
-  public function dispose() {
+  public inline function add(composite:Composite):Composite {
+    composites.push(composite);
+    return composite;
+  }
+
+  public inline function remove(composite:Composite):Bool {
+    return composites.remove(composite);
+  }
+
+  public inline function dispose() {
     if (composites != null) for (composite in composites) composite.clear();
     composites = null;
+  }
+
+  inline function set_fixed_framerate(v:Float) {
+    fixed_framerate = Math.max(v, 0);
+    fixed_dt = 1 / fixed_framerate;
+    return fixed_framerate;
   }
 }

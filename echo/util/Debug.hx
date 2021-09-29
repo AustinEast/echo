@@ -177,11 +177,14 @@ class Debug {
   }
 
   public function draw_verlet(verlet:Verlet, draw_dots:Bool = true, draw_constraints:Bool = true) {
+    var last_pos = new Vector2(0, 0);
     for (composite in verlet.composites) {
       if (draw_constraints) for (constraint in composite.constraints) {
-        var positions = constraint.get_positions();
-        if (positions.length > 1) for (i in 1...positions.length) {
-          draw_line(positions[i - 1].x, positions[i - 1].y, positions[i].x, positions[i].y, intersection_overlap_color);
+        var first = true;
+        for (p in constraint) {
+          if (!first) draw_line(last_pos.x, last_pos.y, p.x, p.y, intersection_overlap_color);
+          else first = false;
+          last_pos.copy_from(p);
         }
       }
       if (draw_dots) for (dot in composite.dots) draw_circle(dot.x, dot.y, 2, shape_fill_color);

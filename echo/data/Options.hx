@@ -292,12 +292,22 @@ typedef VerletOptions = {
    * The amount of acceleration on the Y axis applied to each `Dot` every Step.
    */
   var ?gravity_y:Float;
-
+  /**
+   *  Default value is `0.98`.
+   */
   var ?drag:Float;
   /**
-   * The amount of iterations that occur each time the World is stepped. The higher the number, the more stable the Physics Simulation will be, at the cost of performance.
+   * The amount of iterations that occur each time the World is stepped. The higher the number, the more stable the Physics Simulation will be, at the cost of performance. 
+   * 
+   * Default value is `5`.
    */
   var ?iterations:Int;
+  /**
+   * The fixed Step rate of the Verlet World. The Verlet simulation must be stepped forward at a consistent rate, or it's stability will quickly deteriorate.
+   * 
+   * Default value is `60`.
+   */
+  var ?fixed_framerate:Float;
 }
 
 typedef RectOptions = {

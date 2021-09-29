@@ -44,10 +44,6 @@ class Polygon extends Shape implements IPooled {
 
   var dirty_bounds:Bool;
   /**
-   * A cached `Vector2` used to reduce allocations. Used Internally.
-   */
-  var sync_pos:Vector2 = new Vector2(0, 0);
-  /**
    * Gets a Polygon from the pool, or creates a new one if none are available. Call `put()` on the Polygon to place it back in the pool.
    * @param x
    * @param y
@@ -283,12 +279,13 @@ class Polygon extends Shape implements IPooled {
    */
   inline function compute_normals():Void {
     for (i in 0...count) {
-      sync_pos.copy_from(_vertices[(i + 1) % count]);
-      sync_pos -= _vertices[i];
+      var v = _vertices[(i + 1) % count].clone();
+      v -= _vertices[i];
+      v.rotate_left();
 
       // Calculate normal with 2D cross product between vector and scalar
-      if (_normals[i] == null) _normals[i] = new Vector2(-sync_pos.y, sync_pos.x);
-      else _normals[i].set(-sync_pos.y, sync_pos.x);
+      if (_normals[i] == null) _normals[i] = v.clone();
+      else _normals[i].copy_from(v);
       _normals[i].normalize();
     }
   }

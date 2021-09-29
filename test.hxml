@@ -7,6 +7,16 @@
 # libraries
 -lib echo
 
+# math lib integrations
+# -lib hxmath
+# -D ECHO_USE_HXMATH
+
+# -lib zerolib
+# -D ECHO_USE_ZEROLIB
+
+# -lib vector-math
+# -D ECHO_USE_VECTORMATH
+
 --each
 
 # output

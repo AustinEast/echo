@@ -268,7 +268,8 @@ inline function negate(v:Vector2)
 inline function distance(a:Vector2, b:Vector2):Float
   return (b - a).length;
 
-inline function dot(a:Vector2, b:Vector2):Float return a.x * b.x + a.y * b.y;
+inline function dot(a:Vector2, b:Vector2):Float
+  return a.x * b.x + a.y * b.y;
 
 inline function normalize(v:Vector2):Vector2 {
   v.length = 1;
@@ -296,12 +297,34 @@ overload extern inline function rotate(v:Vector2, radians:Float, pivot:Vector2):
 
   return v;
 }
+/**
+ * Rotates a `Vector2` (in place) by 90 degrees to the left/counterclockwise (-y, x).
+ * @param v The `Vector2` to modify.
+ */
+inline function rotate_left(v:Vector2):Vector2 {
+  var x = -v.y;
+  v.y = v.x;
+  v.x = x;
+
+  return v;
+}
+/**
+ * Rotates a `Vector2` (in place) by 90 degrees to the right/clockwise (y, -x). 
+ * @param v The `Vector2` to modify.
+ */
+inline function rotate_right(v:Vector2):Vector2 {
+  var x = v.y;
+  v.y = -v.x;
+  v.x = x;
+
+  return v;
+}
 
 inline function lerp(a:Vector2, b:Vector2, t:Float):Vector2
   return new Vector2((1.0 - t) * a.x + t * b.x, (1.0 - t) * a.y + t * b.y);
 /**
  * Normalizes a `Vector2` (in place) to represent the closest cardinal direction (Up, Down, Left, or Right).
- * @param normal The `Vector2` to modify.
+ * @param v The `Vector2` to modify.
  * @return the modified `Vector2`
  */
 inline function square_normal(v:Vector2):Vector2 {

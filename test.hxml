@@ -17,6 +17,8 @@
 # -lib vector-math
 # -D ECHO_USE_VECTORMATH
 
+# -D ECHO_USE_HEAPS
+
 --each
 
 # output

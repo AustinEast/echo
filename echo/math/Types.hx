@@ -28,6 +28,10 @@ abstract Mat3Impl(Mat3) from Mat3 to Mat3 {
     this = new Mat3(m00, m01, m02, m10, m11, m12, m20, m21, m22);
   }
 }
+#elseif ECHO_USE_HEAPS
+typedef Vector2Type = h2d.col.Point;
+typedef Vector3Type = h3d.col.Point;
+typedef Matrix3Type = echo.math.Matrix3.Matrix3Default;
 #else
 typedef Vector2Type = echo.math.Vector2.Vector2Default;
 typedef Vector3Type = echo.math.Vector3.Vector3Default;

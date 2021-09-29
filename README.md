@@ -117,23 +117,22 @@ body.entity = new some.package.Entity();
 
 Echo comes with basic implementations of common math structures (Vector2, Vector3, Matrix3), but also allows these structures to be extended and used seamlessly with other popular Haxe math libraries. 
 
-Support is currently available for [hxmath](https://github.com/tbrosman/hxmath), [vector-math](https://github.com/haxiomic/vector-math), and [zerolib](https://github.com/01010111/zerolib).
+Support is currently available for the following libraries (activated by adding the listed compiler flag to your project's build parameters):
+
+| Library | Compiler Flag |
+| --- | --- |
+| [hxmath](https://github.com/tbrosman/hxmath) | ECHO_USE_HXMATH |
+| [vector-math](https://github.com/haxiomic/vector-math) | ECHO_USE_VECTORMATH |
+| [zerolib](https://github.com/01010111/zerolib) | ECHO_USE_ZEROLIB |
+| [heaps](https://heaps.io) | ECHO_USE_HEAPS |
 
 (pull requests for other libraries happily accepted!)
 
-If you compile your project with a standard `.hxml`, add one of these to your file:
+If you compile your project with a standard `.hxml`:
 ```hxml
 # hxmath support
 -lib hxmath
 -D ECHO_USE_HXMATH
-
-# vector-math support
--lib vector-math
--D ECHO_USE_VECTORMATH
-
-# zerolib support
--lib zerolib
--D ECHO_USE_ZEROLIB
 ```
 
 For OpenFL users, add one of the following into your `Project.xml`:
@@ -141,14 +140,6 @@ For OpenFL users, add one of the following into your `Project.xml`:
 <!-- hxmath support -->
 <haxelib name="hxmath" />
 <haxedef name="ECHO_USE_HXMATH" />
-
-<!-- vector-math support -->
-<haxelib name="vector-math" />
-<haxedef name="ECHO_USE_VECTORMATH" />
-
-<!-- zerolib support -->
-<haxelib name="zerolib" />
-<haxedef name="ECHO_USE_ZEROLIB" />
 ```
 
 For Kha users, add one of the following into your `khafile.js`:
@@ -156,14 +147,6 @@ For Kha users, add one of the following into your `khafile.js`:
 // hxmath support
 project.addLibrary('hxmath');
 project.addDefine('ECHO_USE_HXMATH');
-
-// vector-math support
-project.addLibrary('vector-math');
-project.addDefine('ECHO_USE_VECTORMATH');
-
-// zerolib support
-project.addLibrary('zerolib');
-project.addDefine('ECHO_USE_ZEROLIB');
 ```
 
 # Examples

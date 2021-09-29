@@ -24,6 +24,7 @@ class Main extends BaseApp {
 
   override function init() {
     instance = this;
+
     // Create a World to hold all the Physics Bodies
     world = Echo.start({
       width: width,
@@ -32,6 +33,12 @@ class Main extends BaseApp {
       iterations: 5,
       history: 1000
     });
+
+    // Reduce Quadtree depths - our World is very small, so not many subdivisions of the Quadtree are actually needed.
+    // This can help with performance by limiting the Quadtree's overhead on simulations with small Body counts!
+    world.quadtree.max_depth = 2;
+    world.static_quadtree.max_depth = 3;
+
     // Set up our Sample States
     sample_states = [
       PolygonState, StackingState, MultiShapeState, ShapesState, GroupsState, StaticState, LinecastState, Linecast2State, TileMapState, TileMapState2,

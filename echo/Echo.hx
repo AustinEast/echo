@@ -29,10 +29,6 @@ class Echo {
    */
   static final cached_body:Body = new Body();
   /**
-   * Cache'd `Vector2` with a value of (0,0) to help with memory management.
-   */
-  static final cached_zero:Vector2 = Vector2.zero;
-  /**
    * Shortcut for creating a new `World`
    * @param options Options for the new `World`
    * @return World

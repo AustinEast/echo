@@ -1,5 +1,6 @@
 package echo;
 
+import echo.math.Vector2;
 import echo.Listener;
 import echo.data.Data;
 
@@ -33,8 +34,7 @@ class Physics {
       body.velocity.x = compute_velocity(body.velocity.x, accel_x, body.drag.x, body.max_velocity.x, dt);
       body.velocity.y = compute_velocity(body.velocity.y, accel_y, body.drag.y, body.max_velocity.y, dt);
       // Apply Linear Drag
-      @:privateAccess
-      if (body.drag_length > 0 && body.acceleration == Echo.cached_zero && body.velocity != Echo.cached_zero) {
+      if (body.drag_length > 0 && body.acceleration == Vector2.zero && body.velocity != Vector2.zero) {
         body.velocity.length = body.velocity.length - body.drag_length * dt;
       }
       // Apply Linear Max Velocity

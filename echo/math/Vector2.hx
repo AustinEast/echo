@@ -24,10 +24,10 @@ class Vector2Default {
 @:forward(x, y)
 abstract Vector2(Vector2Type) from Vector2Type to Vector2Type {
   public static var zero(get, never):Vector2;
-
   public static var up(get, never):Vector2;
-
+  public static var down(get, never):Vector2;
   public static var right(get, never):Vector2;
+  public static var left(get, never):Vector2;
 
   public var length(get, set):Float;
 
@@ -194,11 +194,17 @@ abstract Vector2(Vector2Type) from Vector2Type to Vector2Type {
   static inline function get_zero():Vector2
     return new Vector2(0.0, 0.0);
 
-  static inline function get_right():Vector2
-    return new Vector2(1.0, 0.0);
-
   static inline function get_up():Vector2
     return new Vector2(0.0, 1.0);
+
+  static inline function get_down():Vector2
+    return new Vector2(0.0, -1.0);
+
+  static inline function get_left():Vector2
+    return new Vector2(-1.0, 0.0);
+
+  static inline function get_right():Vector2
+    return new Vector2(1.0, 0.0);
 
   inline function get_length():Float {
     var self:Vector2 = this;
@@ -270,12 +276,20 @@ inline function distance(a:Vector2, b:Vector2):Float
 
 inline function dot(a:Vector2, b:Vector2):Float
   return a.x * b.x + a.y * b.y;
-
+/**
+ * Normalizes a `Vector2` (in place).
+ * @param v 
+ * @return Vector2
+ */
 inline function normalize(v:Vector2):Vector2 {
   v.length = 1;
   return v;
 }
-
+/**
+ * Rotates a `Vector2` (in place) by the specified amount of radians.
+ * @param v The `Vector2` to modify.
+ * @param radians The amount of radians to rotate.
+ */
 overload extern inline function rotate(v:Vector2, radians:Float):Vector2 {
   var cos = Math.cos(radians);
   var sin = Math.sin(radians);
@@ -285,7 +299,12 @@ overload extern inline function rotate(v:Vector2, radians:Float):Vector2 {
 
   return v;
 }
-
+/**
+ * Rotates a `Vector2` (in place) around a pivot by the specified amount of radians.
+ * @param v The `Vector2` to modify.
+ * @param radians The amount of radians to rotate.
+ * @param pivot Pivot position to rotate the `Vector2` around.
+ */
 overload extern inline function rotate(v:Vector2, radians:Float, pivot:Vector2):Vector2 {
   var cos = Math.cos(radians);
   var sin = Math.sin(radians);

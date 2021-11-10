@@ -24,9 +24,21 @@ class Vector2Default {
 @:forward(x, y)
 abstract Vector2(Vector2Type) from Vector2Type to Vector2Type {
   public static var zero(get, never):Vector2;
+  /**
+   * Returns { x: 0.0, y: 1.0 };
+   */
   public static var up(get, never):Vector2;
+  /**
+   * Returns { x: 0.0, y: -1.0 };
+   */
   public static var down(get, never):Vector2;
+  /**
+   * Returns { x: 1.0, y: 0.0 };
+   */
   public static var right(get, never):Vector2;
+  /**
+   * Returns { x: -1.0, y: 0.0 };
+   */
   public static var left(get, never):Vector2;
 
   public var length(get, set):Float;

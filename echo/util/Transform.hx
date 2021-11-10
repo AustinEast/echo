@@ -22,6 +22,10 @@ class Transform implements IDisposable #if cog implements cog.IComponent #end {
    */
   public var rotation(get, set):Float;
   /**
+   * The Transform's rotation in world coordinates.
+   */
+  public var radians(get, set):Float;
+  /**
    * The Transform's scale on the X axis in world coordinates.
    */
   public var scale_x(get, set):Float;
@@ -40,7 +44,11 @@ class Transform implements IDisposable #if cog implements cog.IComponent #end {
   /**
    * The Transform's rotation (as degrees) in local coordinates.
    */
-  public var local_rotation(default, set):Float;
+  public var local_rotation(get, set):Float;
+  /**
+   * The Transform's rotation in local coordinates.
+   */
+  public var local_radians(default, set):Float;
   /**
    * The Transform's scale on the X axis in local coordinates.
    */
@@ -50,10 +58,10 @@ class Transform implements IDisposable #if cog implements cog.IComponent #end {
    */
   public var local_scale_y(default, set):Float;
 
-  public var right(get, never):Vector2;
-  public var left(get, never):Vector2;
   public var up(get, never):Vector2;
   public var down(get, never):Vector2;
+  public var right(get, never):Vector2;
+  public var left(get, never):Vector2;
   /**
    * Optional callback method that gets called when the Transform is set as dirty.
    */
@@ -61,7 +69,7 @@ class Transform implements IDisposable #if cog implements cog.IComponent #end {
 
   var _x:Float = 0;
   var _y:Float = 0;
-  var _rotation:Float = 0;
+  var _radians:Float = 0;
   var _scale_x:Float = 1;
   var _scale_y:Float = 1;
 
@@ -157,10 +165,9 @@ class Transform implements IDisposable #if cog implements cog.IComponent #end {
    * @return Matrix3
    */
   public inline function get_local_matrix():Matrix3 {
-    // translate(local_x, local_y) * rotate(local_rotation.deg_to_rad()) * scale(local_scale_x, local_scale_y);
-    var radians = local_rotation.deg_to_rad();
-    var s = Math.sin(radians);
-    var c = Math.cos(radians);
+    // translate(local_x, local_y) * rotate(local_radians) * scale(local_scale_x, local_scale_y);
+    var s = Math.sin(local_radians);
+    var c = Math.cos(local_radians);
     return new Matrix3(c * local_scale_x, -s * local_scale_y, local_x, s * local_scale_x, c * local_scale_y, local_y, 0, 0, 1);
   }
   /**
@@ -402,7 +409,7 @@ class Transform implements IDisposable #if cog implements cog.IComponent #end {
       _y = local_y;
       _scale_x = local_scale_x;
       _scale_y = local_scale_y;
-      _rotation = local_rotation;
+      _radians = local_radians;
     }
     else {
       var a = m.m00;
@@ -413,7 +420,7 @@ class Transform implements IDisposable #if cog implements cog.IComponent #end {
       _y = m.m21;
       _scale_x = Math.sqrt(a * a + b * b);
       _scale_y = Math.sqrt(c * c + d * d);
-      _rotation = Math.atan2(-c / _scale_y, a / _scale_x).rad_to_deg();
+      _radians = Math.atan2(-c / _scale_y, a / _scale_x).rad_to_deg();
     }
 
     coordinates_dirty = false;
@@ -443,9 +450,15 @@ class Transform implements IDisposable #if cog implements cog.IComponent #end {
   }
 
   inline function get_rotation() {
-    if (parent == null) return local_rotation;
+    if (parent == null) return local_radians.rad_to_deg();
     sync();
-    return _rotation;
+    return _radians.rad_to_deg();
+  }
+
+  inline function get_radians() {
+    if (parent == null) return local_radians;
+    sync();
+    return _radians;
   }
 
   inline function get_scale_x() {
@@ -460,20 +473,24 @@ class Transform implements IDisposable #if cog implements cog.IComponent #end {
     return _scale_y;
   }
 
+  inline function get_local_rotation() {
+    return local_radians.rad_to_deg();
+  }
+
   inline function get_right() {
-    return Vector2.from_radians(rotation.deg_to_rad(), 1);
+    return Vector2.from_radians(radians, 1);
   }
 
   inline function get_left() {
-    return Vector2.from_radians((rotation + 180).deg_to_rad(), 1);
+    return Vector2.from_radians(radians + Math.PI, 1);
   }
 
   inline function get_up() {
-    return Vector2.from_radians((rotation + 90).deg_to_rad(), 1);
+    return Vector2.from_radians(radians + Math.PI * 0.5, 1);
   }
 
   inline function get_down() {
-    return Vector2.from_radians((rotation - 90).deg_to_rad(), 1);
+    return Vector2.from_radians(radians - Math.PI * 0.5, 1);
   }
 
   inline function set_x(v:Float) {
@@ -492,6 +509,12 @@ class Transform implements IDisposable #if cog implements cog.IComponent #end {
     if (parent == null) return local_rotation = v;
     local_rotation = parent.rotation_to_local(v);
     return rotation;
+  }
+
+  inline function set_radians(v:Float) {
+    if (parent == null) return local_radians = v;
+    local_radians = parent.rotation_to_local(v);
+    return radians;
   }
 
   inline function set_scale_x(v:Float) {
@@ -517,8 +540,12 @@ class Transform implements IDisposable #if cog implements cog.IComponent #end {
   }
 
   inline function set_local_rotation(v:Float) {
+    return local_radians = v.deg_to_rad();
+  }
+
+  inline function set_local_radians(v:Float) {
     try_set_dirty();
-    return local_rotation = v;
+    return local_radians = v;
   }
 
   inline function set_local_scale_x(v:Float) {

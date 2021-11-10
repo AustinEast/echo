@@ -44,13 +44,13 @@ class Verlet implements IDisposable {
    */
   public var fixed_framerate(default, set):Float;
 
-  public var bounds_left:Bool = true;
+  public var bounds_left:Bool = false;
 
-  public var bounds_right:Bool = true;
+  public var bounds_right:Bool = false;
 
-  public var bounds_top:Bool = true;
+  public var bounds_top:Bool = false;
 
-  public var bounds_bottom:Bool = true;
+  public var bounds_bottom:Bool = false;
 
   var fixed_accumulator:Float = 0;
   var fixed_dt:Float;
@@ -138,6 +138,7 @@ class Verlet implements IDisposable {
           if (bounds_left && d.x < x) d.x = x;
           else if (bounds_right && d.x > width + x) d.x = width + x;
 
+          // TODO
           // Check collisions
           if (colliders != null) for (c in colliders) {}
         }

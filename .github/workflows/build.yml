@@ -18,21 +18,21 @@ on:
 jobs:
   # This workflow contains a single job called "build"
   build:
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        haxe: [4.2.4]
-      fail-fast: true
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
       - uses: krdlab/setup-haxe@v1
       - uses: actions/checkout@v2
         with:
-          haxe-version: ${{ matrix.haxe }}
-      - run: haxe -version
-      - run: haxelib git dox https://github.com/HaxeFoundation/dox.git
-      - run: haxelib git heaps https://github.com/HeapsIO/heaps.git
-      - run: haxelib dev echo .
-      - run: haxe test.hxml
-      - run: haxe sample.hxml
-      - run: haxe dox.hxml
+          haxe-version: 4.2.4
+          
+      - name: Install Haxelib Dependencies
+        run: |
+          haxelib git dox https://github.com/HaxeFoundation/dox.git
+          haxelib git heaps https://github.com/HeapsIO/heaps.git
+          haxelib dev echo .
+          
+      - name: Run Builds
+        run: |
+          haxe test.hxml
+          haxe sample.hxml
+          haxe dox.hxml

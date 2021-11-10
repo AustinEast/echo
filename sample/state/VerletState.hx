@@ -24,6 +24,11 @@ class VerletState extends BaseState {
       gravity_y: 20
     });
 
+    // Constrict composites into th simulation bounds
+    verlet.bounds_bottom = true;
+    verlet.bounds_left = true;
+    verlet.bounds_right = true;
+
     // Create a couple random rectangles
     for (i in 0...4) {
       var box = Verlet.rect(Random.range(parent.width * 0.2, parent.width * 0.8), 80, 30, 40, 0.7);

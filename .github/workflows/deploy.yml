@@ -9,11 +9,13 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
+  call-build:
+    uses: AustinEast/echo/.github/workflows/build.yml@v1
+
   deploy:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
-    steps:
-      - uses: AustinEast/echo/.github/workflows/build.yml@v1
+#     steps:
+      

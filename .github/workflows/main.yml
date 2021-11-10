@@ -17,16 +17,20 @@ on:
 jobs:
   # This workflow contains a single job called "build"
   build:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        haxe: [4.2.4]
+      fail-fast: true
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: krdlab/setup-haxe@v1
         with:
-          haxe-version: 4.2.4
-      - run: |
-          haxe -version
-          haxelib git dox https://github.com/HaxeFoundation/dox.git
-          haxelib git heaps https://github.com/HeapsIO/heaps.git
-          haxelib dev echo .
-          haxe ./test.hxml
-          haxe ./sample.hxml
-          haxe ./dox.hxml
+          haxe-version: ${{ matrix.haxe }}
+      - run: haxe -version
+      - run: haxelib git dox https://github.com/HaxeFoundation/dox.git
+      - run: haxelib git heaps https://github.com/HeapsIO/heaps.git
+      - run: haxelib dev echo .
+      - run: haxe ./test.hxml
+      - run: haxe ./sample.hxml
+      - run: haxe ./dox.hxml

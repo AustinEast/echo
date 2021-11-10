@@ -31,6 +31,6 @@ jobs:
       - run: haxelib git dox https://github.com/HaxeFoundation/dox.git
       - run: haxelib git heaps https://github.com/HeapsIO/heaps.git
       - run: haxelib dev echo .
-      - run: haxe ./test.hxml
-      - run: haxe ./sample.hxml
-      - run: haxe ./dox.hxml
+      - run: haxe test.hxml
+      - run: haxe sample.hxml
+      - run: haxe dox.hxml

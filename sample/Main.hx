@@ -36,8 +36,13 @@ class Main extends BaseApp {
 
     // Reduce Quadtree depths - our World is very small, so not many subdivisions of the Quadtree are actually needed.
     // This can help with performance by limiting the Quadtree's overhead on simulations with small Body counts!
-    world.quadtree.max_depth = 2;
+    world.quadtree.max_depth = 3;
     world.static_quadtree.max_depth = 3;
+
+    // Increase max contents per Quadtree depth - can help reduce Quadtree subdivisions in smaller World sizes.
+    // Tuning these Quadtree settings can be very useful when optimizing for performance!
+    world.quadtree.max_contents = 20;
+    world.static_quadtree.max_contents = 20;
 
     // Set up our Sample States
     sample_states = [

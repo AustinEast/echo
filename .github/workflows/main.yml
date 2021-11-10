@@ -26,7 +26,6 @@ jobs:
     steps:
       - uses: krdlab/setup-haxe@v1
       - uses: actions/checkout@v2
-      - uses: ./
         with:
           haxe-version: ${{ matrix.haxe }}
       - run: haxe -version

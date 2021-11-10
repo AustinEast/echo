@@ -20,7 +20,7 @@
 # -lib vector-math
 # -D ECHO_USE_VECTORMATH
 
-# -D ECHO_USE_HEAPS
+-D ECHO_USE_HEAPS
 
 #flags
 -dce full

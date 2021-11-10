@@ -10,7 +10,7 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   call-build:
-    uses: AustinEast/echo/.github/workflows/build.yml@v1
+    uses: AustinEast/echo/.github/workflows/build.yml@master
 
   deploy:
     # The type of runner that the job will run on

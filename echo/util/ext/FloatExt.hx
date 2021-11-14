@@ -27,3 +27,10 @@ inline function rad_to_deg(rad:Float):Float
  */
 inline function deg_to_rad(deg:Float):Float
   return Math.PI / 180 * deg;
+
+inline extern overload function sign(value:Float):Int return value > 0 ? 1 : value < 0 ? -1 : 0;
+
+inline extern overload function sign(value:Float, deadzone:Float):Int {
+  if (Math.abs(value) < deadzone) return 0;
+  return value <= -deadzone ? -1 : 1;
+}

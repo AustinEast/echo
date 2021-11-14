@@ -1,0 +1,44 @@
+name: CI Build
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+  
+  # Allows you to run this workflow from another workflow
+  workflow_call:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: krdlab/setup-haxe@v1
+      - uses: actions/checkout@v2
+        with:
+          haxe-version: 4.2.4
+          
+      - name: Install Haxelib Dependencies
+        run: |
+          haxelib git dox https://github.com/HaxeFoundation/dox.git
+          haxelib git heaps https://github.com/HeapsIO/heaps.git
+          haxelib dev echo .
+          
+      - name: Run Builds
+        run: |
+          haxe test.hxml
+          haxe sample.hxml
+          haxe dox.hxml
+          
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v2.2.4
+        with:
+          # Artifact name
+          name: bin
+          # A file, directory or wildcard pattern that describes what to upload
+          path: bin

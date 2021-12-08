@@ -141,16 +141,12 @@ class Body implements IDisposable #if cog implements cog.IComponent #end {
    *
    * Note: a maximum of 32 layers are supported.
    */
-  @:dox(hide)
-  @:noCompletion
   public var layers:BitMask = new BitMask();
   /**
    * Collision layers that this Body will collide with. Combine with `layers` to filter collisions between layers.
    *
    * Note: a maximum of 32 layers are supported.
    */
-  @:dox(hide)
-  @:noCompletion
   public var layer_mask:BitMask = new BitMask();
 
   public var disposed(default, null):Bool;

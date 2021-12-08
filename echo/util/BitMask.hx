@@ -1,22 +1,24 @@
 package echo.util;
 
-abstract BitMask(Int) {
-  static inline function value(index:Int) return 1 << index;
-
-  @:to public function to_int():Int return value(this);
-
-  public function new() this = 0;
-
-  public inline function remove(mask:Int):Int {
-    return this = this & ~value(mask);
+abstract BitMask(Int) to Int {
+  
+  @:from
+  public static function from_int(i:Int):BitMask {
+    return new BitMask(1 << i);
   }
 
-  public inline function add(mask:Int):Int {
-    return this = this | value(mask);
+  public function new(value:Int = 0) this = value;
+
+  public inline function remove(mask:BitMask):Int {
+    return this = this & ~mask;
   }
 
-  public inline function contains(mask:Int):Bool {
-    return this & value(mask) != 0;
+  public inline function add(mask:BitMask):Int {
+    return this = this | mask;
+  }
+
+  public inline function contains(mask:BitMask):Bool {
+    return this & mask != 0;
   }
 
   public inline function clear() {

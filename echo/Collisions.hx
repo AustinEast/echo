@@ -215,6 +215,6 @@ class Collisions {
   }
 
   static inline function layer_match(a:Body, b:Body) {
-    return a.layer_mask.is_empty() || a.layer_mask.contains(b.layers);
+    return a.layer_mask.is_empty() || b.layer_mask.is_empty() || (a.layer_mask.contains(b.layers) && b.layer_mask.contains(a.layers));
   }
 }

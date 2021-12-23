@@ -30,10 +30,16 @@ jobs:
         with:
           name: echo-web
   
-      - name: Unzip Artifacts
-        run: |
-          unzip echo-haxelib.zip
-          unzip echo-web.zip
+      - name: Unzip Website Artifacts
+        run: unzip echo-web.zip
+        
+      - name: Deploy to Github Pages
+        uses: crazy-max/ghaction-github-pages@v2
+        with:
+          target_branch: gh-pages-test
+          build_dir: bin
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
       - name: Display structure of downloaded files
         run: ls -R

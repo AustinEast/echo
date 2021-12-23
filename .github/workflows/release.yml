@@ -37,6 +37,8 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - uses: krdlab/setup-haxe@v1
+    
       - name: Download Haxelib Artifact
         uses: actions/download-artifact@v2
         with:

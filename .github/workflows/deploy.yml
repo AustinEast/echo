@@ -29,6 +29,11 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: echo-web
+  
+      - name: Unzip Artifacts
+        run: |
+          unzip echo-haxelib.zip
+          unzip echo-web.zip
     
       - name: Display structure of downloaded files
         run: ls -R

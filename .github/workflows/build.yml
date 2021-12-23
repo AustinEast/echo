@@ -35,17 +35,16 @@ jobs:
           haxe sample.hxml
           haxe dox.hxml
           
-      - name: Prepare Haxelib
-        run: zip -r echo.zip echo *.html *.md *.json *.hxml run.n
-      
-      - name: Upload Echo Website Artifact
-        uses: actions/upload-artifact@v2.2.4
-        with:
-          # Artifact name
-          name: echo-web
-          # A file, directory or wildcard pattern that describes what to upload
-          path: bin
-    
+      - name: Clean Prior Artifacts
+        run: |
+          rm -f echo.zip
+          rm -f echo-web.zip
+          
+      - name: Prepare Artifacts
+        run: |
+          zip -r echo.zip echo *.html *.md *.json run.n
+          zip -r echo-web.zip bin
+          
       - name: Upload Echo Haxelib Artifact
         uses: actions/upload-artifact@v2.2.4
         with:
@@ -53,3 +52,11 @@ jobs:
           name: echo
           # A file, directory or wildcard pattern that describes what to upload
           path: echo.zip
+          
+      - name: Upload Echo Website Artifact
+        uses: actions/upload-artifact@v2.2.4
+        with:
+          # Artifact name
+          name: echo-web
+          # A file, directory or wildcard pattern that describes what to upload
+          path: echo-web.zip

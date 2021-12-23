@@ -35,11 +35,6 @@ jobs:
           haxe sample.hxml
           haxe dox.hxml
           
-      - name: Clean Prior Artifacts
-        run: |
-          rm -f echo-haxelib.zip
-          rm -f echo-web.zip
-          
       - name: Prepare Artifacts
         run: |
           zip -r echo-haxelib.zip echo LICENSE README.md haxelib.json

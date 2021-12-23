@@ -37,12 +37,12 @@ jobs:
           
       - name: Clean Prior Artifacts
         run: |
-          rm -f echo.zip
+          rm -f echo-haxelib.zip
           rm -f echo-web.zip
           
       - name: Prepare Artifacts
         run: |
-          zip -r echo.zip echo LICENSE *.md *.json
+          zip -r echo-haxelib.zip echo LICENSE README.md haxelib.json
           zip -r echo-web.zip bin
           
       - name: Upload Echo Haxelib Artifact
@@ -51,7 +51,7 @@ jobs:
           # Artifact name
           name: echo
           # A file, directory or wildcard pattern that describes what to upload
-          path: echo.zip
+          path: echo-haxelib.zip
           
       - name: Upload Echo Website Artifact
         uses: actions/upload-artifact@v2.2.4

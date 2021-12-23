@@ -11,7 +11,7 @@ on:
 jobs:
 
   build:
-    uses: AustinEast/echo/.github/workflows/build.yml@master
+    uses: AustinEast/echo/.github/workflows/build.yml@feature/github-actions-deploy
 
   deploy:
     needs: build
@@ -20,7 +20,15 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - uses: actions/download-artifact@v2
+      - name: Download Haxelib Artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: echo-haxelib
+      
+      - name: Download Website Artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: echo-web
     
       - name: Display structure of downloaded files
         run: ls -R

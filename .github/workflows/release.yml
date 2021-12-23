@@ -43,3 +43,4 @@ jobs:
           name: echo-haxelib
 
       - name: Deploy to Haxelib
+        run: haxelib submit echo-haxelib.zip $HAXELIB_PWD --always

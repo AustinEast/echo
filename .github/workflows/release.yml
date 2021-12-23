@@ -43,4 +43,4 @@ jobs:
           name: echo-haxelib
 
       - name: Deploy to Haxelib
-        run: haxelib submit echo-haxelib.zip $HAXELIB_PWD --always
+        run: haxelib submit echo-haxelib.zip ${{ secrets.HAXELIB_PWD }} --always

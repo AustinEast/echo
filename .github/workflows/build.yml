@@ -18,6 +18,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+    
+      - name: PRE - Display structure of workspace
+        run: ls -R
+    
       - uses: krdlab/setup-haxe@v1
         with:
           haxe-version: 4.2.4
@@ -56,5 +60,5 @@ jobs:
           # A file, directory or wildcard pattern that describes what to upload
           path: echo-web.zip
 
-      - name: Display structure of workspace
+      - name: POST - Display structure of workspace
         run: ls -R

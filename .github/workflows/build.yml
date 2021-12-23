@@ -18,9 +18,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+    
       - uses: krdlab/setup-haxe@v1
         with:
           haxe-version: 4.2.4
+          
       - uses: actions/checkout@v2
           
       - name: Install Haxelib Dependencies
@@ -35,11 +37,6 @@ jobs:
           haxe sample.hxml
           haxe dox.hxml
           
-      - name: Clean Prior Artifacts
-        run: |
-          rm -f echo-haxelib.zip
-          rm -f echo-web.zip
-          
       - name: Prepare Artifacts
         run: |
           zip -r echo-haxelib.zip echo LICENSE README.md haxelib.json
@@ -49,7 +46,7 @@ jobs:
         uses: actions/upload-artifact@v2.2.4
         with:
           # Artifact name
-          name: echo
+          name: echo-haxelib
           # A file, directory or wildcard pattern that describes what to upload
           path: echo-haxelib.zip
           

@@ -11,7 +11,7 @@ on:
 jobs:
 
   build:
-    uses: AustinEast/echo/.github/workflows/build.yml@feature/github-actions-deploy
+    uses: AustinEast/echo/.github/workflows/build.yml@master
 
   deploy-website:
     needs: build

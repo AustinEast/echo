@@ -42,7 +42,7 @@ jobs:
           
       - name: Prepare Artifacts
         run: |
-          zip -r echo.zip echo *.html *.md *.json run.n
+          zip -r echo.zip echo LICENSE *.md *.json
           zip -r echo-web.zip bin
           
       - name: Upload Echo Haxelib Artifact

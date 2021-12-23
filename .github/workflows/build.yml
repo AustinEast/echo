@@ -19,12 +19,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     
-      - name: PRE - Display structure of workspace
-        run: ls -R
-    
       - uses: krdlab/setup-haxe@v1
         with:
           haxe-version: 4.2.4
+          
       - uses: actions/checkout@v2
           
       - name: Install Haxelib Dependencies
@@ -59,6 +57,3 @@ jobs:
           name: echo-web
           # A file, directory or wildcard pattern that describes what to upload
           path: echo-web.zip
-
-      - name: POST - Display structure of workspace
-        run: ls -R

@@ -55,3 +55,6 @@ jobs:
           name: echo-web
           # A file, directory or wildcard pattern that describes what to upload
           path: echo-web.zip
+
+      - name: Display structure of workspace
+        run: ls -R

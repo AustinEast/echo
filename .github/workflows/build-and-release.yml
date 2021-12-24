@@ -1,0 +1,101 @@
+name: Build & Release
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push, but only for the master branch
+  push:
+    branches: [ master ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+
+  build:
+    name: Build & Upload Artifacts
+    steps:
+      - name: Build Library
+        uses: AustinEast/echo/.github/workflows/build.yml@master
+
+      - name: Prepare Artifacts
+        run: |
+          zip -r echo-haxelib.zip echo LICENSE README.md haxelib.json
+          zip -r echo-web.zip bin
+          
+      - name: Upload Echo Haxelib Artifact
+        uses: actions/upload-artifact@v2.2.4
+        with:
+          name: echo-haxelib
+          path: echo-haxelib.zip
+          
+      - name: Upload Echo Website Artifact
+        uses: actions/upload-artifact@v2.2.4
+        with:
+          name: echo-web
+          path: echo-web.zip
+
+  release:
+    name: Check version & Create release
+    runs-on: ubuntu-latest
+    needs: build
+    outputs:
+      released: ${{ steps.check.outputs.version }} # expose release.outputs.released for the "publish" job
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - uses: EndBug/version-check@v1
+      id: check
+      with:
+        file-name: haxelib.json
+        diff-search: true
+    - name: Create Release
+      if: steps.check.outputs.changed
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.check.outputs.version }}
+        # tag_name: ${{ github.ref }}
+        release_name: ${{ steps.check.outputs.version }}
+        # release_name: ${{ github.ref }}
+        draft: false
+        prerelease: false
+
+  deploy-website:
+    name: Deploy to Website
+    needs: release
+    if: needs.release.outputs.released
+    runs-on: ubuntu-latest
+    steps:      
+      - name: Download Website Artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: echo-web
+  
+      - name: Unzip Website Artifacts
+        run: unzip echo-web.zip
+        
+      # - name: Deploy to Github Pages Branch
+      #   uses: crazy-max/ghaction-github-pages@v2
+      #   with:
+      #     target_branch: gh-pages
+      #     build_dir: bin
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy-haxelib:
+    name: Publish to Haxelib
+    needs: release
+    if: needs.release.outputs.released
+    runs-on: ubuntu-latest
+    steps:
+      - uses: krdlab/setup-haxe@v1
+    
+      - name: Download Haxelib Artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: echo-haxelib
+
+      # - name: Submit to Haxelib
+      #   run: haxelib submit echo-haxelib.zip ${{ secrets.HAXELIB_PWD }} --always

@@ -11,11 +11,9 @@ on:
 jobs:
 
   build:
-    name: Build Artifacts
     uses: AustinEast/echo/.github/workflows/build.yml@master
 
   deploy-website:
-    name: Deploy to Github Pages
     needs: build
     runs-on: ubuntu-latest
     steps:      
@@ -24,11 +22,11 @@ jobs:
         with:
           name: echo-web
   
-      - name: Unzip Website Artifact
+      - name: Unzip Website Artifacts
         run: unzip echo-web.zip
-      
-      - name: Deploy Artifact
-      - uses: crazy-max/ghaction-github-pages@v2
+        
+      - name: Deploy to Github Pages
+        uses: crazy-max/ghaction-github-pages@v2
         with:
           target_branch: gh-pages
           build_dir: bin
@@ -36,7 +34,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   deploy-haxelib:
-    name: Deploy to Haxelib
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -47,5 +44,5 @@ jobs:
         with:
           name: echo-haxelib
 
-      - name: Deploy Artifact
+      - name: Deploy to Haxelib
         run: haxelib submit echo-haxelib.zip ${{ secrets.HAXELIB_PWD }} --always

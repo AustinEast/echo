@@ -14,6 +14,7 @@ jobs:
 
   build:
     name: Build & Upload Artifacts
+    runs-on: ubuntu-latest
     steps:
       - name: Build Library
         uses: AustinEast/echo/.github/workflows/build.yml@master

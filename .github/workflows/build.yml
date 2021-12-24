@@ -4,6 +4,8 @@ name: CI Build
 on:
   # Triggers the workflow on push or pull request events
   push:
+    branches-ignore: [ master ]
+
   pull_request:
 
   # Allows you to run this workflow manually from the Actions tab

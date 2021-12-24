@@ -22,14 +22,14 @@ jobs:
       - name: Build Library
         uses: AustinEast/echo/.github/composites/build@master
 
-      - uses: EndBug/version-check@v1
+      - name: Check version
+        uses: EndBug/version-check@v1
         id: check
         with:
           file-name: haxelib.json
           diff-search: true
 
       - name: Prepare Artifacts
-        if: steps.check.outputs.changed
         run: |
           zip -r echo-haxelib.zip echo LICENSE README.md haxelib.json
           zip -r echo-web.zip bin
@@ -47,10 +47,10 @@ jobs:
           path: echo-web.zip
 
   release:
-    name: Check version & Create release
-    runs-on: ubuntu-latest
+    name: Create Release
     needs: build
     if: needs.build.outputs.released
+    runs-on: ubuntu-latest
     steps:
     - name: Create Release
       uses: actions/create-release@v1
@@ -78,13 +78,13 @@ jobs:
       - name: Unzip Website Artifacts
         run: unzip echo-web.zip
         
-      # - name: Deploy to Github Pages Branch
-      #   uses: crazy-max/ghaction-github-pages@v2
-      #   with:
-      #     target_branch: gh-pages
-      #     build_dir: bin
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Deploy to Github Pages Branch
+        uses: crazy-max/ghaction-github-pages@v2
+        with:
+          target_branch: gh-pages
+          build_dir: bin
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   deploy-haxelib:
     name: Publish to Haxelib
@@ -99,5 +99,5 @@ jobs:
         with:
           name: echo-haxelib
 
-      # - name: Submit to Haxelib
-      #   run: haxelib submit echo-haxelib.zip ${{ secrets.HAXELIB_PWD }} --always
+      - name: Submit to Haxelib
+        run: haxelib submit echo-haxelib.zip ${{ secrets.HAXELIB_PWD }} --always

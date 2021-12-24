@@ -15,21 +15,4 @@ on:
 jobs:
   build:
     steps:
-    
-      - uses: krdlab/setup-haxe@v1
-        with:
-          haxe-version: 4.2.4
-          
-      - uses: actions/checkout@v2
-          
-      - name: Install Haxelib Dependencies
-        run: |
-          haxelib git dox https://github.com/HaxeFoundation/dox.git
-          haxelib git heaps https://github.com/HeapsIO/heaps.git
-          haxelib dev echo .
-          
-      - name: Run Builds
-        run: |
-          haxe test.hxml
-          haxe sample.hxml
-          haxe dox.hxml
+      - uses: AustinEast/echo/.github/composites/build.yml@master

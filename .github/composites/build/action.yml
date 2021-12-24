@@ -11,12 +11,14 @@ runs:
       - uses: actions/checkout@v2
           
       - name: Install Haxelib Dependencies
+        shell: bash
         run: |
           haxelib git dox https://github.com/HaxeFoundation/dox.git
           haxelib git heaps https://github.com/HeapsIO/heaps.git
           haxelib dev echo .
           
       - name: Run Builds
+        shell: bash
         run: |
           haxe test.hxml
           haxe sample.hxml

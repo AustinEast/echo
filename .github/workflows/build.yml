@@ -15,4 +15,4 @@ on:
 jobs:
   build:
     steps:
-      - uses: AustinEast/echo/.github/composites/build.yml@master
+      - uses: AustinEast/echo/.github/composites/build@master

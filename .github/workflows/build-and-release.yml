@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Build Library
-        uses: AustinEast/echo/.github/composites/build.yml@master
+        uses: AustinEast/echo/.github/composites/build@master
 
       - name: Prepare Artifacts
         run: |

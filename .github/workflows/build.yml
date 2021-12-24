@@ -16,6 +16,7 @@ on:
 
 jobs:
   build:
+    name: Setup & Build
     runs-on: ubuntu-latest
     steps:
     
@@ -36,7 +37,11 @@ jobs:
           haxe test.hxml
           haxe sample.hxml
           haxe dox.hxml
-          
+  upload:
+    name: Upload Artifacts
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
       - name: Prepare Artifacts
         run: |
           zip -r echo-haxelib.zip echo LICENSE README.md haxelib.json
@@ -45,15 +50,11 @@ jobs:
       - name: Upload Echo Haxelib Artifact
         uses: actions/upload-artifact@v2.2.4
         with:
-          # Artifact name
           name: echo-haxelib
-          # A file, directory or wildcard pattern that describes what to upload
           path: echo-haxelib.zip
           
       - name: Upload Echo Website Artifact
         uses: actions/upload-artifact@v2.2.4
         with:
-          # Artifact name
           name: echo-web
-          # A file, directory or wildcard pattern that describes what to upload
           path: echo-web.zip

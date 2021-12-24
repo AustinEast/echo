@@ -14,6 +14,7 @@ on:
 
 jobs:
   build:
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - uses: AustinEast/echo/.github/composites/build@master

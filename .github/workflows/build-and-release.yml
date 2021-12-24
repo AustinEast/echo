@@ -15,11 +15,21 @@ jobs:
   build:
     name: Build & Upload Artifacts
     runs-on: ubuntu-latest
+    outputs:
+      released: ${{ steps.check.outputs.changed }}
+      version: ${{ steps.check.outputs.version }}
     steps:
       - name: Build Library
         uses: AustinEast/echo/.github/composites/build@master
 
+      - uses: EndBug/version-check@v1
+        id: check
+        with:
+          file-name: haxelib.json
+          diff-search: true
+
       - name: Prepare Artifacts
+        if: steps.check.outputs.changed
         run: |
           zip -r echo-haxelib.zip echo LICENSE README.md haxelib.json
           zip -r echo-web.zip bin
@@ -40,33 +50,24 @@ jobs:
     name: Check version & Create release
     runs-on: ubuntu-latest
     needs: build
-    outputs:
-      released: ${{ steps.check.outputs.version }} # expose release.outputs.released for the "publish" job
+    if: needs.build.outputs.released
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-    - uses: EndBug/version-check@v1
-      id: check
-      with:
-        file-name: haxelib.json
-        diff-search: true
     - name: Create Release
-      if: steps.check.outputs.changed
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ steps.check.outputs.version }}
+        tag_name: ${{ needs.build.outputs.version }}
         # tag_name: ${{ github.ref }}
-        release_name: ${{ steps.check.outputs.version }}
+        release_name: ${{ needs.build.outputs.version }}
         # release_name: ${{ github.ref }}
         draft: false
         prerelease: false
 
   deploy-website:
     name: Deploy to Website
-    needs: release
-    if: needs.release.outputs.released
+    needs: build
+    if: needs.build.outputs.released
     runs-on: ubuntu-latest
     steps:      
       - name: Download Website Artifact
@@ -87,8 +88,8 @@ jobs:
 
   deploy-haxelib:
     name: Publish to Haxelib
-    needs: release
-    if: needs.release.outputs.released
+    needs: build
+    if: needs.build.outputs.released
     runs-on: ubuntu-latest
     steps:
       - uses: krdlab/setup-haxe@v1

@@ -45,7 +45,7 @@ class Shape #if cog implements cog.IComponent #end {
    * @return Rect
    */
   public static inline function rect(?x:Float, ?y:Float, ?width:Float, ?height:Float, ?scale_x:Float,
-      ?scale_y:Float) return Rect.get(x, y, width, height, scale_x, scale_y);
+      ?scale_y:Float) return Rect.get(x, y, width, height, 0, scale_x, scale_y);
   /**
    * Gets a `Rect` with uniform width/height from the Rect Classes' Object Pool. Shortcut for `Rect.get()`.
    * @param x The X position of the Rect

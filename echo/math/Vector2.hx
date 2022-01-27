@@ -306,8 +306,10 @@ overload extern inline function rotate(v:Vector2, radians:Float):Vector2 {
   var cos = Math.cos(radians);
   var sin = Math.sin(radians);
 
+  var tmpX = v.x;
+
   v.x = v.x * cos - v.y * sin;
-  v.y = v.x * sin + v.y * cos;
+  v.y = tmpX * sin + v.y * cos;
 
   return v;
 }

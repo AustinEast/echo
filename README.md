@@ -217,7 +217,7 @@ Check out the source code for the [Echo Samples](https://austineast.dev/echo/) h
 
 * [HaxeFlixel](https://haxeflixel.com): https://github.com/AustinEast/echo-flixel
 * [Heaps](https://heaps.io): https://github.com/AustinEast/echo-heaps
-* [Peyote View](https://github.com/maitag/peote-view): https://github.com/maitag/peote-views-samples/tree/master/echo
+* [Peote View](https://github.com/maitag/peote-view): https://github.com/maitag/peote-views-samples/tree/master/echo
 * [HaxePunk](https://haxepunk.com): https://github.com/XANOZOID/EchoHaxePunk
 
 

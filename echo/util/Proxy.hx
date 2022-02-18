@@ -35,9 +35,12 @@ class Proxy {
       var alias:Null<Expr>;
       if (field.meta != null) {
         for (meta in field.meta) {
-          if (meta.name == ':alias') {
-            if (meta.params.length > 0) alias = meta.params[0];
-            else throw "Variables with the `@:alias` metadata need a property as the parameter";
+          switch (meta.name) {
+            case ":alias":
+              if (meta.params.length > 0) alias = meta.params[0];
+              else throw "Variables with the `@:alias` metadata need a property as the parameter";
+            case ":forward":
+              if (meta.params.length > 0) throw "Variables with the `@:forward` metadata cannot have any parameters";
           }
         }
       }

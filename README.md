@@ -5,7 +5,7 @@
 # echo
 A 2D Physics library written in Haxe.
 
-[![Build Status](https://travis-ci.org/AustinEast/echo.svg?branch=master)](https://travis-ci.org/AustinEast/echo)
+![Build Status](https://github.com/AustinEast/echo/actions/workflows/build-and-release.yml/badge.svg)
 
 Echo focuses on maintaining a simple API that is easy to integrate into any engine/framework (Heaps, OpenFL, Kha, etc). All Echo needs is an update loop and its ready to go!
 

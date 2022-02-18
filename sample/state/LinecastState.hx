@@ -3,7 +3,7 @@ package state;
 import echo.Line;
 import echo.Body;
 import echo.World;
-import ghost.Random;
+import util.Random;
 
 class LinecastState extends BaseState {
   var body_count:Int = 30;
@@ -35,7 +35,7 @@ class LinecastState extends BaseState {
 
   override function step(world:World, dt:Float) {
     line.end.set(Main.instance.scene.mouseX, Main.instance.scene.mouseY);
-    var result = line.linecast(dynamics);
+    var result = line.linecast(dynamics, world);
     if (result != null) Main.instance.debug.draw_intersection(result);
     else Main.instance.debug.draw_line(line.start.x, line.start.y, line.end.x, line.end.y, Main.instance.debug.intersection_color);
   }

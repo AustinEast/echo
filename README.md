@@ -13,7 +13,7 @@ Try the [Samples 🎮](https://austineast.dev/echo)!
 
 Check out the [API 📖](https://austineast.dev/echo/api/)!
 
-## Features
+# Features
 * Semi-implicit euler integration physics
 * SAT-powered collision detection
 * Quadtree for broadphase collision querying
@@ -21,9 +21,9 @@ Check out the [API 📖](https://austineast.dev/echo/api/)!
 * Physics State History Management with Built-in Undo/Redo functionality
 * Extendable debug drawing
 
-## Getting Started
+# Getting Started
 
-Echo requires [Haxe 4](https://haxe.org/download/) to run.
+Echo requires [Haxe 4.2+](https://haxe.org/download/) to run.
 
 Install the library from haxelib:
 ```
@@ -34,66 +34,73 @@ Alternatively the dev version of the library can be installed from github:
 haxelib git echo https://github.com/AustinEast/echo.git
 ```
 
-Then include the library in your project's `.hxml`:
+Then for standard Haxe applications, include the library in your project's `.hxml`:
 ```hxml
 -lib echo
 ```
-For OpenFL users, add this into your `Project.xml`:
+
+For OpenFL users, add the library into your `Project.xml`:
 
 ```xml
 <haxelib name="echo" />
 ```
 
-For Kha users (who don't use haxelib), clone echo and [hxmath](https://github.com/tbrosman/hxmath) to `Libraries` folder in your project root, and then add the following to your `khafile.js`:
+For Kha users (who don't use haxelib), clone echo to thee `Libraries` folder in your project root, and then add the following to your `khafile.js`:
 
 ```js
 project.addLibrary('echo');
-project.addLibrary('hxmath');
 ```
 
-## Usage
+# Usage
 
-### Concepts
+## Concepts
 
-#### Echo
+### Echo
 
 The `Echo` Class holds helpful utility methods to help streamline the creation and management of Physics Simulations.
 
-#### World
+### World
 
 A `World` is an Object representing the state of a Physics simulation and it configurations. 
 
-#### Bodies
+### Bodies
 
 A `Body` is an Object representing a Physical Body in a `World`. A `Body` has a position, velocity, mass, optional collider shapes, and many other properties that are used in a `World` simulation.
 
-#### Shapes
+### Shapes
 
-A Body's collider is represented by different Shapes. Available Shapes:
+A Body's collider is represented by different Shapes. Without a `Shape` to define it's form, a `Body` can be thought of a just a point in the `World` that cant collide with anything.
+
+Available Shapes:
 * Rectangle
 * Circle
 * Polygon (Convex Only)
 
-#### Lines
+When a Shape is added to a Body, it's transform (x, y, rotation) becomes relative to its parent Body. In this case, a Shape's local transform can still be accessed through `shape.local_x`, `shape.local_y`, and `shape.local_rotation`.
 
-Use Lines to perform Linecasts against other Lines, Bodies, and Shapes.
+It's important to note that all Shapes (including Rectangles) have their origins centered.
 
-#### Listeners
+### Lines
 
-Listeners keep track of collisions between Bodies - enacting callbacks and physics responses depending on their configurations.
+Use Lines to perform Linecasts against other Lines, Bodies, and Shapes. Check out the `Echo` class for various methods to preform Linecasts.
 
-### Integration
+### Listeners
 
+Listeners keep track of collisions between Bodies - enacting callbacks and physics responses depending on their configurations. Once you add a `Listener` to a `World`, it will automatically update itself as the `World` is stepped forward.
+
+## Integration
+
+### Codebase Integration
 Echo has a couple of ways to help integrate itself into codebases through the `Body` class. 
 
-First, the `Body` class has two public fields named `on_move` and `on_rotate`. If these are set on a body, they'll be called any time the body moves or rotates:
+First, the `Body` class has two public fields named `on_move` and `on_rotate`. If these are set on a body, they'll be called any time the body moves or rotates. This is useful for things such as syncing the Body's transform with external objects:
 ```haxe
 var body = new echo.Body();
 body.on_move = (x,y) -> entity.position.set(x,y);
 body.on_rotate = (rotation) -> entity.rotation = rotation;
 ```
 
-Second, a build macro is available to add custom fields to the `Body` class, such as an `Entity` class:
+Second, a build macro is available to add custom fields to the `Body` class, such as a reference to an `Entity` class:
 
 in build.hxml:
 ```hxml
@@ -106,7 +113,45 @@ var body = new echo.Body();
 body.entity = new some.package.Entity();
 ```
 
-## Example
+### Other Math Library Integration
+
+Echo comes with basic implementations of common math structures (Vector2, Vector3, Matrix3), but also allows these structures to be extended and used seamlessly with other popular Haxe math libraries. 
+
+Support is currently available for the following libraries (activated by adding the listed compiler flag to your project's build parameters):
+
+| Library | Compiler Flag |
+| --- | --- |
+| [hxmath](https://github.com/tbrosman/hxmath) | ECHO_USE_HXMATH |
+| [vector-math](https://github.com/haxiomic/vector-math) | ECHO_USE_VECTORMATH |
+| [zerolib](https://github.com/01010111/zerolib) | ECHO_USE_ZEROLIB |
+| [heaps](https://heaps.io) | ECHO_USE_HEAPS |
+
+(pull requests for other libraries happily accepted!)
+
+If you compile your project with a standard `.hxml`:
+```hxml
+# hxmath support
+-lib hxmath
+-D ECHO_USE_HXMATH
+```
+
+For OpenFL users, add one of the following into your `Project.xml`:
+```xml
+<!-- hxmath support -->
+<haxelib name="hxmath" />
+<haxedef name="ECHO_USE_HXMATH" />
+```
+
+For Kha users, add one of the following into your `khafile.js`:
+```js
+// hxmath support
+project.addLibrary('hxmath');
+project.addDefine('ECHO_USE_HXMATH');
+```
+
+# Examples
+
+## Basic
 ```haxe
 import echo.Echo;
 
@@ -165,13 +210,23 @@ class Main {
 }
 ```
 
-## Roadmap
-### Sooner
-* Linecast updates 
-  * Provide normals in Linecast results
-  * Allow querying World's Quadtree when Linecasting
-* Allow parenting of Body transforms
-### Later
+## Samples
+Check out the source code for the [Echo Samples](https://austineast.dev/echo/) here: https://github.com/AustinEast/echo/tree/master/sample/state
+
+## Engine/Framework Specific
+
+* [HaxeFlixel](https://haxeflixel.com): https://github.com/AustinEast/echo-flixel
+* [Heaps](https://heaps.io): https://github.com/AustinEast/echo-heaps
+* [Peyote View](https://github.com/maitag/peote-view): https://github.com/maitag/peote-views-samples/tree/master/echo
+* [HaxePunk](https://haxepunk.com): https://github.com/XANOZOID/EchoHaxePunk
+
+
+# Roadmap
+## Sooner
+* Endless length Line support
+* Update Readme with info on the various utilities (Tilemap, Bezier, etc)
+## Later
 * Allow Concave Polygons (through Convex Decomposition)
 * Sleeping Body optimations
 * Constraints
+* Compiler Flag to turn off a majority of inlined functions (worse performance, but MUCH smaller filesize)

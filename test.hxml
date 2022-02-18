@@ -1,10 +1,31 @@
 # class paths
 -cp test
+
 # entry point
 -main Main
+
 # libraries
 -lib echo
--lib ghostlib
+
+# math lib integrations
+# -lib hxmath
+# -D ECHO_USE_HXMATH
+
+# -lib zerolib
+# -D ECHO_USE_ZEROLIB
+
+# -lib vector-math
+# -D ECHO_USE_VECTORMATH
+
+# -D ECHO_USE_HEAPS
+
+--each
+
 # output
+-hl bin/test.hl
+--no-output
+
+--next
+
 -js bin/test.js
 --no-output

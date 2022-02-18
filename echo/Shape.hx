@@ -1,16 +1,16 @@
 package echo;
 
-import hxmath.frames.Frame2;
-import echo.util.Proxy;
-import echo.shape.*;
 import echo.data.Data;
 import echo.data.Options;
 import echo.data.Types;
-import hxmath.math.Vector2;
+import echo.shape.*;
+import echo.util.AABB;
+import echo.util.Transform;
+import echo.math.Vector2;
 /**
- * Base Shape Class. Acts as a Body's collider. Check out `echo.shapes` for all available shapes
+ * Base Shape Class. Acts as a Body's collider. Check out `echo.shapes` for all available shapes.
  */
-class Shape implements IProxy {
+class Shape #if cog implements cog.IComponent #end {
   /**
    * Default Shape Options
    */
@@ -25,12 +25,13 @@ class Shape implements IProxy {
     var s:Shape;
     switch (options.type) {
       case RECT:
-        s = Rect.get(options.offset_x, options.offset_y, options.width, options.height);
+        s = Rect.get(options.offset_x, options.offset_y, options.width, options.height, options.rotation, options.scale_x, options.scale_y);
       case CIRCLE:
-        s = Circle.get(options.offset_x, options.offset_y, options.radius);
+        s = Circle.get(options.offset_x, options.offset_y, options.radius, options.rotation, options.scale_x, options.scale_y);
       case POLYGON:
-        if (options.vertices != null) s = Polygon.get_from_vertices(options.offset_x, options.offset_y, 0, options.vertices);
-        else s = Polygon.get(options.offset_x, options.offset_y, options.sides, options.radius);
+        if (options.vertices != null) s = Polygon.get_from_vertices(options.offset_x, options.offset_y, options.rotation, options.vertices, options.scale_x,
+          options.scale_y);
+        else s = Polygon.get(options.offset_x, options.offset_y, options.sides, options.radius, options.rotation, options.scale_x, options.scale_y);
     }
     s.solid = options.solid;
     return s;
@@ -43,7 +44,8 @@ class Shape implements IProxy {
    * @param height The height of the Rect
    * @return Rect
    */
-  public static inline function rect(?x:Float, ?y:Float, ?width:Float, ?height:Float) return Rect.get(x, y, width, height);
+  public static inline function rect(?x:Float, ?y:Float, ?width:Float, ?height:Float, ?scale_x:Float,
+      ?scale_y:Float) return Rect.get(x, y, width, height, 0, scale_x, scale_y);
   /**
    * Gets a `Rect` with uniform width/height from the Rect Classes' Object Pool. Shortcut for `Rect.get()`.
    * @param x The X position of the Rect
@@ -59,49 +61,59 @@ class Shape implements IProxy {
    * @param radius The radius of the Circle
    * @return Rect
    */
-  public static inline function circle(?x:Float, ?y:Float, ?radius:Float) return Circle.get(x, y, radius);
-  /**
-   * Creates a new Shape
-   * @param x
-   * @param y
-   */
-  inline function new(x:Float = 0, y:Float = 0, rotation:Float = 0) {
-    sync_pos = new Vector2(0, 0);
-    solid = true;
-    local_x = _x = x;
-    local_y = _y = y;
-    local_rotation = _rotation = rotation;
-  }
+  public static inline function circle(?x:Float, ?y:Float, ?radius:Float, ?scale_x:Float, ?scale_y:Float) return Circle.get(x, y, radius, scale_x, scale_y);
   /**
    * Enum value determining what shape this Object is (Rect, Circle, Polygon).
    */
   public var type:ShapeType;
   /**
-   * The Shape's position on the X axis.
+   * The Shape's position on the X axis. For Rects, Circles, and simple Polygons, this position is based on the center of the Shape.
    *
-   * If added to a `Body`, this value is treated as an offset to the Body's X position.
+   * If added to a `Body`, this value is relative to the Body's X position. To get the Shape's local X position in this case, use `local_x`.
    */
   public var x(get, set):Float;
   /**
-   * The Shape's position on the Y axis.
+   * The Shape's position on the Y axis. For Rects, Circles, and simple Polygons, this position is based on the center of the Shape.
+   *
+   * If added to a `Body`, this value is relative to the Body's Y position. To get the Shape's local Y position in this case, use `local_y`.
+   */
+  public var y(get, set):Float;
+  /**
+   * The Shape's angular rotation.
+   *
+   * If added to a `Body`, this value is relative to the Body's rotation. To get the Shape's local rotation in this case, use `local_rotation`.
+   */
+  public var rotation(get, set):Float;
+
+  public var scale_x(get, set):Float;
+
+  public var scale_y(get, set):Float;
+  /**
+   * The Shape's position on the X axis. For Rects, Circles, and simple Polygons, this position is based on the center of the Shape.
+   *
+   * If added to a `Body`, this value is treated as an offset to the Body's X position.
+   */
+  public var local_x(get, set):Float;
+  /**
+   * The Shape's position on the Y axis. For Rects, Circles, and simple Polygons, this position is based on the center of the Shape.
    *
    * If added to a `Body`, this value is treated as an offset to the Body's Y position.
    */
-  public var y(get, set):Float;
+  public var local_y(get, set):Float;
 
-  public var rotation(get, set):Float;
+  public var local_rotation(get, set):Float;
 
-  public var local_x(default, set):Float;
+  public var local_scale_x(get, set):Float;
 
-  public var local_y(default, set):Float;
+  public var local_scale_y(get, set):Float;
 
-  public var local_rotation(default, set):Float;
+  public var transform:Transform = new Transform();
   /**
    * Flag to set whether the Shape collides with other Shapes.
    *
    * If false, this Shape's Body will not have its position or velocity affected by other Bodies, but it will still call collision callbacks
    */
-  public var solid:Bool;
+  public var solid:Bool = true;
   /**
    * The Upper Bounds of the Shape.
    */
@@ -123,54 +135,68 @@ class Shape implements IProxy {
    */
   public var collided:Bool;
 
-  var parent_frame:Frame2;
+  var parent(default, null):Body;
   /**
-   * A cached `Vector2` used to reduce allocations. Used Internally.
+   * Creates a new Shape
+   * @param x
+   * @param y
    */
-  var sync_pos:Vector2;
-
-  var _x:Float;
-
-  var _y:Float;
-
-  var _rotation:Float;
-
-  public function put() {
-    parent_frame = null;
+  inline function new(x:Float = 0, y:Float = 0, rotation:Float = 0) {
+    local_x = x;
+    local_y = y;
+    local_rotation = rotation;
   }
 
-  public function sync() {}
+  public function put() {
+    transform.set_parent(null);
+    parent = null;
+    collided = false;
+  }
   /**
    * Gets the Shape's position on the X and Y axis as a `Vector2`.
    */
-  public inline function get_position():Vector2 return new Vector2(_x, _y);
+  public inline function get_position():Vector2 return transform.get_position();
 
-  public inline function get_local_position():Vector2 return new Vector2(local_x, local_y);
+  public inline function get_local_position():Vector2 return transform.get_local_position();
 
-  public inline function set_local_position(value:Vector2):Vector2 {
-    local_x = value.x;
-    local_y = value.y;
-    return value;
+  public inline function set_position(position:Vector2):Void {
+    transform.set_position(position);
   }
 
-  public function set_parent(?frame:Frame2) {
-    parent_frame = frame;
-    sync();
+  public inline function set_local_position(position:Vector2):Void {
+    transform.set_local_position(position);
+  }
+
+  public function set_parent(?body:Body):Void {
+    if (parent == body) return;
+    parent = body;
+    transform.set_parent(body == null ? null : body.transform);
   }
   /**
-   * Returns an AABB `Rect` representing the bounds of the `Shape`.
-   * @param rect Optional `Rect` to set the values to.
-   * @return Rect
+   * Returns an `AABB` representing the bounds of the `Shape`.
+   * @param aabb Optional `AABB` to set the values to.
+   * @return AABB
    */
-  public function bounds(?rect:Rect):Rect return rect == null ? Rect.get(x, y, 0, 0) : rect.set(x, y, 0, 0);
+  public function bounds(?aabb:AABB):AABB return aabb == null ? AABB.get(x, y, 0, 0) : aabb.set(x, y, 0, 0);
   /**
    * Clones the Shape into a new Shape
    * @return Shape return new Shape(x, y)
    */
   public function clone():Shape return new Shape(x, y, rotation);
+  /**
+   * TODO
+   */
+  @:dox(hide)
+  @:noCompletion
+  public function scale(v:Float) {}
 
-  // public function scale(v:Float) {}
   public function contains(v:Vector2):Bool return get_position() == v;
+  /**
+   * TODO
+   */
+  @:dox(hide)
+  @:noCompletion
+  public function closest_point_on_edge(v:Vector2):Vector2 return get_position();
 
   public function intersect(l:Line):Null<IntersectionData> return null;
 
@@ -194,11 +220,25 @@ class Shape implements IProxy {
   }
 
   // getters
-  inline function get_x():Float return _x;
+  inline function get_x():Float return transform.x;
 
-  inline function get_y():Float return _y;
+  inline function get_y():Float return transform.y;
 
-  inline function get_rotation():Float return _rotation;
+  inline function get_rotation():Float return transform.rotation;
+
+  inline function get_scale_x():Float return transform.scale_x;
+
+  inline function get_scale_y():Float return transform.scale_y;
+
+  inline function get_local_x():Float return transform.local_x;
+
+  inline function get_local_y():Float return transform.local_y;
+
+  inline function get_local_rotation():Float return transform.local_rotation;
+
+  inline function get_local_scale_x():Float return transform.local_scale_x;
+
+  inline function get_local_scale_y():Float return transform.local_scale_y;
 
   function get_top():Float return y;
 
@@ -209,54 +249,44 @@ class Shape implements IProxy {
   function get_right():Float return x;
 
   // setters
-  inline function set_x(value:Float):Float {
-    if (parent_frame == null) return local_x = value;
-
-    var pos = new Vector2(value, y);
-    set_local_position(parent_frame.transformTo(pos));
-    return _x;
+  inline function set_x(v:Float):Float {
+    return transform.x = v;
   }
 
-  inline function set_y(value:Float):Float {
-    if (parent_frame == null) return local_y = value;
-
-    var pos = new Vector2(x, value);
-    set_local_position(parent_frame.transformTo(pos));
-    return _y;
+  inline function set_y(v:Float):Float {
+    return transform.y = v;
   }
 
-  inline function set_rotation(value:Float):Float {
-    if (parent_frame == null) return local_rotation = value;
-
-    local_rotation = value - parent_frame.angleDegrees;
-    return _rotation;
+  inline function set_rotation(v:Float):Float {
+    return transform.rotation = v;
   }
 
-  inline function set_local_x(value:Float):Float {
-    local_x = value;
-
-    if (parent_frame != null) sync();
-    else _x = local_x;
-
-    return local_x;
+  inline function set_scale_x(v:Float):Float {
+    return transform.scale_x = v;
   }
 
-  inline function set_local_y(value:Float):Float {
-    local_y = value;
-
-    if (parent_frame != null) sync();
-    else _y = local_y;
-
-    return local_y;
+  inline function set_scale_y(v:Float):Float {
+    return transform.scale_y = v;
   }
 
-  inline function set_local_rotation(value:Float):Float {
-    local_rotation = value;
+  inline function set_local_x(v:Float):Float {
+    return transform.local_x = v;
+  }
 
-    if (parent_frame != null) sync();
-    else _rotation = local_rotation;
+  inline function set_local_y(v:Float):Float {
+    return transform.local_y = v;
+  }
 
-    return local_rotation;
+  inline function set_local_rotation(v:Float):Float {
+    return transform.local_rotation = v;
+  }
+
+  inline function set_local_scale_x(v:Float):Float {
+    return transform.local_scale_x = v;
+  }
+
+  inline function set_local_scale_y(v:Float):Float {
+    return transform.local_scale_y = v;
   }
 
   static function get_defaults():ShapeOptions return {
@@ -266,6 +296,8 @@ class Shape implements IProxy {
     height: 0,
     sides: 3,
     rotation: 0,
+    scale_x: 1,
+    scale_y: 1,
     offset_x: 0,
     offset_y: 0,
     solid: true

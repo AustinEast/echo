@@ -1,11 +1,11 @@
 package state;
 
 import echo.Echo;
-import hxmath.math.Vector2;
+import echo.math.Vector2;
 import echo.Line;
 import echo.Body;
 import echo.World;
-import ghost.Random;
+import util.Random;
 
 class Linecast2State extends BaseState {
   var body_count:Int = 50;
@@ -46,5 +46,6 @@ class Linecast2State extends BaseState {
       if (result != null) Main.instance.debug.draw_intersection(result, false);
       else Main.instance.debug.draw_line(line.start.x, line.start.y, line.end.x, line.end.y, Main.instance.debug.intersection_color);
     }
+    line.put();
   }
 }

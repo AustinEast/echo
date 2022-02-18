@@ -3,7 +3,7 @@ package echo.data;
 import echo.Body;
 import echo.data.Data;
 import echo.data.Types;
-import hxmath.math.Vector2;
+import echo.math.Vector2;
 
 typedef BodyOptions = {
   /**
@@ -14,6 +14,14 @@ typedef BodyOptions = {
    * Defines an array of Shapes that the Body will use as colliders
    */
   var ?shapes:Array<ShapeOptions>;
+  /**
+   * A Shape instance that the Body will use as a collider
+   */
+  var ?shape_instance:Shape;
+  /**
+   * An array of Shape instances that the Body will use as colliders
+   */
+  var ?shape_instances:Array<Shape>;
   /**
    * Flag to set how a Body is affected by Collisions.
    *
@@ -41,6 +49,14 @@ typedef BodyOptions = {
    */
   var ?rotation:Float;
   /**
+   * The Body's scale on the X axis.
+   */
+  var ?scale_x:Float;
+  /**
+   * The Body's scale on the Y axis.
+   */
+  var ?scale_y:Float;
+  /**
    * Value to determine how much of a Body's `velocity` should be retained during collisions (or how much should the `Body` "bounce" in other words).
    */
   var ?elasticity:Float;
@@ -57,32 +73,54 @@ typedef BodyOptions = {
    */
   var ?rotational_velocity:Float;
   /**
-   * The maximum velocity range that a `Body` can have on the X axis.
+   * The maximum velocity range that a `Body` can have on the X axis. If set to 0, the Body has no restrictions on how fast it can move.
    *
-   * If set to 0, the Body has no restrictions on how fast it can move.
+   * Note: this is calculated separately from a Body's `max_velocity_length`, so be careful when applying both.
    */
   var ?max_velocity_x:Float;
   /**
-   * The maximum velocity range that a `Body` can have on the Y axis.
+   * The maximum velocity range that a `Body` can have on the Y axis. If set to 0, the Body has no restrictions on how fast it can move.
    *
-   * If set to 0, the Body has no restrictions on how fast it can move.
+   * Note: this is calculated separately from a Body's `max_velocity_length`, so be careful when applying both.
    */
   var ?max_velocity_y:Float;
   /**
-   * The maximum rotational velocity range that a `Body` can have. Currently not Implemented.
+   * The maximum velocity that a `Body` can have along the velocity's length. If set to 0, the Body has no restrictions on how fast it can move.
+   *
+   * Note: this is calculated separately from a Body's `max_velocity_x` or 'max_velocity_y', so be careful when applying both.
+   */
+  var ?max_velocity_length:Float;
+  /**
+   * The maximum rotational velocity range that a `Body` can have.
    *
    * If set to 0, the Body has no restrictions on how fast it can rotate.
    */
   var ?max_rotational_velocity:Float;
   /**
    * A measure of how fast a Body will move its velocity towards 0 on the X axis when there is no acceleration.
+   *
+   * Note: this is calculated separately from a Body's `drag_length`, so be careful when applying both.
    */
   var ?drag_x:Float;
   /**
    * A measure of how fast a Body will move its velocity towards 0 on the Y axis when there is no acceleration.
+   *
+   * Note: this is calculated separately from a Body's `drag_length`, so be careful when applying both.
    */
   var ?drag_y:Float;
-
+  /**
+   * A measure of how fast a Body will move its velocity towards 0 along the velocity's length, when there is no acceleration.
+   *
+   * Note: this is calculated separately from a Body's `drag`, so be careful when applying both.
+   */
+  var ?drag_length:Float;
+  /**
+   * A measure of how fast a Body will move its `rotational_velocity` towards 0.
+   */
+  var ?rotational_drag:Float;
+  /**
+   * Percentage value that represents how much a World's gravity affects the Body.
+   */
   var ?gravity_scale:Float;
 }
 
@@ -150,7 +188,7 @@ typedef ListenerOptions = {
   /**
    * A callback function that allows extra logic to be run on a potential collision.
    *
-   * If it returns true, the collision is valid. Otherwise the collision is discarded and no physics resolution/collision callbacks occur
+   * If it returns true, the collision is valid. Otherwise the collision is discarded and no physics resolution/collision callbacks occur.
    */
   var ?condition:Body->Body->Array<CollisionData>->Bool;
   /**
@@ -161,6 +199,15 @@ typedef ListenerOptions = {
    * Threshold determining how close two separating bodies must be before position correction occurs. Helps reduce jitter.
    */
   var ?correction_threshold:Float;
+}
+
+typedef LinecastOptions = {
+  /**
+   * A callback function that allows extra logic to be run before a potential linecast.
+   *
+   * If it returns false, the linecast will not occur.
+   */
+  var ?filter:Line->Body->Bool;
 }
 
 typedef ShapeOptions = {
@@ -203,6 +250,14 @@ typedef ShapeOptions = {
    */
   var ?rotation:Float;
   /**
+   * The Shape's scale on the X axis.
+   */
+  var ?scale_x:Float;
+  /**
+   * The Shape's scale on the Y axis.
+   */
+  var ?scale_y:Float;
+  /**
    * The Shape's offset from it's parent Body on the X-Axis.
    */
   var ?offset_x:Float;
@@ -210,6 +265,49 @@ typedef ShapeOptions = {
    * The Shape's offset from it's parent Body on the Y-Axis.
    */
   var ?offset_y:Float;
+}
+
+typedef VerletOptions = {
+  /**
+   * Width of the Verlet World, extending right from the World's X position.
+   */
+  var width:Float;
+  /**
+   * Height of the Verlet World, extending down from the World's Y position.
+   */
+  var height:Float;
+  /**
+   * The Verlet World's position on the X axis.
+   */
+  var ?x:Float;
+  /**
+   * The Verlet World's position on the Y axis.
+   */
+  var ?y:Float;
+  /**
+   * The amount of acceleration on the X axis applied to each `Dot` every Step.
+   */
+  var ?gravity_x:Float;
+  /**
+   * The amount of acceleration on the Y axis applied to each `Dot` every Step.
+   */
+  var ?gravity_y:Float;
+  /**
+   *  Default value is `0.98`.
+   */
+  var ?drag:Float;
+  /**
+   * The amount of iterations that occur each time the World is stepped. The higher the number, the more stable the Physics Simulation will be, at the cost of performance. 
+   * 
+   * Default value is `5`.
+   */
+  var ?iterations:Int;
+  /**
+   * The fixed Step rate of the Verlet World. The Verlet simulation must be stepped forward at a consistent rate, or it's stability will quickly deteriorate.
+   * 
+   * Default value is `60`.
+   */
+  var ?fixed_framerate:Float;
 }
 
 typedef RectOptions = {

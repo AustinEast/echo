@@ -14,7 +14,7 @@ class JSON {
    * @param	into The Target object to copy fields to
    * @return	The resulting object
    */
-  public static function copy_fields(from:Dynamic, into:Dynamic):Dynamic {
+  public static function copy_fields<T>(from:T, into:T):T {
     if (from == null) return into;
     if (into == null) into = Reflect.copy(from);
     else for (f in Reflect.fields(from)) Reflect.setField(into, f, Reflect.field(from, f));

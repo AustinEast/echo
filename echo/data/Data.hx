@@ -1,8 +1,8 @@
 package echo.data;
 
+import echo.math.Vector2;
+import echo.util.AABB;
 import echo.util.Pool;
-import echo.shape.Rect;
-import hxmath.math.Vector2;
 
 @:structInit
 class BodyState {
@@ -10,17 +10,22 @@ class BodyState {
   public final x:Float;
   public final y:Float;
   public final rotation:Float;
-  public final velocity:Vector2;
-  public final acceleration:Vector2;
+  public final velocity_x:Float;
+  public final velocity_y:Float;
+  public final acceleration_x:Float;
+  public final acceleration_y:Float;
   public final rotational_velocity:Float;
 
-  public function new(id:Int, x:Float, y:Float, rotation:Float, velocity:Vector2, acceleration:Vector2, rotational_velocity:Float) {
+  public function new(id:Int, x:Float, y:Float, rotation:Float, velocity_x:Float, velocity_y:Float, acceleration_x:Float, acceleration_y:Float,
+      rotational_velocity:Float) {
     this.id = id;
     this.x = x;
     this.y = y;
     this.rotation = rotation;
-    this.velocity = velocity.clone();
-    this.acceleration = velocity.clone();
+    this.velocity_x = velocity_x;
+    this.velocity_y = velocity_y;
+    this.acceleration_x = acceleration_x;
+    this.acceleration_y = acceleration_y;
     this.rotational_velocity = rotational_velocity;
   }
 }
@@ -181,6 +186,10 @@ class IntersectionData implements IPooled {
   public var line:Line;
   public var shape:Shape;
   /**
+   * The second Line in the Intersection. This is only set when intersecting two Lines.
+   */
+  public var line2:Line;
+  /**
    * The position along the line where the line hit the shape.
    */
   public var hit:Vector2;
@@ -192,24 +201,39 @@ class IntersectionData implements IPooled {
    * The length of the line that has overlapped the shape.
    */
   public var overlap:Float;
+  /**
+   * The normal vector (direction) of the Line's penetration into the Shape.
+   */
+  public var normal:Vector2;
+  /**
+    Indicates if normal was inversed and usually occurs when Line penetrates into the Shape from the inside.
+  **/
+  public var inverse_normal:Bool;
 
   public var pooled:Bool;
 
-  public static inline function get(distance:Float, overlap:Float, x:Float, y:Float):IntersectionData {
+  public static inline function get(distance:Float, overlap:Float, x:Float, y:Float, normal_x:Float, normal_y:Float,
+      inverse_normal:Bool = false):IntersectionData {
     var i = _pool.get();
     i.line = null;
     i.shape = null;
-    i.set(distance, overlap, x, y);
+    i.line2 = null;
+    i.set(distance, overlap, x, y, normal_x, normal_y, inverse_normal);
     i.pooled = false;
     return i;
   }
 
-  inline function new() hit = new Vector2(0, 0);
+  inline function new() {
+    hit = new Vector2(0, 0);
+    normal = new Vector2(0, 0);
+  }
 
-  public inline function set(distance:Float, overlap:Float, x:Float, y:Float) {
+  public inline function set(distance:Float, overlap:Float, x:Float, y:Float, normal_x:Float, normal_y:Float, inverse_normal:Bool = false) {
     this.distance = distance;
     this.overlap = overlap;
+    this.inverse_normal = inverse_normal;
     hit.set(x, y);
+    normal.set(normal_x, normal_y);
   }
 
   public function put() {
@@ -239,19 +263,20 @@ class Material {
   public var friction:Float;
 }
 
-typedef QuadTreeData = {
+@:structInit
+class QuadTreeData {
   /**
    * Id of the Data.
    */
-  var id:Int;
+  public var id:Int;
   /**
    * Bounds of the Data.
    */
-  var ?bounds:Rect;
+  @:optional public var bounds:AABB;
   /**
    * Helper flag to check if this Data has been counted during queries.
    */
-  var flag:Bool;
+  public var flag:Bool = false;
 }
 
 @:enum

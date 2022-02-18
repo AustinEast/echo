@@ -1,24 +1,41 @@
 package echo.shape;
 
-import echo.util.Pool;
-import echo.shape.*;
 import echo.data.Data;
-import hxmath.math.Vector2;
+import echo.shape.*;
+import echo.util.AABB;
+import echo.util.Pool;
+import echo.math.Vector2;
 
 using echo.util.SAT;
-using hxmath.math.MathUtil;
 
 class Circle extends Shape implements IPooled {
   public static var pool(get, never):IPool<Circle>;
   static var _pool = new Pool<Circle>(Circle);
-
-  public var radius:Float;
+  /**
+   * The radius of the Circle, transformed with `scale_x`. Use `local_radius` to get the untransformed radius.
+   */
+  public var radius(get, set):Float;
+  /**
+   * The diameter of the Circle.
+   */
   public var diameter(get, set):Float;
-  public var pooled:Bool;
+  /**
+   * The local radius of the Circle, which represents the Circle's radius with no transformations.
+   */
+  public var local_radius:Float;
 
-  public static inline function get(x:Float = 0, y:Float = 0, radius:Float = 1, rotation:Float = 0):Circle {
+  public var pooled:Bool;
+  /**
+   * Gets a Cirlce from the pool, or creates a new one if none are available. Call `put()` on the Cirlce to place it back in the pool.
+   * @param x
+   * @param y
+   * @param radius
+   * @param rotation
+   * @return Circle
+   */
+  public static inline function get(x:Float = 0, y:Float = 0, radius:Float = 1, rotation:Float = 0, scale_x:Float = 1, scale_y:Float = 1):Circle {
     var circle = _pool.get();
-    circle.set(x, y, radius, rotation);
+    circle.set(x, y, radius, rotation, scale_x, scale_y);
     circle.pooled = false;
     return circle;
   }
@@ -29,25 +46,30 @@ class Circle extends Shape implements IPooled {
     radius = 0;
   }
 
-  override inline function put() {
-    parent_frame = null;
+  override function put() {
+    super.put();
     if (!pooled) {
       pooled = true;
       _pool.put_unsafe(this);
     }
   }
 
-  public inline function set(x:Float = 0, y:Float = 0, radius:Float = 1, rotation:Float = 0):Circle {
+  public inline function set(x:Float = 0, y:Float = 0, radius:Float = 1, rotation:Float = 0, scale_x:Float = 1, scale_y:Float = 1):Circle {
     local_x = x;
     local_y = y;
     local_rotation = rotation;
+    local_scale_x = scale_x;
+    local_scale_y = scale_y;
     this.radius = radius;
     return this;
   }
 
   public inline function load(circle:Circle):Circle return set(circle.x, circle.y, circle.radius);
 
-  override inline function bounds(?rect:Rect):Rect return rect == null ? Rect.get(x, y, diameter, diameter) : rect.set(x, y, diameter, diameter);
+  override inline function bounds(?aabb:AABB):AABB {
+    var d = diameter;
+    return aabb == null ? AABB.get(x, y, d, d) : aabb.set(x, y, d, d);
+  }
 
   override function clone():Circle return Circle.get(local_x, local_y, radius);
 
@@ -72,23 +94,10 @@ class Circle extends Shape implements IPooled {
 
   override inline function collide_polygon(p:Polygon):Null<CollisionData> return this.circle_and_polygon(p, true);
 
-  override inline function sync() {
-    if (parent_frame != null) {
-      sync_pos.set(local_x, local_y);
-      var pos = parent_frame.transformFrom(sync_pos);
-      _x = pos.x;
-      _y = pos.y;
-      _rotation = parent_frame.angleDegrees + local_rotation;
-    }
-    else {
-      _x = local_x;
-      _y = local_x;
-      _rotation = local_rotation;
-    }
-  }
-
   // getters
   static function get_pool():IPool<Circle> return _pool;
+
+  inline function get_radius():Float return local_radius * scale_x;
 
   inline function get_diameter():Float return radius * 2;
 
@@ -101,6 +110,11 @@ class Circle extends Shape implements IPooled {
   override inline function get_right():Float return x + radius;
 
   // setters
+  inline function set_radius(value:Float):Float {
+    local_radius = value / scale_x;
+    return value;
+  }
+
   inline function set_diameter(value:Float):Float {
     radius = value * 0.5;
     return value;

@@ -3,7 +3,6 @@ package echo;
 import haxe.ds.Either;
 import echo.util.Disposable;
 import echo.Body;
-import echo.Echo;
 import echo.data.Data;
 import echo.data.Options;
 import echo.util.BodyOrBodies;

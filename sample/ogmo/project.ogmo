@@ -1,0 +1,34 @@
+{
+  "name": "New Project",
+  "ogmoVersion": "3.3.0",
+  "levelPaths": ["."],
+  "backgroundColor": "#282c34ff",
+  "gridColor": "#3c4049cc",
+  "anglesRadians": true,
+  "directoryDepth": 5,
+  "layerGridDefaultSize": {"x": 8, "y": 8},
+  "levelDefaultSize": {"x": 320, "y": 240},
+  "levelMinSize": {"x": 128, "y": 128},
+  "levelMaxSize": {"x": 4096, "y": 4096},
+  "levelValues": [],
+  "defaultExportMode": ".json",
+  "compactExport": false,
+  "externalScript": "",
+  "playCommand": "",
+  "entityTags": [],
+  "layers": [
+    {
+      "definition": "tile",
+      "name": "tiles",
+      "gridSize": {"x": 16, "y": 16},
+      "exportID": "31998968",
+      "exportMode": 0,
+      "arrayMode": 0,
+      "defaultTileset": "tileset"
+    }
+  ],
+  "entities": [],
+  "tilesets": [
+    {"label": "tileset", "path": "terrain-tiles.png", "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAANAAAAAgCAMAAABU6AZfAAAAAXNSR0IArs4c6QAAAA9QTFRFAAAA4NvNKysmqJ+UcGtmTGMrswAAAAV0Uk5TAP////8c0CZSAAABLElEQVRYhdXZ6w7DIAgF4JK9/zsvWbKl43YOkljhb0X9rKOtuy4VosJc1glpOD0EDV8qgjTbXTpd27OYqwWRfDqjSMugfL6ogSRDOWP/OoEpxhMMYxe0BZJ08SIOQ3oGJOlYCQeSHI87irNDGiDJ0gAHkBqg9aIgYDDAyUhBgi1o1HKSIHhrIScmPQEiy2rOCUjxHQ3alUQ+iKtCmOOSHgBRP1qOY0lJWtSuIvJAzB7nOZq0H0RsiRrnj5QXkWBilfcv0yNewTrnRtoOggOucb4kkFx+bFiQDjSnZQ6V3geBOzYfNH7LlUQTikJFNKJsF0QzHqy8aMirDy2a8nLKisZ8PpCiOR94nGjQJzglOumQpBFHHmO14sSDxl4ceBTcjFqHOw7ru3He3ykq3lQ4ILU1D1tLAAAAAElFTkSuQmCC", "tileWidth": 16, "tileHeight": 16, "tileSeparationX": 0, "tileSeparationY": 0, "tileMarginX": 0, "tileMarginY": 0}
+  ]
+}

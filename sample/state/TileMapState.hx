@@ -2,7 +2,7 @@ package state;
 
 import echo.Body;
 import echo.World;
-import ghost.Random;
+import util.Random;
 
 class TileMapState extends BaseState {
   var cursor:Body;
@@ -38,6 +38,7 @@ class TileMapState extends BaseState {
         y: Random.range(hh - 64, hh + 64),
         elasticity: 0.2,
         rotation: Random.range(0, 360),
+        drag_length: 10,
         shape: {
           type: POLYGON,
           radius: Random.range(8, 16),

@@ -1,14 +1,14 @@
 package echo;
 
+import echo.util.AABB;
 import haxe.ds.Either;
 import echo.data.Data;
-import hxmath.math.Vector2;
+import echo.math.Vector2;
 import echo.Body;
 import echo.Listener;
 import echo.Collisions;
 import echo.World;
 import echo.data.Options;
-import echo.shape.Rect;
 import echo.util.BodyOrBodies;
 
 @:expose
@@ -19,7 +19,15 @@ class Echo {
   /**
    * Cache'd `Listeners` collection to help with memory management.
    */
-  static var listeners:Listeners = new Listeners();
+  static final cached_listeners:Listeners = new Listeners();
+  /**
+   * Cache'd `Collision` Array to help with memory management.
+   */
+  static final cached_collisions:Array<Collision> = [];
+  /**
+   * Cache'd `Body` to help with memory management.
+   */
+  static final cached_body:Body = new Body();
   /**
    * Shortcut for creating a new `World`
    * @param options Options for the new `World`
@@ -54,16 +62,16 @@ class Echo {
    * @param options Options to define the Collision Check's behavior
    */
   public static function check(world:World, ?a:BodyOrBodies, ?b:BodyOrBodies, ?options:ListenerOptions) {
-    listeners.clear();
+    cached_listeners.clear();
 
-    if (a == null && b == null) listeners.add(world.members, world.members, options);
-    else if (a == null) listeners.add(b, b, options);
-    else if (b == null) listeners.add(a, a, options);
-    else listeners.add(a, b, options);
+    if (a == null && b == null) cached_listeners.add(world.members, world.members, options);
+    else if (a == null) cached_listeners.add(b, b, options);
+    else if (b == null) cached_listeners.add(a, a, options);
+    else cached_listeners.add(a, b, options);
 
-    Collisions.query(world, listeners);
-    Physics.separate(world, listeners);
-    Collisions.notify(world, listeners);
+    Collisions.query(world, cached_listeners);
+    Physics.separate(world, cached_listeners);
+    Collisions.notify(world, cached_listeners);
   }
   /**
    * Steps a `World` forward.
@@ -78,17 +86,14 @@ class Echo {
         x: b.x,
         y: b.y,
         rotation: b.rotation,
-        velocity: b.velocity,
-        acceleration: b.acceleration,
+        velocity_x: b.velocity.x,
+        velocity_y: b.velocity.y,
+        acceleration_x: b.acceleration.x,
+        acceleration_y: b.acceleration.y,
         rotational_velocity: b.rotational_velocity
       }
     ]);
 
-    // Apply Gravity
-    world.for_each(member -> {
-      member.acceleration.x += world.gravity.x * member.gravity_scale;
-      member.acceleration.y += world.gravity.y * member.gravity_scale;
-    });
     // Step the World incrementally based on the number of iterations
     var fdt = dt / world.iterations;
     for (i in 0...world.iterations) {
@@ -97,8 +102,6 @@ class Echo {
       Physics.separate(world);
       Collisions.notify(world);
     }
-    // Reset acceleration
-    world.for_each(member -> member.acceleration.set(0, 0));
   }
   /**
    * Casts a Line Created from the supplied floats, returning the Intersection with the closest Body.
@@ -109,9 +112,10 @@ class Echo {
    * @param test The Body or Array of Bodies to Cast the Line at.
    * @return Null<Intersection> the Intersection with the closest Body, if any occured.
    */
-  public static inline function linecast_floats(x:Float, y:Float, dx:Float, dy:Float, test:BodyOrBodies):Null<Intersection> {
+  public static inline function linecast_floats(x:Float, y:Float, dx:Float, dy:Float, test:BodyOrBodies, ?world:World,
+      update_world_quadtree:Bool = true):Null<Intersection> {
     var line = Line.get(x, y, dx, dy);
-    var result = linecast(line, test);
+    var result = linecast(line, test, world, update_world_quadtree);
     line.put();
     return result;
   }
@@ -123,9 +127,10 @@ class Echo {
    * @param test The Body or Array of Bodies to Cast the Line at.
    * @return Null<Intersection> the Intersection with the closest Body, if any occured.
    */
-  public static inline function linecast_vector(start:Vector2, angle:Float, length:Float, test:BodyOrBodies):Null<Intersection> {
+  public static inline function linecast_vector(start:Vector2, angle:Float, length:Float, test:BodyOrBodies, ?world:World,
+      update_world_quadtree:Bool = true):Null<Intersection> {
     var line = Line.get_from_vector(start, angle, length);
-    var result = linecast(line, test);
+    var result = linecast(line, test, world, update_world_quadtree);
     line.put();
     return result;
   }
@@ -136,9 +141,10 @@ class Echo {
    * @param test The Body or Array of Bodies to Cast the Line at.
    * @return Null<Intersection> the Intersection with the closest Body, if any occured.
    */
-  public static inline function linecast_vectors(start:Vector2, end:Vector2, test:BodyOrBodies):Null<Intersection> {
+  public static inline function linecast_vectors(start:Vector2, end:Vector2, test:BodyOrBodies, ?world:World,
+      update_world_quadtree:Bool = true):Null<Intersection> {
     var line = Line.get_from_vectors(start, end);
-    var result = linecast(line, test);
+    var result = linecast(line, test, world);
     line.put();
     return result;
   }
@@ -148,41 +154,66 @@ class Echo {
    * @param test The Body or Array of Bodies to Cast the Line at.
    * @return Null<Intersection> the Intersection with the closest Body, if any occured.
    */
-  public static inline function linecast(line:Line, test:BodyOrBodies):Null<Intersection> {
+  public static function linecast(line:Line, test:BodyOrBodies, ?world:World, update_world_quadtree:Bool = true):Null<Intersection> {
     var closest:Null<Intersection> = null;
-    var lb = Rect.get_from_min_max(Math.min(line.start.x, line.end.x), Math.min(line.start.y, line.end.y), Math.max(line.start.x, line.end.x),
+    var lb = AABB.get_from_min_max(Math.min(line.start.x, line.end.x), Math.min(line.start.y, line.end.y), Math.max(line.start.x, line.end.x),
       Math.max(line.start.y, line.end.y));
+
     switch (cast test : Either<Body, Array<Body>>) {
       case Left(body):
-        var bb = body.bounds();
-        if (lb.overlaps(bb)) {
-          for (i in 0...body.shapes.length) {
-            var result = line.intersect(body.shapes[i]);
-            if (result != null) {
-              if (closest == null) closest = Intersection.get(line, body);
-              closest.data.push(result);
-            }
-          }
-        }
-        bb.put();
-      case Right(arr):
-        for (body in arr) {
-          if (body == null) continue;
+        if (!body.disposed && body.active) {
           var bb = body.bounds();
-          var temp = Intersection.get(line, body);
           if (lb.overlaps(bb)) {
             for (i in 0...body.shapes.length) {
               var result = line.intersect(body.shapes[i]);
-              if (result != null) temp.data.push(result);
+              if (result != null) {
+                if (closest == null) closest = Intersection.get(line, body);
+                closest.data.push(result);
+              }
             }
           }
           bb.put();
-          // loop to check if closest
-          if (temp.data.length > 0 && (closest == null || closest.closest.distance > temp.closest.distance)) {
-            if (closest != null) closest.put();
-            closest = temp;
+        }
+      case Right(arr):
+        if (world == null) {
+          for (body in arr) {
+            if (body == null || body.disposed || !body.active) continue;
+            var bb = body.bounds();
+            var temp = Intersection.get(line, body);
+            if (lb.overlaps(bb)) {
+              for (i in 0...body.shapes.length) {
+                var result = line.intersect(body.shapes[i]);
+                if (result != null) temp.data.push(result);
+              }
+            }
+            bb.put();
+            // check if closest
+            if (temp.data.length > 0 && (closest == null || closest.closest.distance > temp.closest.distance)) {
+              if (closest != null) closest.put();
+              closest = temp;
+            }
+            else temp.put();
           }
-          else temp.put();
+        }
+        else {
+          for (collision in cached_collisions) collision.put();
+          cached_collisions.resize(0);
+          cached_body.shape = lb.to_rect();
+          if (update_world_quadtree) Collisions.update_quadtree(world);
+          Collisions.overlap_body_and_bodies_bounds(cached_body, arr, world, cached_collisions);
+          for (collision in cached_collisions) {
+            var temp = Intersection.get(line, collision.b);
+            for (i in 0...collision.b.shapes.length) {
+              var result = line.intersect(collision.b.shapes[i]);
+              if (result != null) temp.data.push(result);
+            }
+            // check if closest
+            if (temp.data.length > 0 && (closest == null || closest.closest.distance > temp.closest.distance)) {
+              if (closest != null) closest.put();
+              closest = temp;
+            }
+            else temp.put();
+          }
         }
     }
     lb.put();
@@ -194,10 +225,11 @@ class Echo {
    * @param test The Body or Array of Bodies to Cast the Line at.
    * @return Array<Intersection> All Intersections found. if none occured, the length will be 0.
    */
-  public static inline function linecast_all(line:Line, test:BodyOrBodies):Array<Intersection> {
+  public static function linecast_all(line:Line, test:BodyOrBodies, ?world:World, update_world_quadtree:Bool = true):Array<Intersection> {
     var intersections:Array<Intersection> = [];
-    var lb = Rect.get_from_min_max(Math.min(line.start.x, line.end.x), Math.min(line.start.y, line.end.y), Math.max(line.start.x, line.end.x),
+    var lb = AABB.get_from_min_max(Math.min(line.start.x, line.end.x), Math.min(line.start.y, line.end.y), Math.max(line.start.x, line.end.x),
       Math.max(line.start.y, line.end.y));
+
     switch (cast test : Either<Body, Array<Body>>) {
       case Left(body):
         var temp = Intersection.get(line, body);
@@ -214,19 +246,37 @@ class Echo {
         if (temp.data.length > 0) intersections.push(temp);
         else temp.put();
       case Right(arr):
-        for (body in arr) {
-          if (body == null) continue;
-          var bb = body.bounds();
-          var temp = Intersection.get(line, body);
-          if (lb.overlaps(bb)) {
-            for (i in 0...body.shapes.length) {
-              var result = line.intersect(body.shapes[i]);
+        if (world == null) {
+          for (body in arr) {
+            if (body == null) continue;
+            var bb = body.bounds();
+            var temp = Intersection.get(line, body);
+            if (lb.overlaps(bb)) {
+              for (i in 0...body.shapes.length) {
+                var result = line.intersect(body.shapes[i]);
+                if (result != null) temp.data.push(result);
+              }
+            }
+            bb.put();
+            if (temp.data.length > 0) intersections.push(temp);
+            else temp.put();
+          }
+        }
+        else {
+          for (collision in cached_collisions) collision.put();
+          cached_collisions.resize(0);
+          cached_body.shape = lb.to_rect();
+          if (update_world_quadtree) Collisions.update_quadtree(world);
+          Collisions.overlap_body_and_bodies_bounds(cached_body, arr, world, cached_collisions);
+          for (collision in cached_collisions) {
+            var temp = Intersection.get(line, collision.b);
+            for (i in 0...collision.b.shapes.length) {
+              var result = line.intersect(collision.b.shapes[i]);
               if (result != null) temp.data.push(result);
             }
+            if (temp.data.length > 0) intersections.push(temp);
+            else temp.put();
           }
-          bb.put();
-          if (temp.data.length > 0) intersections.push(temp);
-          else temp.put();
         }
     }
     lb.put();
@@ -248,7 +298,9 @@ class Echo {
               body.x = item.x;
               body.y = item.y;
               body.rotation = item.rotation;
-              body.velocity = item.velocity;
+              body.velocity.set(item.velocity_x, item.velocity_y);
+              body.acceleration.set(item.acceleration_x, item.acceleration_y);
+              body.rotational_velocity = item.rotational_velocity;
             }
           }
         }
@@ -272,8 +324,8 @@ class Echo {
               body.x = item.x;
               body.y = item.y;
               body.rotation = item.rotation;
-              body.velocity = item.velocity;
-              body.acceleration = item.acceleration;
+              body.velocity.set(item.velocity_x, item.velocity_y);
+              body.acceleration.set(item.acceleration_x, item.acceleration_y);
               body.rotational_velocity = item.rotational_velocity;
             }
           }

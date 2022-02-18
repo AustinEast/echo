@@ -2,7 +2,7 @@ package;
 
 import echo.World;
 import echo.util.Debug;
-import ghost.FSM;
+import util.FSM;
 
 class BaseApp extends hxd.App {
   public var debug:HeapsDebug;
@@ -26,11 +26,11 @@ class BaseApp extends hxd.App {
     return fsm.set(Type.createInstance(sample_states[index], []));
   }
 
-  function getFont() {
+  public function getFont() {
     return hxd.res.DefaultFont.get();
   }
 
-  function addButton(label:String, onClick:Void->Void, ?parent:h2d.Object) {
+  public function addButton(label:String, onClick:Void->Void, ?parent:h2d.Object) {
     var f = new h2d.Flow(parent == null ? fui : parent);
     f.padding = 5;
     f.paddingBottom = 7;
@@ -45,7 +45,7 @@ class BaseApp extends hxd.App {
     return f;
   }
 
-  function addSlider(label:String, get:Void->Float, set:Float->Void, min:Float = 0., max:Float = 1., int:Bool = false) {
+  public function addSlider(label:String, get:Void->Float, set:Float->Void, min:Float = 0., max:Float = 1., int:Bool = false) {
     var f = new h2d.Flow(fui);
 
     f.horizontalSpacing = 5;
@@ -76,7 +76,7 @@ class BaseApp extends hxd.App {
     return sli;
   }
 
-  function addCheck(label:String, get:Void->Bool, set:Bool->Void) {
+  public function addCheck(label:String, get:Void->Bool, set:Bool->Void) {
     var f = new h2d.Flow(fui);
 
     f.horizontalSpacing = 5;
@@ -108,9 +108,9 @@ class BaseApp extends hxd.App {
     return i;
   }
 
-  function addChoice(text, choices, callb:Int->Void, value = 0) {
+  public function addChoice(text, choices, callb:Int->Void, value = 0, width = 110) {
     var font = getFont();
-    var i = new h2d.Interactive(110, font.lineHeight, fui);
+    var i = new h2d.Interactive(width, font.lineHeight, fui);
     i.backgroundColor = 0xFF808080;
     fui.getProperties(i).paddingLeft = 20;
 
@@ -135,7 +135,7 @@ class BaseApp extends hxd.App {
     return i;
   }
 
-  function addText(text = "", ?parent) {
+  public function addText(text = "", ?parent) {
     var tf = new h2d.Text(getFont(), parent == null ? fui : parent);
     tf.text = text;
     return tf;

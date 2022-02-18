@@ -1,17 +1,17 @@
 package echo;
 
-import hxmath.math.Vector2;
-import echo.util.Disposable;
-import echo.util.QuadTree;
-import echo.util.History;
 import echo.Listener;
-import echo.shape.Rect;
 import echo.data.Data;
 import echo.data.Options;
+import echo.shape.Rect;
+import echo.util.Disposable;
+import echo.util.History;
+import echo.util.QuadTree;
+import echo.math.Vector2;
 /**
  * A `World` is an Object representing the state of a Physics simulation and it configurations. 
  */
- @:using(echo.Echo)
+@:using(echo.Echo)
 class World implements IDisposable {
   /**
    * Width of the World, extending right from the World's X position.
@@ -41,6 +41,7 @@ class World implements IDisposable {
    * The World's QuadTree for static Bodies. Generally doesn't need to be touched.
    */
   public var static_quadtree:QuadTree;
+
   public var listeners:Listeners;
   public var members:Array<Body>;
   public var count(get, never):Int;
@@ -48,14 +49,16 @@ class World implements IDisposable {
    * The amount of iterations that occur each time the World is stepped. The higher the number, the more stable the Physics Simulation will be, at the cost of performance.
    */
   public var iterations:Int;
+
   public var history:Null<History<Array<BodyState>>>;
+
   var init:Bool;
 
   public function new(options:WorldOptions) {
     members = options.members == null ? [] : options.members;
     init = false;
-    width = options.width < 1 ? throw("World must have a width of at least 1") : options.width;
-    height = options.height < 1 ? throw("World must have a width of at least 1") : options.height;
+    width = options.width < 1?throw("World must have a width of at least 1") : options.width;
+    height = options.height < 1?throw("World must have a width of at least 1") : options.height;
     x = options.x == null ? 0 : options.x;
     y = options.y == null ? 0 : options.y;
     gravity = new Vector2(options.gravity_x == null ? 0 : options.gravity_x, options.gravity_y == null ? 0 : options.gravity_y);
@@ -64,6 +67,16 @@ class World implements IDisposable {
     listeners = new Listeners(options.listeners);
     iterations = options.iterations == null ? 5 : options.iterations;
     if (options.history != null) history = new History(options.history);
+  }
+
+  public inline function set(x:Float, y:Float, width:Float, height:Float) {
+    init = false;
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    init = true;
+    reset_quadtrees();
   }
 
   public inline function set_from_shape(s:Shape) {
@@ -81,6 +94,7 @@ class World implements IDisposable {
     if (body.world == this) return body;
     if (body.world != null) body.remove();
     body.world = this;
+    body.dirty = true;
     members.push(body);
     body.quadtree_data = {id: body.id, bounds: body.bounds(), flag: false};
     body.is_static() ? static_quadtree.insert(body.quadtree_data) : quadtree.insert(body.quadtree_data);
@@ -126,7 +140,10 @@ class World implements IDisposable {
    * Clears the World's members and listeners.
    */
   public function clear() {
-    members.resize(0);
+    while (members.length > 0) {
+      var m = members.pop();
+      if (m != null) m.remove();
+    }
     reset_quadtrees();
     listeners.clear();
   }
@@ -151,14 +168,14 @@ class World implements IDisposable {
     quadtree = QuadTree.get();
     if (static_quadtree != null) static_quadtree.put();
     static_quadtree = QuadTree.get();
-    var r = center();
+    var r = center().to_aabb(true);
     quadtree.load(r);
     static_quadtree.load(r);
-    r.put();
-    for_each((member)-> {
+    for_each((member) -> {
       if (member.is_dynamic()) {
         member.dirty = true;
-      } else {
+      }
+      else {
         member.bounds(member.quadtree_data.bounds);
         static_quadtree.update(member.quadtree_data);
       }

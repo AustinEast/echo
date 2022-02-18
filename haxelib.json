@@ -1,13 +1,15 @@
 {
-    "name": "echo",
-    "license": "MIT",
-    "tags": ["physics", "collisions"],
-    "description": "Simple Physics Library written in Haxe",
-    "contributors": ["austineast", "01010111"],
-    "url": "https://austineast.dev/echo",
-    "releasenote": "improved performance and docs",
-    "version": "1.4.0",
-    "dependencies": {
-      "hxmath": ""
-    }
-  }
+  "name": "echo",
+  "license": "MIT",
+  "tags": [
+    "physics",
+    "collisions"
+  ],
+  "description": "Simple Physics Library written in Haxe",
+  "contributors": [
+    "austineast"
+  ],
+  "url": "https://austineast.dev/echo",
+  "releasenote": "Abstract Math Types",
+  "version": "4.0.0"
+}

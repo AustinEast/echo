@@ -2,10 +2,10 @@ package state;
 
 import echo.Body;
 import echo.World;
-import ghost.Random;
+import util.Random;
 
 class StackingState extends BaseState {
-  var body_count:Int = 99;
+  var body_count:Int = 149;
 
   override public function enter(world:World) {
     Main.instance.state_text.text = "Sample: Stacking Boxes";

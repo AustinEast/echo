@@ -1,10 +1,20 @@
 -lib heaps
 -lib hlsdl
 -lib echo
+
 -main Main
+
+# math lib integrations
+# -lib hxmath
+# -D ECHO_USE_HXMATH
+
+# -lib zerolib
+# -D ECHO_USE_ZEROLIB
+
+# -lib vector-math
+# -D ECHO_USE_VECTORMATH
+
 -dce full
--debug
 -D standalone
 -D windowSize=1280x720
 -hl bin/sample.hl
--cmd hl bin/sample.hl

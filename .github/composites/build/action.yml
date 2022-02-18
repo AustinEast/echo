@@ -1,0 +1,25 @@
+name: 'Checkout & Build'
+description: 'This action checks out the repo and builds all .hxmls'
+author: 'austineast'
+runs:
+    using: 'composite'
+    steps:
+      - uses: krdlab/setup-haxe@v1
+        with:
+          haxe-version: 4.2.4
+          
+      - uses: actions/checkout@v2
+          
+      - name: Install Haxelib Dependencies
+        shell: bash
+        run: |
+          haxelib git dox https://github.com/HaxeFoundation/dox.git
+          haxelib git heaps https://github.com/HeapsIO/heaps.git
+          haxelib dev echo .
+          
+      - name: Run Builds
+        shell: bash
+        run: |
+          haxe test.hxml
+          haxe sample.hxml
+          haxe dox.hxml

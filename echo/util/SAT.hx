@@ -1,23 +1,25 @@
 package echo.util;
 
-import echo.shape.*;
 import echo.data.Data;
-import hxmath.math.Vector2;
+import echo.shape.*;
+import echo.math.Vector2;
 
-using hxmath.math.MathUtil;
+using echo.util.ext.FloatExt;
 using echo.util.SAT;
-using echo.util.Ext;
 /**
  * Class containing methods to perform collision checks using the Separating Axis Thereom
  */
 class SAT {
+  static final norm = new Vector2(0, 0);
+  static final closest = new Vector2(0, 0);
+
   public static inline function point_in_rect(p:Vector2, r:Rect):Bool {
-    if (r.transformed_rect != null && !r.rotation.equals(0)) return p.point_in_polygon(r.transformed_rect);
-    return r.left <= p.x && r.right >= p.x && r.top <= p.x && r.bottom >= p.y;
+    if (r.transformed_rect != null && r.rotation != 0) return p.point_in_polygon(r.transformed_rect);
+    return r.left <= p.x && r.right >= p.x && r.top <= p.y && r.bottom >= p.y;
   }
 
   public static inline function point_in_circle(p:Vector2, c:Circle):Bool {
-    return p.distanceTo(c.get_position()) < c.radius;
+    return (p - c.get_position()).length_sq < c.radius * c.radius;
   }
 
   public static inline function point_in_polygon(point:Vector2, polygon:Polygon):Bool {
@@ -46,7 +48,7 @@ class SAT {
     return point_in_polygon(v, p);
   }
 
-  public static inline function line_interects_line(line1:Line, line2:Line):Null<IntersectionData> {
+  public static inline function line_intersects_line(line1:Line, line2:Line):Null<IntersectionData> {
     var d = ((line2.dy - line2.y) * (line1.dx - line1.x)) - ((line2.dx - line2.x) * (line1.dy - line1.y));
 
     if (d.equals(0)) return null;
@@ -57,14 +59,19 @@ class SAT {
     if ((ua < 0) || (ua > 1) || (ub < 0) || (ub > 1)) return null;
 
     var hit = line1.start + ua * (line1.end - line1.start);
-    var distance = line1.start.distanceTo(hit);
+    var distance = line1.start.distance(hit);
     var overlap = line1.length - distance;
-
-    return IntersectionData.get(distance, overlap, hit.x, hit.y);
+    var inverse = d >= 0;
+    var l2l = line2.length * (inverse ? -1 : 1);
+    norm.set((line2.dy - line2.y) / l2l, -(line2.dx - line2.x) / l2l);
+    var data = IntersectionData.get(distance, overlap, hit.x, hit.y, norm.x, norm.y, inverse);
+    data.line = line1;
+    data.line2 = line2;
+    return data;
   }
 
-  public static function line_interects_rect(l:Line, r:Rect):Null<IntersectionData> {
-    if (r.transformed_rect != null && !r.rotation.equals(0)) return r.transformed_rect.intersect(l);
+  public static function line_intersects_rect(l:Line, r:Rect):Null<IntersectionData> {
+    if (r.transformed_rect != null && r.rotation != 0) return r.transformed_rect.intersect(l);
     var closest:Null<IntersectionData> = null;
 
     var left = r.left;
@@ -73,19 +80,19 @@ class SAT {
     var bottom = r.bottom;
 
     var line = Line.get(left, top, right, top);
-    var result = l.line_interects_line(line);
+    var result = l.line_intersects_line(line);
     if (result != null) closest = result;
 
     line.set(right, top, right, bottom);
-    result = l.line_interects_line(line);
+    result = l.line_intersects_line(line);
     if (result != null && (closest == null || closest.distance > result.distance)) closest = result;
 
     line.set(right, bottom, left, bottom);
-    result = l.line_interects_line(line);
+    result = l.line_intersects_line(line);
     if (result != null && (closest == null || closest.distance > result.distance)) closest = result;
 
     line.set(left, bottom, left, top);
-    result = l.line_interects_line(line);
+    result = l.line_intersects_line(line);
     if (result != null && (closest == null || closest.distance > result.distance)) closest = result;
 
     if (closest != null) {
@@ -99,10 +106,11 @@ class SAT {
   public static function line_intersects_circle(l:Line, c:Circle):Null<IntersectionData> {
     var d = l.end - l.start;
     var f = l.start - c.get_position();
+    var r = c.radius;
 
-    var a = d * d;
-    var b = 2 * (f * d);
-    var e = (f * f) - (c.radius * c.radius);
+    var a = d.dot(d);
+    var b = 2 * f.dot(d);
+    var e = f.dot(f) - (r * r);
 
     var discriminant = b * b - 4 * a * e;
     if (discriminant < 0) return null;
@@ -114,10 +122,12 @@ class SAT {
 
     if (t1 >= 0 && t1 <= 1) {
       var hit = l.point_along_ratio(t1);
-      var distance = l.start.distanceTo(hit);
+      var distance = l.start.distance(hit);
       var overlap = l.length - distance;
+      norm.set(hit.x - c.x, hit.y - c.y);
+      norm /= r;
 
-      var i = IntersectionData.get(distance, overlap, hit.x, hit.y);
+      var i = IntersectionData.get(distance, overlap, hit.x, hit.y, norm.x, norm.y);
       i.line = l;
       i.shape = c;
       return i;
@@ -125,10 +135,12 @@ class SAT {
 
     if (t2 >= 0 && t2 <= 1) {
       var hit = l.point_along_ratio(t2);
-      var distance = l.start.distanceTo(hit);
+      var distance = l.start.distance(hit);
       var overlap = l.length - distance;
+      norm.set(hit.x - c.x, hit.y - c.y);
+      norm.copy_from(-norm / r);
 
-      var i = IntersectionData.get(distance, overlap, hit.x, hit.y);
+      var i = IntersectionData.get(distance, overlap, hit.x, hit.y, norm.x, norm.y, true);
       i.line = l;
       i.shape = c;
       return i;
@@ -144,7 +156,7 @@ class SAT {
 
     for (i in 0...p.count) {
       line.set_from_vectors(p.vertices[i], p.vertices[(i + 1) % p.count]);
-      var result = l.line_interects_line(line);
+      var result = l.line_intersects_line(line);
       if (result != null && (closest == null || closest.distance > result.distance)) closest = result;
     }
 
@@ -157,7 +169,7 @@ class SAT {
   }
 
   public static inline function rect_intersects(r:Rect, l:Line):Null<IntersectionData> {
-    return line_interects_rect(l, r);
+    return line_intersects_rect(l, r);
   }
 
   public static inline function circle_intersects(c:Circle, l:Line):Null<IntersectionData> {
@@ -175,12 +187,27 @@ class SAT {
    * @return Null<CollisionData>
    */
   public static function rect_and_rect(rect1:Rect, rect2:Rect, flip:Bool = false):Null<CollisionData> {
-    if (!rect1.rotation.equals(0) || !rect2.rotation.equals(0)) {
+    var col:CollisionData = null;
+    if (rect1.rotation != 0 || rect2.rotation != 0) {
       if (rect1.transformed_rect != null) {
-        return rect_and_polygon(rect2, rect1.transformed_rect, flip);
+        col = rect_and_polygon(rect2, rect1.transformed_rect, flip);
+
+        if (col == null) return null;
+
+        if (flip) col.sa = rect1;
+        else col.sb = rect1;
+
+        return col;
       }
       if (rect2.transformed_rect != null) {
-        return rect_and_polygon(rect1, rect2.transformed_rect, !flip);
+        col = rect_and_polygon(rect1, rect2.transformed_rect, !flip);
+
+        if (col == null) return null;
+
+        if (flip) col.sa = rect2;
+        else col.sb = rect2;
+
+        return col;
       }
     }
 
@@ -193,7 +220,6 @@ class SAT {
     // Calculate overlap on x axis
     var x_overlap = sa.ex + sb.ex - Math.abs(nx);
 
-    var col:CollisionData = null;
     // SAT test on x axis
     if (x_overlap > 0) {
       // Calculate overlap on y axis
@@ -300,7 +326,16 @@ class SAT {
    * @return Null<CollisionData>
    */
   public static function rect_and_circle(r:Rect, c:Circle, flip:Bool = false):Null<CollisionData> {
-    if (r.transformed_rect != null && !r.rotation.equals(0)) return circle_and_polygon(c, r.transformed_rect, flip);
+    if (r.transformed_rect != null && r.rotation != 0) {
+      var col = circle_and_polygon(c, r.transformed_rect, flip);
+
+      if (col == null) return null;
+
+      if (flip) col.sa = r;
+      else col.sb = r;
+
+      return col;
+    }
 
     // Vector from A to B
     var nx = flip ? c.x - r.x : r.x - c.x;
@@ -313,6 +348,7 @@ class SAT {
     cx = cx.clamp(-r.ex, r.ex);
     cy = cy.clamp(-r.ey, r.ey);
     var inside = false;
+    var rad = c.radius;
 
     // Circle is inside the AABB, so we need to clamp the circle's center
     // to the closest edge
@@ -321,11 +357,11 @@ class SAT {
       // Find closest axis
       if (Math.abs(nx) > Math.abs(ny)) {
         // Clamp to closest extent
-        cx = cx > 0 ? r.ex + c.radius + 0.1 : -r.ex - c.radius - 0.1;
+        cx = cx > 0 ? r.ex + rad + 0.1 : -r.ex - rad - 0.1;
       }
       else {
         // Clamp to closest extent
-        cy = cy > 0 ? r.ey + c.radius + 0.1 : -r.ey - c.radius - 0.1;
+        cy = cy > 0 ? r.ey + rad + 0.1 : -r.ey - rad - 0.1;
       }
     }
 
@@ -333,7 +369,6 @@ class SAT {
     ny -= cy;
     // length squared
     var d = nx * nx + ny * ny;
-    var rad = c.radius;
 
     // Early out if the radius is shorter than distance to closest point and
     // Circle not inside the AABB
@@ -358,16 +393,22 @@ class SAT {
   }
 
   public static function rect_and_polygon(r:Rect, p:Polygon, flip:Bool = false):Null<CollisionData> {
-    if (r.transformed_rect != null) return polygon_and_polygon(r.transformed_rect, p, flip);
-
-    var tr = Polygon.get_from_rect(r);
-    var col = polygon_and_polygon(tr, p, flip);
+    var col:CollisionData = null;
+    if (r.transformed_rect != null) {
+      col = polygon_and_polygon(r.transformed_rect, p, flip);
+    }
+    else {
+      var tr = Polygon.get_from_rect(r);
+      @:privateAccess
+      tr.set_parent(r.parent);
+      col = polygon_and_polygon(tr, p, flip);
+      tr.put();
+    }
 
     if (col == null) return null;
 
     if (flip) col.sb = r;
     else col.sa = r;
-    tr.put();
 
     return col;
   }
@@ -381,11 +422,11 @@ class SAT {
   public static function circle_and_polygon(c:Circle, p:Polygon, flip:Bool = false):Null<CollisionData> {
     var distance:Float = 0;
     var testDistance:Float = 0x3FFFFFFF;
-    var closest = new Vector2(0, 0);
     var c_pos = c.get_position();
+    var c_rad = c.radius;
 
     for (i in 0...p.count) {
-      distance = (c_pos - p.vertices[i]).lengthSq;
+      distance = (c_pos - p.vertices[i]).length_sq;
 
       if (distance < testDistance) {
         testDistance = distance;
@@ -393,23 +434,23 @@ class SAT {
       }
     }
 
-    var normal = (closest - c_pos).normalize();
+    var normal = (closest - c_pos).normal;
 
     // Project the polygon's points
     var test:Float = 0;
-    var min1 = normal * p.vertices[0];
+    var min1 = normal.dot(p.vertices[0]);
     var max1 = min1;
 
     for (j in 1...p.count) {
-      test = normal * p.vertices[j];
+      test = normal.dot(p.vertices[j]);
       if (test < min1) min1 = test;
       if (test > max1) max1 = test;
     }
 
     // Project the circle
-    var max2 = c.radius;
-    var min2 = -c.radius;
-    var offset = normal * -c_pos;
+    var max2 = c_rad;
+    var min2 = -c_rad;
+    var offset = normal.dot(-c_pos);
 
     min1 += offset;
     max1 += offset;
@@ -429,25 +470,25 @@ class SAT {
 
     // Find the normal axis for each point and project
     for (i in 0...p.count) {
-      normal = p.normals[i].clone();
+      normal.set(p.normals[i].x, p.normals[i].y);
 
       // Project the polygon
-      min1 = normal * p.vertices[0];
+      min1 = normal.dot(p.vertices[0]);
       max1 = min1;
 
       // Project all other points
       for (j in 1...p.count) {
-        test = normal * p.vertices[j];
+        test = normal.dot(p.vertices[j]);
         if (test < min1) min1 = test;
         if (test > max1) max1 = test;
       }
 
       // Project the circle
-      max2 = c.radius;
-      min2 = -c.radius;
+      max2 = c_rad;
+      min2 = -c_rad;
 
       // Offset points
-      offset = normal * -c_pos;
+      offset = normal.dot(-c_pos);
       min1 += offset;
       max1 += offset;
 
@@ -456,6 +497,7 @@ class SAT {
 
       // Preform another test
       if (test1 > 0 || test2 > 0) {
+        col.put();
         return null;
       }
 
@@ -477,7 +519,7 @@ class SAT {
     col.overlap = Math.abs(col.overlap);
 
     if (flip) {
-      col.normal.applyNegate();
+      col.normal.negate();
     }
 
     return col;
@@ -493,25 +535,26 @@ class SAT {
     var max2:Float = 0;
     var closest:Float = 0x3FFFFFFF;
     var col:Null<CollisionData> = null;
+    var normal = new Vector2(0, 0);
 
     // loop to begin projection
     for (i in 0...polygon1.count) {
-      var normal = polygon1.normals[i].clone();
+      normal.set(polygon1.normals[i].x, polygon1.normals[i].y);
 
       // project polygon1
-      max1 = min1 = normal * polygon1.vertices[0];
+      max1 = min1 = normal.dot(polygon1.vertices[0]);
 
       for (j in 1...polygon1.count) {
-        testNum = normal * polygon1.vertices[j];
+        testNum = normal.dot(polygon1.vertices[j]);
         if (testNum < min1) min1 = testNum;
         if (testNum > max1) max1 = testNum;
       }
 
       // project polygon2
-      max2 = min2 = normal * polygon2.vertices[0];
+      max2 = min2 = normal.dot(polygon2.vertices[0]);
 
       for (j in 1...polygon2.count) {
-        testNum = normal * polygon2.vertices[j];
+        testNum = normal.dot(polygon2.vertices[j]);
         if (testNum < min2) min2 = testNum;
         if (testNum > max2) max2 = testNum;
       }
@@ -537,7 +580,7 @@ class SAT {
     col.sb = flip ? polygon1 : polygon2;
 
     if (flip) {
-      col.normal.applyNegate();
+      col.normal.negate();
     }
 
     return col;

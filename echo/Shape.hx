@@ -178,6 +178,8 @@ class Shape #if cog implements cog.IComponent #end {
    * @return AABB
    */
   public function bounds(?aabb:AABB):AABB return aabb == null ? AABB.get(x, y, 0, 0) : aabb.set(x, y, 0, 0);
+
+  public function volume():Float return 0;
   /**
    * Clones the Shape into a new Shape
    * @return Shape return new Shape(x, y)

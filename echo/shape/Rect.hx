@@ -153,6 +153,8 @@ class Rect extends Shape implements IPooled {
     return (aabb == null) ? AABB.get(x, y, width, height) : aabb.set(x, y, width, height);
   }
 
+  override inline function volume() return width * height;
+
   override inline function clone():Rect return Rect.get(local_x, local_y, width, height, local_rotation);
 
   override inline function contains(p:Vector2):Bool return this.rect_contains(p);

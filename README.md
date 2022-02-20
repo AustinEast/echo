@@ -169,7 +169,7 @@ class Main {
 
     // Create a Body with a Circle Collider and add it to the World
     var a = world.make({
-      elasticity: 0.2,
+      material: {elasticity: 0.2},
       shape: {
         type: CIRCLE,
         radius: 16,
@@ -177,12 +177,12 @@ class Main {
     });
 
     // Create a Body with a Rectangle collider and add it to the World
-    // This Body will have a Mass of zero, rendering it as unmovable
+    // This Body will be static (ie have a Mass of `0`), rendering it as unmovable
     // This is useful for things like platforms or walls.
     var b = world.make({
-      mass: 0, // Setting this to zero makes the body unmovable by forces and collisions
+      mass: STATIC, // Setting this to Static/`0` makes the body unmovable by forces and collisions
       y: 48, // Set the object's Y position below the Circle, so that gravity makes them collide
-      elasticity: 0.2,
+      material: {elasticity: 0.2},
       shape: {
         type: RECT,
         width: 10,

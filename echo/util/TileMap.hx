@@ -43,7 +43,7 @@ class TileMap {
    * @return Array<Body>
    */
   public static function generate(data:Array<Int>, tile_width:Int, tile_height:Int, width_in_tiles:Int, height_in_tiles:Int, offset_x:Float = 0,
-      offset_y:Float = 0, start_index:Int = 1, ?shapes:Array<TileShape>, ?ignore:Array<Int>):Array<Body> {
+      offset_y:Float = 0, start_index:Int = 1, ?shapes:Array<TileShape>, ?ignore:Array<Int>, ?material:Material):Array<Body> {
     inline function is_ignored(index:Int):Bool {
       return ignore != null && ignore.indexOf(index) > -1;
     }
@@ -233,7 +233,8 @@ class TileMap {
       return new Body({
         x: x * tile_width + offset_x,
         y: y * tile_height + offset_y,
-        mass: 0,
+        mass: STATIC,
+        material: material,
         shape_instance: shape
       });
     }
@@ -317,7 +318,7 @@ class TileMap {
    * @return Array<Body>
    */
   public static function generate_grid(data:Array<Int>, tile_width:Int, tile_height:Int, width_in_tiles:Int, height_in_tiles:Int, offset_x:Float = 0,
-      offset_y:Float = 0, start_index:Int = 1):Array<Body> {
+      offset_y:Float = 0, start_index:Int = 1, ?material:Material):Array<Body> {
     var colliders = [];
     for (i in 0...data.length) {
       var index = data[i];
@@ -325,7 +326,8 @@ class TileMap {
         var b = new Body({
           x: (i % width_in_tiles) * tile_width,
           y: Math.floor(i / width_in_tiles) * tile_height,
-          mass: 0,
+          mass: STATIC,
+          material: material,
           shape: {
             type: RECT,
             width: tile_width,

@@ -1,5 +1,6 @@
 package state;
 
+import echo.Material;
 import echo.Body;
 import echo.World;
 import util.Random;
@@ -9,12 +10,16 @@ class StackingState extends BaseState {
 
   override public function enter(world:World) {
     Main.instance.state_text.text = "Sample: Stacking Boxes";
+
+    // Create a material for all the shapes to share
+    var material:Material = {elasticity: 0.7};
+
     // Add a bunch of random Physics Bodies to the World
     for (i in 0...body_count) {
       var b = new Body({
         x: Random.range(60, world.width - 60),
         y: Random.range(0, world.height / 2),
-        elasticity: 0.3,
+        material: material,
         shape: {
           type: RECT,
           width: Random.range(16, 48),
@@ -27,10 +32,10 @@ class StackingState extends BaseState {
     // Add a Physics body at the bottom of the screen for the other Physics Bodies to stack on top of
     // This body has a mass of 0, so it acts as an immovable object
     world.add(new Body({
-      mass: 0,
+      mass: STATIC,
       x: world.width / 2,
       y: world.height - 10,
-      elasticity: 0.2,
+      material: {elasticity: 0.2},
       shape: {
         type: RECT,
         width: world.width,

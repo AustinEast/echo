@@ -1,5 +1,6 @@
 package state;
 
+import echo.Material;
 import echo.Body;
 import echo.World;
 import util.Random;
@@ -20,12 +21,15 @@ class StaticState extends BaseState {
     dynamics = [];
     statics = [];
 
+    // Create a material for all the static shapes to share
+    var static_material:Material = {elasticity: 1};
+
     for (i in 0...static_count) {
       var b = new Body({
-        mass: 0,
+        mass: STATIC,
         x: (world.width * 0.5) * Math.cos(i) + world.width * 0.5,
         y: (world.height * 0.5) * Math.sin(i) + world.height * 0.5,
-        elasticity: 1,
+        material: static_material,
         shape: {
           type: CIRCLE,
           radius: Random.range(2, 4),

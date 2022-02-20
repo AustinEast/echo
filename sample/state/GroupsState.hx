@@ -23,10 +23,10 @@ class GroupsState extends BaseState {
     // Setting the Mass to 0 makes them unmovable
     for (i in 0...4) {
       var floor = new Body({
-        mass: 0,
+        mass: STATIC,
         x: (world.width / 4) * i + (world.width / 8),
         y: world.height - 30,
-        elasticity: 0.3,
+        material: {elasticity: 0.3},
         shape: {
           type: RECT,
           width: world.width / 8,
@@ -80,7 +80,7 @@ class GroupsState extends BaseState {
   }
 
   inline function make_circle():Body return new Body({
-    elasticity: 0.5,
+    material: {elasticity: 0.5},
     shape: {
       type: CIRCLE,
       radius: Random.range(16, 32)
@@ -88,7 +88,7 @@ class GroupsState extends BaseState {
   });
 
   inline function make_rect():Body return new Body({
-    elasticity: 0.5,
+    material: {elasticity: 0.5},
     shape: {
       type: RECT,
       width: Random.range(32, 64),

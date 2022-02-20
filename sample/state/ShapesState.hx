@@ -17,10 +17,10 @@ class ShapesState extends BaseState {
     // Setting the Mass to 0 makes them unmovable
     for (i in 0...4) {
       world.add(new Body({
-        mass: 0,
+        mass: STATIC,
         x: (world.width / 4) * i + (world.width / 8),
         y: world.height - 30,
-        elasticity: 0.3,
+        material: {elasticity: 0.3},
         shape: {
           type: RECT,
           width: world.width / 8,
@@ -52,7 +52,7 @@ class ShapesState extends BaseState {
     if (timer > 0.3 + Random.range(-0.2, 0.2)) {
       if (world.count < body_count) world.add(new Body({
         x: Random.range(0, world.width),
-        elasticity: 0.3,
+        material: {elasticity: 0.3},
         rotational_velocity: Random.range(-30, 30),
         shape: {
           type: Random.chance() ? RECT : POLYGON,

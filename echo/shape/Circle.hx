@@ -71,6 +71,11 @@ class Circle extends Shape implements IPooled {
     return aabb == null ? AABB.get(x, y, d, d) : aabb.set(x, y, d, d);
   }
 
+  override inline function volume():Float {
+    var r = radius;
+    return Math.PI * r * r;
+  }
+
   override function clone():Circle return Circle.get(local_x, local_y, radius);
 
   override function contains(v:Vector2):Bool return this.circle_contains(v);

@@ -23,41 +23,37 @@ class Physics {
       body.last_x = body.x;
       body.last_y = body.y;
       body.last_rotation = body.rotation;
-      var accel_x = body.acceleration.x;
-      var accel_y = body.acceleration.y;
-      // Apply Gravity
+      var accel_x = body.acceleration.x * body.inverse_mass;
+      var accel_y = body.acceleration.y * body.inverse_mass;
+
+      // Apply Gravity (after applying body's inverse mass to acceleration)
       if (!body.kinematic) {
-        accel_x += gravity_x * body.gravity_scale;
-        accel_y += gravity_y * body.gravity_scale;
+        accel_x += gravity_x * body.material.gravity_scale;
+        accel_y += gravity_y * body.material.gravity_scale;
       }
+
       // Apply Acceleration, Drag, and Max Velocity
       body.velocity.x = compute_velocity(body.velocity.x, accel_x, body.drag.x, body.max_velocity.x, dt);
       body.velocity.y = compute_velocity(body.velocity.y, accel_y, body.drag.y, body.max_velocity.y, dt);
+
       // Apply Linear Drag
       if (body.drag_length > 0 && body.acceleration == Vector2.zero && body.velocity != Vector2.zero) {
         body.velocity.length = body.velocity.length - body.drag_length * dt;
       }
+
       // Apply Linear Max Velocity
       if (body.max_velocity_length > 0 && body.velocity.length > body.max_velocity_length) {
         body.velocity.length = body.max_velocity_length;
       }
+
       // Apply Velocity
-      body.x += body.velocity.x * body.inverse_mass * dt;
-      body.y += body.velocity.y * body.inverse_mass * dt;
-      // Apply Max Rotational Velocity
-      if (body.max_rotational_velocity > 0) body.rotational_velocity = body.rotational_velocity.clamp(-body.max_rotational_velocity,
-        body.max_rotational_velocity);
-      // Apply Rotational Drag
-      if (body.rotational_drag > 0) {
-        if (body.rotational_velocity > 0) {
-          body.rotational_velocity -= body.rotational_drag * dt;
-          if (body.rotational_velocity < 0) body.rotational_velocity = 0; // drag should never make us rotate in the opposite direction
-        }
-        else {
-          body.rotational_velocity += body.rotational_drag * dt;
-          if (body.rotational_velocity > 0) body.rotational_velocity = 0; // drag should never make us rotate in the opposite direction
-        }
-      }
+      body.x += body.velocity.x * dt;
+      body.y += body.velocity.y * dt;
+
+      // Apply Rotational Acceleration, Drag, and Max Velocity
+      var accel_rot = body.rotational_acceleration * body.inverse_mass;
+      body.rotational_velocity = compute_velocity(body.rotational_velocity, body.rotational_drag, accel_rot, body.max_rotational_velocity, dt);
+
       // Apply Rotational Velocity
       body.rotation += body.rotational_velocity * dt;
     }
@@ -81,24 +77,29 @@ class Physics {
    * @param b the second `Body` in the Collision
    * @param cd Data related to the Collision
    */
-  public static inline function resolve(a:Body, b:Body, cd:CollisionData, correction_threshold:Float = 0.013, percent_correction:Float = 0.9) {
+  public static inline function resolve(a:Body, b:Body, cd:CollisionData, correction_threshold:Float = 0.013, percent_correction:Float = 0.9,
+      advanced:Bool = false) {
     // Do not resolve if either objects arent solid
     if (!cd.sa.solid || !cd.sb.solid || !a.active || !b.active || a.disposed || b.disposed || a.is_static() && b.is_static()) return;
 
     // Calculate relative velocity
     var rvx = a.velocity.x - b.velocity.x;
     var rvy = a.velocity.y - b.velocity.y;
+
     // Calculate relative velocity in terms of the normal direction
     var vel_to_normal = rvx * cd.normal.x + rvy * cd.normal.y;
     var inv_mass_sum = a.inverse_mass + b.inverse_mass;
+
     // Do not resolve if velocities are separating
     if (vel_to_normal > 0) {
       // Calculate elasticity
-      var e = (a.elasticity + b.elasticity) * 0.5;
+      var e = (a.material.elasticity + b.material.elasticity) * 0.5;
+
       // Calculate impulse scalar
       var j = (-(1 + e) * vel_to_normal) / inv_mass_sum;
       var impulse_x = -j * cd.normal.x;
       var impulse_y = -j * cd.normal.y;
+
       // Apply impulse
       var mass_sum = a.mass + b.mass;
       var ratio = a.mass / mass_sum;
@@ -110,6 +111,14 @@ class Physics {
       if (!b.kinematic) {
         b.velocity.x += impulse_x * b.inverse_mass;
         b.velocity.y += impulse_y * b.inverse_mass;
+      }
+
+      if (advanced) {
+        // Calculate static and dynamic friction
+        var sf = Math.sqrt(a.material.static_friction * a.material.static_friction + b.material.static_friction * b.material.static_friction);
+        var df = Math.sqrt(a.material.friction * a.material.friction + b.material.friction * b.material.friction);
+
+        // TODO - FRICTION / TORQUE / CONTACT POINT RESOLUTION
       }
     }
 

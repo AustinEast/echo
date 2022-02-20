@@ -1,5 +1,6 @@
 package echo.data;
 
+import echo.Material;
 import echo.Body;
 import echo.data.Data;
 import echo.data.Types;
@@ -22,6 +23,8 @@ typedef BodyOptions = {
    * An array of Shape instances that the Body will use as colliders
    */
   var ?shape_instances:Array<Shape>;
+
+  var ?material:Material;
   /**
    * Flag to set how a Body is affected by Collisions.
    *
@@ -30,12 +33,14 @@ typedef BodyOptions = {
    */
   var ?kinematic:Bool;
   /**
-   * Body's mass. Affects how the Body reacts to Collisions and Velocity.
-   *
-   * The higher a Body's mass, the more resistant it is to those forces.
-   * If a Body's mass is set to `0`, it becomes static - unmovable by forces and collisions.
+   * The Body's mass. Affects how the Body reacts to Collisions and Acceleration Forces. The higher a Body's mass, the more resistant it is to those forces.
+   * 
+   * Can be set to a `Float` value, `AUTO`, or `STATIC` (`mass = 5`, `mass = AUTO`, and `mass = STATIC` are all valid).
+   * 
+   * If left empty (or set to `AUTO`), the Body will automatically calculate it's mass based on it's volume and material's `density`.
+   * If a Body's mass is set to `STATIC` or `0`, it becomes static - unmovable by forces and collisions.
    */
-  var ?mass:Float;
+  var ?mass:MassType;
   /**
    * The Body's position on the X axis.
    */
@@ -59,6 +64,7 @@ typedef BodyOptions = {
   /**
    * Value to determine how much of a Body's `velocity` should be retained during collisions (or how much should the `Body` "bounce" in other words).
    */
+  @:deprecated('Elasticity Value has been moved into the Material object. Set `material.elasticity instead.')
   var ?elasticity:Float;
   /**
    * The units/second that a `Body` moves on the X axis.
@@ -121,6 +127,7 @@ typedef BodyOptions = {
   /**
    * Percentage value that represents how much a World's gravity affects the Body.
    */
+  @:deprecated('Gravity Value has been moved into the Material object. Set `material.gravity_scale instead.')
   var ?gravity_scale:Float;
 }
 

@@ -1,5 +1,6 @@
 package state;
 
+import echo.Material;
 import echo.Line;
 import echo.Body;
 import echo.World;
@@ -12,12 +13,16 @@ class LinecastState extends BaseState {
 
   override public function enter(world:World) {
     Main.instance.state_text.text = "Sample: Linecasting";
+
+    // Create a material for all the shapes to share
+    var material:Material = {gravity_scale: 0};
+
     // Add a bunch of random Physics Bodies to the World
     for (i in 0...body_count) {
       var b = new Body({
         x: (world.width * 0.35) * Math.cos(i) + world.width * 0.5,
         y: (world.height * 0.35) * Math.sin(i) + world.height * 0.5,
-        gravity_scale: 0,
+        material: material,
         shape: {
           type: Random.chance() ? POLYGON : CIRCLE,
           radius: Random.range(16, 32),
@@ -26,6 +31,7 @@ class LinecastState extends BaseState {
           sides: Random.range_int(3, 8)
         }
       });
+
       dynamics.push(b);
       world.add(b);
     }

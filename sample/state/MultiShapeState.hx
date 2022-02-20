@@ -15,7 +15,7 @@ class MultiShapeState extends BaseState {
       var b = new Body({
         x: Random.range(0, world.width),
         y: Random.range(0, world.height / 2),
-        elasticity: 0.3,
+        material: {elasticity: 0.3},
         // rotational_velocity: 25,
         rotation: Random.range(0, 360),
         scale_x: scale,
@@ -53,10 +53,10 @@ class MultiShapeState extends BaseState {
     // Add a Physics body at the bottom of the screen for the other Physics Bodies to stack on top of
     // This body has a mass of 0, so it acts as an immovable object
     world.add(new Body({
-      mass: 0,
+      mass: STATIC,
       x: world.width / 2,
       y: world.height - 10,
-      elasticity: 0.5,
+      material: {elasticity: 0.5},
       shape: {
         type: RECT,
         width: world.width,

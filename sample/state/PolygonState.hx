@@ -1,5 +1,6 @@
 package state;
 
+import echo.Material;
 import hxd.Key;
 import echo.Body;
 import echo.World;
@@ -10,14 +11,18 @@ class PolygonState extends BaseState {
 
   override public function enter(world:World) {
     Main.instance.state_text.text = "Sample: Stacking Polygons";
+
+    // Create a material for all the shapes to share
+    var material:Material = {elasticity: 0.7};
+
     // Add a bunch of random Physics Bodies to the World
     for (i in 0...body_count) {
       var scale = Random.range(0.3, 1);
       var b = new Body({
         x: Random.range(60, world.width - 60),
         y: Random.range(0, world.height / 2),
-        elasticity: 0.7,
         rotation: Random.range(0, 360),
+        material: material,
         shape: {
           type: POLYGON,
           radius: Random.range(16, 32),
@@ -34,10 +39,10 @@ class PolygonState extends BaseState {
     // Add a Physics body at the bottom of the screen for the other Physics Bodies to stack on top of
     // This body has a mass of 0, so it acts as an immovable object
     world.add(new Body({
-      mass: 0,
+      mass: STATIC,
       x: world.width / 5,
       y: world.height - 40,
-      elasticity: 0.7,
+      material: material,
       rotation: 5,
       shape: {
         type: RECT,
@@ -47,10 +52,10 @@ class PolygonState extends BaseState {
     }));
 
     world.add(new Body({
-      mass: 0,
+      mass: STATIC,
       x: world.width - world.width / 5,
       y: world.height - 40,
-      elasticity: 0.7,
+      material: material,
       rotation: -5,
       shape: {
         type: RECT,

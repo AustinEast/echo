@@ -27,7 +27,7 @@ class Echo {
   /**
    * Cache'd `Body` to help with memory management.
    */
-  static final cached_body:Body = new Body();
+  static final cached_body:Body = new Body({mass: 1});
   /**
    * Shortcut for creating a new `World`
    * @param options Options for the new `World`
@@ -214,6 +214,7 @@ class Echo {
             }
             else temp.put();
           }
+          cached_body.shape.put();
         }
     }
     lb.put();
@@ -277,6 +278,7 @@ class Echo {
             if (temp.data.length > 0) intersections.push(temp);
             else temp.put();
           }
+          cached_body.shape.put();
         }
     }
     lb.put();

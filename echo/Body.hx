@@ -23,6 +23,8 @@ class Body implements IDisposable #if cog implements cog.IComponent #end {
    */
   public static var defaults(get, null):BodyOptions;
 
+  public static final minimum_mass = 0.0001;
+
   static var ids:Int = 0;
   /**
    * Unique id of the Body.
@@ -66,16 +68,18 @@ class Body implements IDisposable #if cog implements cog.IComponent #end {
    */
   public var kinematic:Bool;
   /**
-   * Body's mass. Affects how the Body reacts to Collisions and Velocity.
-   *
-   * The higher a Body's mass, the more resistant it is to those forces.
+   * The Body's mass. Affects how the Body reacts to Collisions and Acceleration Forces. The higher a Body's mass, the more resistant it is to those forces.
+   * 
    * If a Body's mass is set to `0`, it becomes static - unmovable by forces and collisions.
    */
   public var mass(default, set):Float;
+
+  public var material:Material = Material.global;
   /**
    * Value to determine how much of a Body's `velocity` should be retained during collisions (or how much should the `Body` "bounce", in other words).
    */
-  public var elasticity:Float;
+  @:deprecated('Elasticity Value has been moved into the Material object. Use `body.material.elasticity instead.')
+  public var elasticity(get, set):Float;
   /**
    * The units/second that a `Body` moves.
    */
@@ -90,6 +94,12 @@ class Body implements IDisposable #if cog implements cog.IComponent #end {
    * The units/second that a `Body` will rotate.
    */
   public var rotational_velocity:Float;
+  /**
+   * A measure of how fast a `Body` will change it's rotational velocity.
+   *
+   * Can be thought of the sum of all external rotation forces on an object during a step.
+   */
+  public var rotational_acceleration:Float = 0;
   /**
    * The maximum values a Body's velocity's x and y components can be. If set to 0, the Body has no restrictions on how fast it can move.
    *
@@ -127,7 +137,8 @@ class Body implements IDisposable #if cog implements cog.IComponent #end {
   /**
    * Percentage value that represents how much a World's gravity affects the Body.
    */
-  public var gravity_scale:Float;
+  @:deprecated('Gravity Value has been moved into the Material object. Use `body.material.gravity_scale instead.')
+  public var gravity_scale(get, set):Float;
   /**
    * Cached value of 1 divided by the Body's mass. Used in Internal calculations.
    */
@@ -227,8 +238,17 @@ class Body implements IDisposable #if cog implements cog.IComponent #end {
     scale_x = options.scale_x;
     scale_y = options.scale_y;
     kinematic = options.kinematic;
-    mass = options.mass;
-    elasticity = options.elasticity;
+
+    if (options.material != null) material = options.material;
+    else if (options.gravity_scale != null || options.elasticity != null) {
+      // Temp: Support deprecated values
+      material = {
+        elasticity: options.elasticity,
+        gravity_scale: options.gravity_scale
+      }
+    }
+    else material = Material.global;
+
     velocity.set(options.velocity_x, options.velocity_y);
     rotational_velocity = options.rotational_velocity;
     max_velocity.set(options.max_velocity_x, options.max_velocity_y);
@@ -237,7 +257,6 @@ class Body implements IDisposable #if cog implements cog.IComponent #end {
     drag.set(options.drag_x, options.drag_y);
     drag_length = options.drag_length;
     rotational_drag = options.rotational_drag;
-    gravity_scale = options.gravity_scale;
     last_x = Math.NaN;
     last_y = Math.NaN;
     last_rotation = Math.NaN;
@@ -246,6 +265,15 @@ class Body implements IDisposable #if cog implements cog.IComponent #end {
     if (options.shapes != null) for (shape in options.shapes) create_shape(shape);
     if (options.shape_instance != null) add_shape(options.shape_instance);
     if (options.shape_instances != null) for (shape in options.shape_instances) add_shape(shape);
+
+    switch (options.mass) {
+      case AUTO:
+        calculate_mass();
+      case STATIC:
+        mass = STATIC;
+      default:
+        mass = options.mass;
+    }
   }
 
   public function clone():Body {
@@ -255,9 +283,9 @@ class Body implements IDisposable #if cog implements cog.IComponent #end {
     b.rotation = rotation;
     b.scale_x = scale_x;
     b.scale_y = scale_y;
+    b.material = material;
     b.kinematic = kinematic;
     b.mass = mass;
-    b.elasticity = elasticity;
     b.velocity.set(velocity.x, velocity.y);
     b.rotational_velocity = rotational_velocity;
     b.max_velocity.set(max_velocity.x, max_velocity.y);
@@ -266,7 +294,6 @@ class Body implements IDisposable #if cog implements cog.IComponent #end {
     b.drag.set(drag.x, drag.y);
     b.drag_length = drag_length;
     b.rotational_drag = rotational_drag;
-    b.gravity_scale = gravity_scale;
     b.last_x = last_x;
     b.last_y = last_y;
     b.last_rotation = last_rotation;
@@ -279,7 +306,9 @@ class Body implements IDisposable #if cog implements cog.IComponent #end {
     return b;
   }
   /**
-   * Adds a new `Shape` to the Body based on the `ShapeOptions` passed in.
+   * Adds a new `Shape` to the Body based on the `ShapeOptions` passed in. 
+   * 
+   * If `mass` has not been manually set, It's recommended to call `calculate_mass()` after adding/removing a Body's shapes.
    * @param options
    * @param position The position in the Body's `shapes` array the Shape will be added to. If set to -1, the Shape is pushed to the end.
    * @return The newly created `Shape`.
@@ -290,6 +319,8 @@ class Body implements IDisposable #if cog implements cog.IComponent #end {
   }
   /**
    * Adds a `Shape` to the Body.
+   * 
+   * If `mass` has not been manually set, It's recommended to call `calculate_mass()` after adding/removing a Body's shapes.
    * @param shape
    * @param position The position in the Body's `shapes` array the Shape will be added to. If set to -1, the Shape is pushed to the end.
    * @return The added `Shape`.
@@ -304,7 +335,13 @@ class Body implements IDisposable #if cog implements cog.IComponent #end {
     }
     return shape;
   }
-
+  /**
+   * Removes a `Shape` from the Body.
+   * 
+   * If `mass` has not been manually set, It's recommended to call `calculate_mass()` after adding/removing a Body's shapes.
+   * @param shape The `Shape` to remove.
+   * @return Shape The removed `Shape`.
+   */
   public inline function remove_shape(shape:Shape):Shape {
     if (shapes.remove(shape)) {
       shape.set_parent();
@@ -315,6 +352,8 @@ class Body implements IDisposable #if cog implements cog.IComponent #end {
   }
   /**
    * Clears all Shapes from the Body, releasing them to their respective pools.
+   * 
+   * If `mass` has not been manually set, It's recommended to call `calculate_mass()` after adding/removing a Body's shapes.
    */
   public inline function clear_shapes() {
     for (shape in shapes) shape.put();
@@ -405,6 +444,18 @@ class Body implements IDisposable #if cog implements cog.IComponent #end {
     }
   }
   /**
+   * Calculates the Body's mass based on the volume of it's shapes and the `density` defined in it's `Material`.
+   * 
+   * This should be called whenever a Body's overall shape is changed, such as in cases of changing the Body's scale - or if an individual shape on the Body has been added, removed, moved, rotated, or scaled.
+   */
+  public inline function calculate_mass() {
+    var sum = 0.;
+    for (shape in shapes) {
+      sum += shape.volume() * material.density;
+    }
+    mass = sum;
+  }
+  /**
    * Returns true if the Body has moved since the last `Physics.step()`.
    */
   public inline function moved() return !x.equals(last_x, 0.001) || !y.equals(last_y, 0.001) || !rotation.equals(last_rotation, 0.001);
@@ -444,6 +495,10 @@ class Body implements IDisposable #if cog implements cog.IComponent #end {
   inline function get_scale_y() return transform.local_scale_y;
 
   inline function get_shape() return shapes[0];
+
+  inline function get_elasticity() return material.elasticity;
+
+  inline function get_gravity_scale() return material.gravity_scale;
 
   // setters
   inline function set_x(value:Float):Float {
@@ -485,7 +540,7 @@ class Body implements IDisposable #if cog implements cog.IComponent #end {
   }
 
   inline function set_mass(value:Float):Float {
-    if (value < 0.0001) {
+    if (value < minimum_mass) {
       mass = inverse_mass = 0;
       update_static_bounds();
     }
@@ -500,15 +555,22 @@ class Body implements IDisposable #if cog implements cog.IComponent #end {
     return mass;
   }
 
+  inline function set_elasticity(value:Float) {
+    return material.elasticity = value;
+  }
+
+  inline function set_gravity_scale(value:Float) {
+    return material.gravity_scale = value;
+  }
+
   static function get_defaults():BodyOptions return {
     kinematic: false,
-    mass: 1,
+    mass: AUTO,
     x: 0,
     y: 0,
     rotation: 0,
     scale_x: 1,
     scale_y: 1,
-    elasticity: 0,
     velocity_x: 0,
     velocity_y: 0,
     rotational_velocity: 0,
@@ -520,6 +582,5 @@ class Body implements IDisposable #if cog implements cog.IComponent #end {
     drag_y: 0,
     drag_length: 0,
     rotational_drag: 0,
-    gravity_scale: 1
   }
 }

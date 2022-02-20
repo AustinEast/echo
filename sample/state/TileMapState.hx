@@ -1,5 +1,6 @@
 package state;
 
+import echo.Material;
 import echo.Body;
 import echo.World;
 import util.Random;
@@ -28,6 +29,10 @@ class TileMapState extends BaseState {
 
   override public function enter(world:World) {
     Main.instance.state_text.text = "Sample: Tilemap Generated Colliders";
+
+    // Create a material for all the shapes to share
+    var material:Material = {elasticity: 0.2};
+
     // Add a bunch of random Physics Bodies to the World
     var bodies = [];
     var hw = world.width / 2;
@@ -36,7 +41,7 @@ class TileMapState extends BaseState {
       var b = new Body({
         x: Random.range(hw - 120, hw + 120),
         y: Random.range(hh - 64, hh + 64),
-        elasticity: 0.2,
+        material: material,
         rotation: Random.range(0, 360),
         drag_length: 10,
         shape: {

@@ -172,6 +172,16 @@ class Polygon extends Shape implements IPooled {
     return aabb == null ? _bounds.clone() : aabb.load(_bounds);
   }
 
+  override inline function volume():Float {
+    var sum = 0.;
+    var v = vertices[vertices.length - 1];
+    for (vi in vertices) {
+      sum += vi.x * v.y - v.x * vi.y;
+      v = vi;
+    }
+    return Math.abs(sum) * 0.5;
+  }
+
   override function clone():Polygon return Polygon.get_from_vertices(x, y, rotation, local_vertices);
 
   override function contains(v:Vector2):Bool return this.polygon_contains(v);

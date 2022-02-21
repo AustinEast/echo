@@ -12,13 +12,13 @@ class Rect extends Shape implements IPooled {
   public static var pool(get, never):IPool<Rect>;
   static var _pool = new Pool<Rect>(Rect);
   /**
-   * The half-width of the Rectangle.
+   * The half-width of the Rectangle, transformed with `scale_x`. Use `local_ex` to get the untransformed extent.
    */
-  public var ex(default, set):Float;
+  public var ex(get, set):Float;
   /**
-   * The half-height of the Rectangle.
+   * The half-height of the Rectangle, transformed with `scale_y`. Use `local_ey` to get the untransformed extent.
    */
-  public var ey(default, set):Float;
+  public var ey(get, set):Float;
   /**
    * The width of the Rectangle, transformed with `scale_x`. Use `local_width` to get the untransformed width.
    */
@@ -35,6 +35,14 @@ class Rect extends Shape implements IPooled {
    * The height of the Rectangle.
    */
   public var local_height(get, set):Float;
+  /**
+   * The half-width of the Rectangle.
+   */
+  public var local_ex(default, set):Float;
+  /**
+   * The half-height of the Rectangle.
+   */
+  public var local_ey(default, set):Float;
   /**
    * The top-left position of the Rectangle.
    */
@@ -209,9 +217,13 @@ class Rect extends Shape implements IPooled {
 
   inline function get_height():Float return local_height * scale_y;
 
-  inline function get_local_width():Float return ex * 2;
+  inline function get_ex():Float return local_ex * scale_x;
 
-  inline function get_local_height():Float return ey * 2;
+  inline function get_ey():Float return local_ey * scale_y;
+
+  inline function get_local_width():Float return local_ex * 2;
+
+  inline function get_local_height():Float return local_ey * 2;
 
   function get_min():Vector2 return new Vector2(left, top);
 
@@ -239,15 +251,13 @@ class Rect extends Shape implements IPooled {
 
   // setters
   inline function set_ex(value:Float):Float {
-    ex = value;
-    if (transformed_rect != null) transformed_rect.set_from_rect(this);
-    return ex;
+    local_ex = value / scale_x;
+    return value;
   }
 
   inline function set_ey(value:Float):Float {
-    ey = value;
-    if (transformed_rect != null) transformed_rect.set_from_rect(this);
-    return ey;
+    local_ey = value / scale_y;
+    return value;
   }
 
   inline function set_width(value:Float):Float {
@@ -263,4 +273,16 @@ class Rect extends Shape implements IPooled {
   inline function set_local_width(value:Float):Float return ex = value * 0.5;
 
   inline function set_local_height(value:Float):Float return ey = value * 0.5;
+
+  inline function set_local_ex(value:Float):Float {
+    local_ex = value;
+    if (transformed_rect != null) transformed_rect.set_from_rect(this);
+    return local_ex;
+  }
+
+  inline function set_local_ey(value:Float):Float {
+    local_ey = value;
+    if (transformed_rect != null) transformed_rect.set_from_rect(this);
+    return local_ey;
+  }
 }

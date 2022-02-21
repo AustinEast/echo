@@ -154,16 +154,18 @@ class Polygon extends Shape implements IPooled {
     if (dirty_bounds) {
       dirty_bounds = false;
 
-      var left = vertices[0].x;
-      var top = vertices[0].y;
-      var right = vertices[0].x;
-      var bottom = vertices[0].y;
+      var verts = vertices;
+
+      var left = verts[0].x;
+      var top = verts[0].y;
+      var right = verts[0].x;
+      var bottom = verts[0].y;
 
       for (i in 1...count) {
-        if (vertices[i].x < left) left = vertices[i].x;
-        if (vertices[i].y < top) top = vertices[i].y;
-        if (vertices[i].x > right) right = vertices[i].x;
-        if (vertices[i].y > bottom) bottom = vertices[i].y;
+        if (verts[i].x < left) left = verts[i].x;
+        if (verts[i].y < top) top = verts[i].y;
+        if (verts[i].x > right) right = verts[i].x;
+        if (verts[i].y > bottom) bottom = verts[i].y;
       }
 
       _bounds.set_from_min_max(left, top, right, bottom);
@@ -174,8 +176,10 @@ class Polygon extends Shape implements IPooled {
 
   override inline function volume():Float {
     var sum = 0.;
-    var v = vertices[vertices.length - 1];
-    for (vi in vertices) {
+    var verts = vertices;
+    var v = verts[verts.length - 1];
+    for (i in 0...count) {
+      var vi = verts[i];
       sum += vi.x * v.y - v.x * vi.y;
       v = vi;
     }
@@ -262,6 +266,30 @@ class Polygon extends Shape implements IPooled {
     if (count > local_vertices.length) for (i in local_vertices.length...count) local_vertices[i] = new Vector2(0, 0);
 
     set_dirty();
+  }
+
+  public inline function centroid() {
+    var ca = 0.;
+    var cx = 0.;
+    var cy = 0.;
+
+    var verts = vertices;
+
+    var v = verts[count - 1];
+    for (i in 0...count) {
+      var vi = verts[i];
+      var a = v.x * vi.y - vi.x * v.y;
+      cx += (v.x + vi.x) * a;
+      cy += (v.y + vi.y) * a;
+      ca += a;
+      v = vi;
+    }
+
+    ca *= 0.5;
+    cx *= 1 / (6 * ca);
+    cy *= 1 / (6 * ca);
+
+    return new Vector2(cx, cy);
   }
 
   function on_dirty(t) {

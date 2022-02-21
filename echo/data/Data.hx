@@ -1,5 +1,6 @@
 package echo.data;
 
+import haxe.ds.Vector;
 import echo.math.Vector2;
 import echo.util.AABB;
 import echo.util.Pool;
@@ -46,9 +47,9 @@ class Collision implements IPooled {
   /**
    * Array containing Data from Each Collision found between the two Bodies' Shapes.
    */
-  public var data:Array<CollisionData>;
+  public final data:Array<CollisionData> = [];
 
-  public var pooled:Bool;
+  public var pooled = false;
 
   public static inline function get(a:Body, b:Body):Collision {
     var c = _pool.get();
@@ -67,7 +68,7 @@ class Collision implements IPooled {
     }
   }
 
-  inline function new() data = [];
+  inline function new() {}
 
   static function get_pool():IPool<Collision> return _pool;
 }
@@ -80,32 +81,38 @@ class CollisionData implements IPooled {
   /**
    * Shape A.
    */
-  public var sa:Shape;
+  public var sa:Null<Shape>;
   /**
    * Shape B.
    */
-  public var sb:Shape;
+  public var sb:Null<Shape>;
   /**
    * The length of Shape A's penetration into Shape B.
    */
-  public var overlap:Float;
+  public var overlap = 0.;
+
+  public var contact_count = 0;
+
+  public final contacts = Vector.fromArrayCopy([Vector2.zero, Vector2.zero]);
   /**
    * The normal vector (direction) of Shape A's penetration into Shape B.
    */
-  public var normal:Vector2;
+  public final normal = Vector2.zero;
 
-  public var pooled:Bool;
+  public var pooled = false;
 
   public static inline function get(overlap:Float, x:Float, y:Float):CollisionData {
     var c = _pool.get();
     c.sa = null;
     c.sb = null;
+    c.contact_count = 0;
+    for (cc in c.contacts) cc.set(0, 0);
     c.set(overlap, x, y);
     c.pooled = false;
     return c;
   }
 
-  inline function new() normal = new Vector2(0, 0);
+  inline function new() {}
 
   public inline function set(overlap:Float, x:Float, y:Float) {
     this.overlap = overlap;
@@ -130,21 +137,21 @@ class Intersection implements IPooled {
   /**
    * Line.
    */
-  public var line:Line;
+  public var line:Null<Line>;
   /**
    * Body.
    */
-  public var body:Body;
+  public var body:Null<Body>;
   /**
    * Array containing Data from Each Intersection found between the Line and each Shape in the Body.
    */
-  public var data:Array<IntersectionData>;
+  public final data:Array<IntersectionData> = [];
+
+  public var pooled = false;
   /**
    * Gets the IntersectionData that has the closest hit distance from the beginning of the Line.
    */
   public var closest(get, never):Null<IntersectionData>;
-
-  public var pooled:Bool;
 
   public static inline function get(line:Line, body:Body):Intersection {
     var i = _pool.get();
@@ -163,7 +170,7 @@ class Intersection implements IPooled {
     }
   }
 
-  inline function new() data = [];
+  inline function new() {}
 
   inline function get_closest():Null<IntersectionData> {
     if (data.length == 0) return null;
@@ -183,34 +190,34 @@ class IntersectionData implements IPooled {
   public static var pool(get, never):IPool<IntersectionData>;
   static var _pool = new Pool<IntersectionData>(IntersectionData);
 
-  public var line:Line;
-  public var shape:Shape;
+  public var line:Null<Line>;
+  public var shape:Null<Shape>;
   /**
    * The second Line in the Intersection. This is only set when intersecting two Lines.
    */
-  public var line2:Line;
+  public var line2:Null<Line>;
   /**
    * The position along the line where the line hit the shape.
    */
-  public var hit:Vector2;
+  public final hit = Vector2.zero;
   /**
    * The distance between the start of the line and the hit position.
    */
-  public var distance:Float;
+  public var distance = 0.;
   /**
    * The length of the line that has overlapped the shape.
    */
-  public var overlap:Float;
+  public var overlap = 0.;
   /**
    * The normal vector (direction) of the Line's penetration into the Shape.
    */
-  public var normal:Vector2;
+  public final normal = Vector2.zero;
   /**
     Indicates if normal was inversed and usually occurs when Line penetrates into the Shape from the inside.
   **/
-  public var inverse_normal:Bool;
+  public var inverse_normal = false;
 
-  public var pooled:Bool;
+  public var pooled = false;
 
   public static inline function get(distance:Float, overlap:Float, x:Float, y:Float, normal_x:Float, normal_y:Float,
       inverse_normal:Bool = false):IntersectionData {
@@ -255,11 +262,11 @@ class QuadTreeData {
   /**
    * Bounds of the Data.
    */
-  @:optional public var bounds:AABB;
+  public var bounds:Null<AABB> = null;
   /**
    * Helper flag to check if this Data has been counted during queries.
    */
-  public var flag:Bool = false;
+  public var flag = false;
 }
 
 @:enum

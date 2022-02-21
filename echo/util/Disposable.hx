@@ -1,7 +1,7 @@
 package echo.util;
 
 @:using(echo.util.Disposable)
-interface IDisposable {
+interface Disposable {
   function dispose():Void;
 }
 /**
@@ -10,7 +10,7 @@ interface IDisposable {
  * @param	object	An IDisposable object that will be disposed if it's not null.
  * @return	null
  */
-inline function dispose<T:IDisposable>(object:Null<IDisposable>):T {
+inline function dispose<T:Disposable>(object:Null<Disposable>):T {
   if (object != null) {
     object.dispose();
   }
@@ -22,7 +22,7 @@ inline function dispose<T:IDisposable>(object:Null<IDisposable>):T {
  * @param	array	An Array of IDisposable objects
  * @return	null
  */
-inline function disposeArray<T:IDisposable>(array:Array<T>):Array<T> {
+inline function dispose_array<T:Disposable>(array:Array<T>):Array<T> {
   if (array != null) {
     for (e in array) dispose(e);
     array.splice(0, array.length);

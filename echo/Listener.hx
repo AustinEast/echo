@@ -72,7 +72,7 @@ class Listener {
 /**
  * Container used to store Listeners
  */
-class Listeners implements IDisposable {
+class Listeners implements Disposable {
   public var members:Array<Listener>;
 
   public function new(?members:Array<Listener>) {

@@ -2,13 +2,11 @@ package echo.util;
 
 import haxe.ds.Vector;
 import echo.data.Data;
-import echo.util.Pool;
+import echo.util.Poolable;
 /**
  * Simple QuadTree implementation to assist with broad-phase 2D collisions.
  */
-class QuadTree extends AABB implements IPooled {
-  public static var pool(get, never):IPool<QuadTree>;
-  static var _pool = new Pool<QuadTree>(QuadTree);
+class QuadTree extends AABB {
   /**
    * The maximum branch depth for this QuadTree collection. Once the max depth is reached, the QuadTrees at the end of the collection will not spilt.
    */
@@ -63,7 +61,7 @@ class QuadTree extends AABB implements IPooled {
    * @return Quadtree
    */
   public static inline function get(x:Float = 0, y:Float = 0, width:Float = 1, height:Float = 1):QuadTree {
-    var qt = _pool.get();
+    var qt = pool.get();
     qt.set(x, y, width, height);
     qt.clear();
     qt.pooled = false;
@@ -78,7 +76,7 @@ class QuadTree extends AABB implements IPooled {
    * @return Quadtree
    */
   public static inline function get_from_min_max(min_x:Float, min_y:Float, max_x:Float, max_y:Float):QuadTree {
-    var qt = _pool.get();
+    var qt = pool.get();
     qt.set_from_min_max(min_x, min_y, max_x, max_y);
     qt.clear();
     qt.pooled = false;
@@ -92,7 +90,7 @@ class QuadTree extends AABB implements IPooled {
       pooled = true;
       clear();
       nodes_list.resize(0);
-      _pool.put_unsafe(this);
+      pool.put_unsafe(this);
     }
   }
   /**
@@ -301,8 +299,6 @@ class QuadTree extends AABB implements IPooled {
   }
 
   inline function get_leaf() return children[0] == null;
-
-  static inline function get_pool():IPool<QuadTree> return _pool;
 
   // setters
 

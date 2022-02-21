@@ -12,7 +12,7 @@ import echo.math.Vector2;
  * A `World` is an Object representing the state of a Physics simulation and it configurations. 
  */
 @:using(echo.Echo)
-class World implements IDisposable {
+class World implements Disposable {
   /**
    * Width of the World, extending right from the World's X position.
    */

@@ -1,17 +1,22 @@
 package echo.util;
 
+#if macro
 import haxe.macro.Context;
 import haxe.macro.Expr;
 
 using Lambda;
+#end
 /**
- *	Implementing this interface on a Class will run `Proxy.build`, then remove itself.
+ *	Implementing this interface on a Class will run `ProxyMacros.build`, then remove itself.
 **/
 @:remove
-@:autoBuild(echo.util.Proxy.build())
-interface IProxy {}
+@:autoBuild(echo.util.ProxyMacros.build())
+interface Proxy {}
 
-class Proxy {
+@:deprecated("`IProxy` renamed to `Proxy`")
+typedef IProxy = Proxy;
+
+class ProxyMacros {
   #if macro
   /**
    * Generates Getters and Setters for all Fields that are marked as such:

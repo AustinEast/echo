@@ -2,17 +2,14 @@ package echo;
 
 import echo.data.Data.IntersectionData;
 import echo.util.AABB;
-import echo.util.Pool;
+import echo.util.Poolable;
 import echo.util.Proxy;
 import echo.math.Vector2;
 
 using echo.util.ext.FloatExt;
 
 @:using(echo.Echo)
-class Line implements IProxy implements IPooled {
-  public static var pool(get, never):IPool<Line>;
-  static var _pool = new Pool<Line>(Line);
-
+class Line implements Proxy implements Poolable {
   @:alias(start.x)
   public var x:Float;
   @:alias(start.y)
@@ -26,10 +23,9 @@ class Line implements IProxy implements IPooled {
   @:alias(start.distanceTo(end))
   public var length(get, never):Float;
   public var radians(get, never):Float;
-  public var pooled:Bool;
 
   public static inline function get(x:Float = 0, y:Float = 0, dx:Float = 1, dy:Float = 1):Line {
-    var line = _pool.get();
+    var line = pool.get();
     line.set(x, y, dx, dy);
     line.pooled = false;
     return line;
@@ -41,7 +37,7 @@ class Line implements IProxy implements IPooled {
    * @param length The length of the Line.
    */
   public static inline function get_from_vector(start:Vector2, degrees:Float, length:Float) {
-    var line = _pool.get();
+    var line = pool.get();
     line.set_from_vector(start, degrees, length);
     line.pooled = false;
     return line;
@@ -80,7 +76,7 @@ class Line implements IProxy implements IPooled {
   public inline function put() {
     if (!pooled) {
       pooled = true;
-      _pool.put_unsafe(this);
+      pool.put_unsafe(this);
     }
   }
 
@@ -184,6 +180,4 @@ class Line implements IProxy implements IPooled {
   }
 
   function toString() return 'Line: {start: $start, end: $end}';
-
-  static function get_pool():IPool<Line> return _pool;
 }

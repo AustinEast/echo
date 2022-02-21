@@ -1,13 +1,10 @@
 package echo.util;
 
 import echo.shape.Rect;
-import echo.util.Pool;
+import echo.util.Poolable;
 import echo.math.Vector2;
 
-class AABB implements IPooled {
-  public static var pool(get, never):IPool<AABB>;
-  static var _pool = new Pool<AABB>(AABB);
-
+class AABB implements Poolable {
   public var min_x:Float;
   public var max_x:Float;
   public var min_y:Float;
@@ -15,8 +12,6 @@ class AABB implements IPooled {
 
   public var width(get, never):Float;
   public var height(get, never):Float;
-
-  public var pooled:Bool;
   /**
    * Gets an AABB from the pool, or creates a new one if none are available. Call `put()` on the AABB to place it back in the pool.
    *
@@ -28,7 +23,7 @@ class AABB implements IPooled {
    * @return AABB
    */
   public static inline function get(x:Float = 0, y:Float = 0, width:Float = 1, height:Float = 1):AABB {
-    var aabb = _pool.get();
+    var aabb = pool.get();
     aabb.set(x, y, width, height);
     aabb.pooled = false;
     return aabb;
@@ -42,7 +37,7 @@ class AABB implements IPooled {
    * @return AABB
    */
   public static inline function get_from_min_max(min_x:Float, min_y:Float, max_x:Float, max_y:Float):AABB {
-    var aabb = _pool.get();
+    var aabb = pool.get();
     aabb.set_from_min_max(min_x, min_y, max_x, max_y);
     aabb.pooled = false;
     return aabb;
@@ -120,14 +115,13 @@ class AABB implements IPooled {
   public function put() {
     if (!pooled) {
       pooled = true;
-      _pool.put_unsafe(this);
+      pool.put_unsafe(this);
     }
   }
 
   function toString() return 'AABB: {min_x: $min_x, min_y: $min_y, max_x: $max_x, max_y: $max_y}';
 
   // getters
-  static function get_pool():IPool<AABB> return _pool;
 
   inline function get_width():Float return max_x - min_x;
 

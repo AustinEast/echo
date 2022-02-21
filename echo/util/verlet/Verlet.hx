@@ -10,7 +10,7 @@ import echo.data.Options.VerletOptions;
  * 
  * This simulation is standalone, meaning it doesn't directly integrate with the standard echo simulation.
  */
-class Verlet implements IDisposable {
+class Verlet implements Disposable {
   /**
    * The Verlet World's position on the X axis.
    */

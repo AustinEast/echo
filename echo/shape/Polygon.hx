@@ -3,14 +3,12 @@ package echo.shape;
 import echo.data.Data;
 import echo.shape.*;
 import echo.util.AABB;
-import echo.util.Pool;
+import echo.util.Poolable;
 
 using echo.util.SAT;
 using echo.math.Vector2;
 
-class Polygon extends Shape implements IPooled {
-  public static var pool(get, never):IPool<Polygon>;
-  static var _pool = new Pool<Polygon>(Polygon);
+class Polygon extends Shape implements Poolable {
   /**
    * The amount of vertices in the Polygon.
    */
@@ -29,8 +27,6 @@ class Polygon extends Shape implements IPooled {
    * Use `set_vertice()` or `set_vertices()` to edit this Polygon's normals.
    */
   public var normals(get, never):Array<Vector2>;
-
-  public var pooled:Bool;
 
   var local_vertices:Array<Vector2>;
 
@@ -56,7 +52,7 @@ class Polygon extends Shape implements IPooled {
       scale_y:Float = 1):Polygon {
     if (sides < 3) throw 'Polygons require 3 sides as a minimum';
 
-    var polygon = _pool.get();
+    var polygon = pool.get();
 
     var rot:Float = (Math.PI * 2) / sides;
     var angle:Float;
@@ -82,7 +78,7 @@ class Polygon extends Shape implements IPooled {
    */
   public static inline function get_from_vertices(x:Float = 0, y:Float = 0, rotation:Float = 0, ?vertices:Array<Vector2>, scale_x:Float = 1,
       scale_y:Float = 1):Polygon {
-    var polygon = _pool.get();
+    var polygon = pool.get();
     polygon.set(x, y, rotation, vertices, scale_x, scale_y);
     polygon.pooled = false;
     return polygon;
@@ -93,7 +89,7 @@ class Polygon extends Shape implements IPooled {
    * @return Polygon return _pool.get().set_from_rect(rect)
    */
   public static inline function get_from_rect(rect:Rect):Polygon return {
-    var polygon = _pool.get();
+    var polygon = pool.get();
     polygon.set_from_rect(rect);
     polygon.pooled = false;
     return polygon;
@@ -106,7 +102,7 @@ class Polygon extends Shape implements IPooled {
     super.put();
     if (!pooled) {
       pooled = true;
-      _pool.put_unsafe(this);
+      pool.put_unsafe(this);
     }
   }
 
@@ -329,7 +325,6 @@ class Polygon extends Shape implements IPooled {
   }
 
   // getters
-  static function get_pool():IPool<Polygon> return _pool;
 
   inline function get_vertices():Array<Vector2> {
     if (dirty_vertices) {

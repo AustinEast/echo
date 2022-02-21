@@ -3,7 +3,7 @@ package echo.data;
 import haxe.ds.Vector;
 import echo.math.Vector2;
 import echo.util.AABB;
-import echo.util.Pool;
+import echo.util.Poolable;
 
 @:structInit
 class BodyState {
@@ -33,9 +33,7 @@ class BodyState {
 /**
  * Class containing data describing any Collisions between two Bodies.
  */
-class Collision implements IPooled {
-  public static var pool(get, never):IPool<Collision>;
-  static var _pool = new Pool<Collision>(Collision);
+class Collision implements Poolable {
   /**
    * Body A.
    */
@@ -49,10 +47,8 @@ class Collision implements IPooled {
    */
   public final data:Array<CollisionData> = [];
 
-  public var pooled = false;
-
   public static inline function get(a:Body, b:Body):Collision {
-    var c = _pool.get();
+    var c = pool.get();
     c.a = a;
     c.b = b;
     c.data.resize(0);
@@ -64,20 +60,16 @@ class Collision implements IPooled {
     if (!pooled) {
       for (d in data) d.put();
       pooled = true;
-      _pool.put_unsafe(this);
+      pool.put_unsafe(this);
     }
   }
 
   inline function new() {}
-
-  static function get_pool():IPool<Collision> return _pool;
 }
 /**
  * Class containing data describing a Collision between two Shapes.
  */
-class CollisionData implements IPooled {
-  public static var pool(get, never):IPool<CollisionData>;
-  static var _pool = new Pool<CollisionData>(CollisionData);
+class CollisionData implements Poolable {
   /**
    * Shape A.
    */
@@ -99,10 +91,8 @@ class CollisionData implements IPooled {
    */
   public final normal = Vector2.zero;
 
-  public var pooled = false;
-
   public static inline function get(overlap:Float, x:Float, y:Float):CollisionData {
-    var c = _pool.get();
+    var c = pool.get();
     c.sa = null;
     c.sb = null;
     c.contact_count = 0;
@@ -122,18 +112,14 @@ class CollisionData implements IPooled {
   public function put() {
     if (!pooled) {
       pooled = true;
-      _pool.put_unsafe(this);
+      pool.put_unsafe(this);
     }
   }
-
-  static function get_pool():IPool<CollisionData> return _pool;
 }
 /**
  * Class containing data describing any Intersections between a Line and a Body.
  */
-class Intersection implements IPooled {
-  public static var pool(get, never):IPool<Intersection>;
-  static var _pool = new Pool<Intersection>(Intersection);
+class Intersection implements Poolable {
   /**
    * Line.
    */
@@ -146,15 +132,13 @@ class Intersection implements IPooled {
    * Array containing Data from Each Intersection found between the Line and each Shape in the Body.
    */
   public final data:Array<IntersectionData> = [];
-
-  public var pooled = false;
   /**
    * Gets the IntersectionData that has the closest hit distance from the beginning of the Line.
    */
   public var closest(get, never):Null<IntersectionData>;
 
   public static inline function get(line:Line, body:Body):Intersection {
-    var i = _pool.get();
+    var i = pool.get();
     i.line = line;
     i.body = body;
     i.data.resize(0);
@@ -166,7 +150,7 @@ class Intersection implements IPooled {
     if (!pooled) {
       for (d in data) d.put();
       pooled = true;
-      _pool.put_unsafe(this);
+      pool.put_unsafe(this);
     }
   }
 
@@ -180,16 +164,11 @@ class Intersection implements IPooled {
     for (i in 1...data.length) if (data[i] != null && data[i].distance < closest.distance) closest = data[i];
     return closest;
   }
-
-  static function get_pool():IPool<Intersection> return _pool;
 }
 /**
  * Class containing data describing an Intersection between a Line and a Shape.
  */
-class IntersectionData implements IPooled {
-  public static var pool(get, never):IPool<IntersectionData>;
-  static var _pool = new Pool<IntersectionData>(IntersectionData);
-
+class IntersectionData implements Poolable {
   public var line:Null<Line>;
   public var shape:Null<Shape>;
   /**
@@ -217,11 +196,9 @@ class IntersectionData implements IPooled {
   **/
   public var inverse_normal = false;
 
-  public var pooled = false;
-
   public static inline function get(distance:Float, overlap:Float, x:Float, y:Float, normal_x:Float, normal_y:Float,
       inverse_normal:Bool = false):IntersectionData {
-    var i = _pool.get();
+    var i = pool.get();
     i.line = null;
     i.shape = null;
     i.line2 = null;
@@ -246,11 +223,9 @@ class IntersectionData implements IPooled {
   public function put() {
     if (!pooled) {
       pooled = true;
-      _pool.put_unsafe(this);
+      pool.put_unsafe(this);
     }
   }
-
-  static function get_pool():IPool<IntersectionData> return _pool;
 }
 
 @:structInit

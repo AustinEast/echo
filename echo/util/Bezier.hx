@@ -7,7 +7,7 @@ using Math;
 using echo.util.ext.FloatExt;
 using echo.util.ext.IntExt;
 
-class Bezier implements IDisposable {
+class Bezier implements Disposable {
   /**
    * Gets the point at the defined `t` (a value between 0.0 to 1.0) from a Quadratic Bezier Curve constructed out of points (ax, ay), (bx, by), and (cx, cy).
    */

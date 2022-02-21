@@ -8,7 +8,7 @@ import echo.math.Vector3;
 using Math;
 using echo.util.ext.FloatExt;
 
-class Transform implements IDisposable #if cog implements cog.IComponent #end {
+class Transform implements Disposable #if cog implements cog.IComponent #end {
   /**
    * The Transform's position on the X axis in world coordinates.
    */

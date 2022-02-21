@@ -2,15 +2,13 @@ package echo.shape;
 
 import echo.util.AABB;
 import echo.shape.*;
-import echo.util.Pool;
+import echo.util.Poolable;
 import echo.data.Data;
 import echo.math.Vector2;
 
 using echo.util.SAT;
 
-class Rect extends Shape implements IPooled {
-  public static var pool(get, never):IPool<Rect>;
-  static var _pool = new Pool<Rect>(Rect);
+class Rect extends Shape implements Poolable {
   /**
    * The half-width of the Rectangle, transformed with `scale_x`. Use `local_ex` to get the untransformed extent.
    */
@@ -51,8 +49,6 @@ class Rect extends Shape implements IPooled {
    * The bottom-right position of the Rectangle.
    */
   public var max(get, null):Vector2;
-
-  public var pooled:Bool;
   /**
    * If the Rectangle has a rotation, this Polygon is constructed to represent the transformed vertices of the Rectangle.
    */
@@ -70,7 +66,7 @@ class Rect extends Shape implements IPooled {
    */
   public static inline function get(x:Float = 0, y:Float = 0, width:Float = 1, height:Float = 0, rotation:Float = 0, scale_x:Float = 1,
       scale_y:Float = 1):Rect {
-    var rect = _pool.get();
+    var rect = pool.get();
     rect.set(x, y, width, height, rotation, scale_x, scale_y);
     rect.pooled = false;
     return rect;
@@ -84,7 +80,7 @@ class Rect extends Shape implements IPooled {
    * @return Rect
    */
   public static inline function get_from_min_max(min_x:Float, min_y:Float, max_x:Float, max_y:Float):Rect {
-    var rect = _pool.get();
+    var rect = pool.get();
     rect.set_from_min_max(min_x, min_y, max_x, max_y);
     rect.pooled = false;
     return rect;
@@ -92,8 +88,8 @@ class Rect extends Shape implements IPooled {
 
   inline function new() {
     super();
-    ex = 0;
-    ey = 0;
+    local_ex = 0;
+    local_ey = 0;
     type = RECT;
     transform.on_dirty = on_dirty;
   }
@@ -106,7 +102,7 @@ class Rect extends Shape implements IPooled {
     }
     if (!pooled) {
       pooled = true;
-      _pool.put_unsafe(this);
+      pool.put_unsafe(this);
     }
   }
 
@@ -129,8 +125,8 @@ class Rect extends Shape implements IPooled {
   public inline function load(rect:Rect):Rect {
     local_x = rect.local_x;
     local_y = rect.local_y;
-    ex = rect.ex;
-    ey = rect.ey;
+    local_ex = rect.local_ex;
+    local_ey = rect.local_ey;
     local_rotation = rect.local_rotation;
     local_scale_x = rect.local_scale_x;
     local_scale_y = rect.local_scale_y;
@@ -211,15 +207,14 @@ class Rect extends Shape implements IPooled {
   }
 
   // getters
-  static function get_pool():IPool<Rect> return _pool;
 
   inline function get_width():Float return local_width * scale_x;
 
   inline function get_height():Float return local_height * scale_y;
 
-  inline function get_ex():Float return local_ex * scale_x;
+  inline function get_ex():Float return local_ex * local_scale_x;
 
-  inline function get_ey():Float return local_ey * scale_y;
+  inline function get_ey():Float return local_ey * local_scale_y;
 
   inline function get_local_width():Float return local_ex * 2;
 
@@ -230,22 +225,22 @@ class Rect extends Shape implements IPooled {
   function get_max():Vector2 return new Vector2(bottom, right);
 
   override inline function get_top():Float {
-    if (transformed_rect == null || rotation == 0) return y - ey * scale_y;
+    if (transformed_rect == null || rotation == 0) return y - ey;
     return transformed_rect.top;
   }
 
   override inline function get_bottom():Float {
-    if (transformed_rect == null || rotation == 0) return y + ey * scale_y;
+    if (transformed_rect == null || rotation == 0) return y + ey;
     return transformed_rect.bottom;
   }
 
   override inline function get_left():Float {
-    if (transformed_rect == null || rotation == 0) return x - ex * scale_x;
+    if (transformed_rect == null || rotation == 0) return x - ex;
     return transformed_rect.left;
   }
 
   override inline function get_right():Float {
-    if (transformed_rect == null || rotation == 0) return x + ex * scale_x;
+    if (transformed_rect == null || rotation == 0) return x + ex;
     return transformed_rect.right;
   }
 

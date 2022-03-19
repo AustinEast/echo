@@ -17,9 +17,10 @@ class Matrix3Default {
   public var m21:Float;
   public var m22:Float;
   /**
+   * Column-Major Orientation.
    * /m00, m10, m20/
    * /m01, m11, m21/
-   * /m02m m12, m22/
+   * /m02, m12, m22/
    */
   public inline function new(m00:Float, m10:Float, m20:Float, m01:Float, m11:Float, m21:Float, m02:Float, m12:Float, m22:Float) {
     this.m00 = m00 + 0.0;
@@ -39,7 +40,12 @@ class Matrix3Default {
     return '{ m00:$m00, m10:$m10, m20:$m20, m01:$m01, m11:$m11, m21:$m21, m02:$m02, m12:$m12, m22:$m22 }';
   }
 }
-
+/**
+ * Column-Major Orientation.
+ * /m00, m10, m20/
+ * /m01, m11, m21/
+ * /m02, m12, m22/
+ */
 @:using(echo.math.Matrix3)
 @:forward(m00, m10, m20, m01, m11, m21, m02, m12, m22)
 abstract Matrix3(Matrix3Type) from Matrix3Type to Matrix3Type {
@@ -178,26 +184,24 @@ abstract Matrix3(Matrix3Type) from Matrix3Type to Matrix3Type {
   static inline function get_identity():Matrix3 {
     return new Matrix3(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0);
   }
+}
 
-  public inline function copy_to(b:Matrix3):Matrix3 {
-    var a = this;
-    b.copy_from(a);
-    return a;
-  }
+inline function copy_to(a:Matrix3, b:Matrix3):Matrix3 {
+  b.copy_from(a);
+  return a;
+}
 
-  public inline function copy_from(b:Matrix3):Matrix3 {
-    var a = this;
-    a.m00 = b.m00;
-    a.m10 = b.m10;
-    a.m20 = b.m20;
+inline function copy_from(a:Matrix3, b:Matrix3):Matrix3 {
+  a.m00 = b.m00;
+  a.m10 = b.m10;
+  a.m20 = b.m20;
 
-    a.m01 = b.m01;
-    a.m11 = b.m11;
-    a.m21 = b.m21;
+  a.m01 = b.m01;
+  a.m11 = b.m11;
+  a.m21 = b.m21;
 
-    a.m02 = b.m02;
-    a.m12 = b.m12;
-    a.m22 = b.m22;
-    return a;
-  }
+  a.m02 = b.m02;
+  a.m12 = b.m12;
+  a.m22 = b.m22;
+  return a;
 }

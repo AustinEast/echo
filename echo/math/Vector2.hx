@@ -280,6 +280,10 @@ inline function copy_to(a:Vector2, b:Vector2):Vector2 {
   return a;
 }
 
+inline function is_zero(v:Vector2):Bool {
+  return v.x == 0 && v.y == 0;
+}
+
 inline function negate(v:Vector2)
   return v.set(-v.x, -v.y);
 

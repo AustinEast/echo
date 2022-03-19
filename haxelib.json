@@ -10,6 +10,6 @@
     "austineast"
   ],
   "url": "https://austineast.dev/echo",
-  "releasenote": "Materials and Mass refactor",
-  "version": "4.1.0"
+  "releasenote": "Rect scale fix and Interface refactors",
+  "version": "4.2.0"
 }

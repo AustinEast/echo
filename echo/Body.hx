@@ -99,7 +99,7 @@ class Body implements Disposable #if cog implements cog.IComponent #end {
    *
    * Can be thought of the sum of all external rotation forces on an object during a step.
    */
-  public var rotational_acceleration:Float = 0;
+  public var torque:Float = 0;
   /**
    * The maximum values a Body's velocity's x and y components can be. If set to 0, the Body has no restrictions on how fast it can move.
    *

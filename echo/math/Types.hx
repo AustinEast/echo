@@ -3,14 +3,17 @@ package echo.math;
 #if ECHO_USE_HXMATH
 typedef Vector2Type = hxmath.math.Vector2;
 typedef Vector3Type = hxmath.math.Vector3;
+typedef Matrix2Type = echo.math.Matrix2.Matrix2Default;
 typedef Matrix3Type = hxmath.math.Matrix3x3;
 #elseif ECHO_USE_ZEROLIB
 typedef Vector2Type = zero.utilities.Vec2;
 typedef Vector3Type = zero.utilities.Vec3;
+typedef Matrix2Type = echo.math.Matrix2.Matrix2Default;
 typedef Matrix3Type = echo.math.Matrix3.Matrix3Default;
 #elseif ECHO_USE_VECTORMATH
 typedef Vector2Type = Vec2;
 typedef Vector3Type = Vec3;
+typedef Matrix2Type = echo.math.Matrix2.Matrix2Default;
 typedef Matrix3Type = echo.math.Matrix3.Matrix3Default;
 
 // TODO - finish type once Mat3 elements are easily accessible
@@ -31,9 +34,11 @@ abstract Mat3Impl(Mat3) from Mat3 to Mat3 {
 #elseif ECHO_USE_HEAPS
 typedef Vector2Type = h2d.col.Point;
 typedef Vector3Type = h3d.col.Point;
+typedef Matrix2Type = echo.math.Matrix2.Matrix2Default;
 typedef Matrix3Type = echo.math.Matrix3.Matrix3Default;
 #else
 typedef Vector2Type = echo.math.Vector2.Vector2Default;
 typedef Vector3Type = echo.math.Vector3.Vector3Default;
+typedef Matrix2Type = echo.math.Matrix2.Matrix2Default;
 typedef Matrix3Type = echo.math.Matrix3.Matrix3Default;
 #end

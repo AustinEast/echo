@@ -11,7 +11,7 @@ Echo focuses on maintaining a simple API that is easy to integrate into any engi
 
 Try the [Samples 🎮](https://austineast.dev/echo)!
 
-Check out the [API 📖](https://austineast.dev/echo/api/)!
+Check out the [API 📖](https://austineast.dev/echo/api/echo/Echo)!
 
 # Features
 * Semi-implicit euler integration physics

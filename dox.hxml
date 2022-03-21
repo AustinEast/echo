@@ -7,4 +7,4 @@
 -xml bin/echo.xml
 
 --next
--cmd haxelib run dox -i bin -o bin/api --title "Echo API" -D website "http://austineast.dev/echo" -in echo --toplevel-package echo
+-cmd haxelib run dox -i bin -o bin/api --title "Echo API" -D website "http://austineast.dev/echo" -D source-path "https://github.com/AustinEast/echo/blob/master/"

@@ -10,6 +10,8 @@
 
       gtag('config', 'G-R0450P2K37');
     </script>
+    <!-- Adds <include> tag -->
+    <script src="https://unpkg.com/htmlincludejs"></script>
     <meta charset="utf-8">
     <title>Echo Physics Library</title>
     <meta name="description" content="Simple Arcade Physics for Haxe" />
@@ -47,7 +49,7 @@
             max-width: 720px;
             max-height: 405px;
         }
-        footer a {
+        a:any-link {
             color: white;
         }
         .theme {
@@ -77,7 +79,8 @@
 </head>
 <body class="theme">
     <main>
-        <img src="./logo.png"></img>
+        <include src="austineast.github.io.base/nav.html"></include>
+        <img style="margin-top: 3rem;" src="./logo.png"></img>
         <h1>Echo</h1>
         <p>Simple Arcade Physics Library for Haxe</p>
         <canvas width="640" height="360" id="webgl"></canvas>
@@ -85,7 +88,7 @@
             <a href="https://github.com/AustinEast/echo/">Get Started</a>
             <a href="./api/" target="_blank">API</a>
         </div>
-        <footer style="font-style: italic; margin-bottom: 0.1em">Created by Austin East @ <a href="https://austineast.dev">austineast.dev</a></footer>
+        <!-- <footer style="font-style: italic; margin-bottom: 0.1em">Created by Austin East @ <a href="https://austineast.dev">austineast.dev</a></footer> -->
     </main>
 </body>
 <script src="./sample.js"></script>

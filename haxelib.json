@@ -10,6 +10,6 @@
     "austineast"
   ],
   "url": "https://austineast.dev/echo",
-  "releasenote": "Rect scale fix and Interface refactors",
-  "version": "4.2.0"
+  "releasenote": "Add default mass setting",
+  "version": "4.2.1"
 }

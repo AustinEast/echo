@@ -37,8 +37,10 @@ typedef BodyOptions = {
    * 
    * Can be set to a `Float` value, `AUTO`, or `STATIC` (`mass = 5`, `mass = AUTO`, and `mass = STATIC` are all valid).
    * 
-   * If left empty (or set to `AUTO`), the Body will automatically calculate it's mass based on it's volume and material's `density`.
+   * If set to `AUTO`, the Body will automatically calculate it's mass based on it's volume and material's `density`.
    * If a Body's mass is set to `STATIC` or `0`, it becomes static - unmovable by forces and collisions.
+   * 
+   * If this value is left `null`, it will automatically be set to the same value as `Body.default_mass`.
    */
   var ?mass:MassType;
   /**

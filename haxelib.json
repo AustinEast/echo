@@ -10,6 +10,6 @@
     "austineast"
   ],
   "url": "https://austineast.dev/echo",
-  "releasenote": "Add default mass setting",
-  "version": "4.2.1"
+  "releasenote": "fix webpage gen",
+  "version": "4.2.2"
 }

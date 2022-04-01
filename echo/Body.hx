@@ -23,6 +23,8 @@ class Body implements Disposable #if cog implements cog.IComponent #end {
    */
   public static var defaults(get, null):BodyOptions;
 
+  public static var default_mass = AUTO;
+
   public static final minimum_mass = 0.0001;
 
   static var ids:Int = 0;
@@ -565,7 +567,7 @@ class Body implements Disposable #if cog implements cog.IComponent #end {
 
   static function get_defaults():BodyOptions return {
     kinematic: false,
-    mass: AUTO,
+    mass: default_mass,
     x: 0,
     y: 0,
     rotation: 0,

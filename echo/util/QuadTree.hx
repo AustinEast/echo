@@ -119,7 +119,7 @@ class QuadTree extends AABB {
     if (leaf) {
       var i = 0;
       while (i < contents.length) {
-        if (contents[i] != null && contents[i].id == data.id) {
+        if (contents[i] != null && data != null && contents[i].id == data.id) {
           contents[i] = null;
           contents_count--;
           return true;

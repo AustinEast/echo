@@ -16,6 +16,7 @@ class Debug {
   public var draw_body_centers:Bool = false;
   public var draw_bounds:Bool = false;
   public var draw_shape_bounds:Bool = false;
+  public var draw_world_bounds:Bool = false;
   public var draw_quadtree:Bool = true;
   public var shape_outline_width:Float = 1;
   public var shape_fill_alpha:Float = 0;
@@ -28,6 +29,7 @@ class Debug {
   public var intersection_overlap_color:Int;
   public var quadtree_color:Int;
   public var quadtree_fill_color:Int;
+  public var world_bounds_color:Int;
 
   public var camera:Null<AABB>;
 
@@ -53,6 +55,9 @@ class Debug {
     if (draw_quadtree) {
       draw_qd(world.static_quadtree);
       draw_qd(world.quadtree);
+    }
+    if (draw_world_bounds) {
+      draw_rect(world.x, world.y, world.width, world.height, shape_fill_color, world_bounds_color, 0);
     }
     if (draw_bodies) world.for_each(member -> if (member.shapes.length != 0) {
       if (camera != null) {
@@ -210,6 +215,7 @@ class HeapsDebug extends Debug {
     quadtree_fill_color = 0x009badb7;
     intersection_color = 0x00cbdbfc;
     intersection_overlap_color = 0x00d95763;
+    world_bounds_color = 0x0087b691;
 
     canvas = new h2d.Graphics(parent);
   }
@@ -258,6 +264,7 @@ class OpenFLDebug extends Debug {
     quadtree_fill_color = 0x009badb7;
     intersection_color = 0x00cbdbfc;
     intersection_overlap_color = 0x00d95763;
+    world_bounds_color = 0x0087b691;
 
     canvas = new openfl.display.Sprite();
   }
@@ -298,6 +305,7 @@ class HaxePunkDebug extends Debug {
     quadtree_fill_color = 0x009badb7;
     intersection_color = 0x00cbdbfc;
     intersection_overlap_color = 0x00d95763;
+    world_bounds_color = 0x0087b691;
   }
 
   override public inline function draw_line(from_x:Float, from_y:Float, to_x:Float, to_y:Float, color:Int, alpha:Float = 1.) {

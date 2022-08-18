@@ -68,7 +68,13 @@ class World implements Disposable {
     iterations = options.iterations == null ? 5 : options.iterations;
     if (options.history != null) history = new History(options.history);
   }
-
+  /**
+   * Sets the size of the World. Only Bodies within the world bound will be collided
+   * @param x The x position of the world bounds
+   * @param y The y position of the world bounds
+   * @param width The width of the world bounds
+   * @param height The height of the world bounds
+   */
   public inline function set(x:Float, y:Float, width:Float, height:Float) {
     init = false;
     this.x = x;
@@ -78,12 +84,35 @@ class World implements Disposable {
     init = true;
     reset_quadtrees();
   }
-
+  /**
+   * Sets the size of the World based on a given shape.
+   * @param s The shape to use as the boundaries of the World
+   */
   public inline function set_from_shape(s:Shape) {
     x = s.left;
     y = s.top;
     width = s.right - x;
     height = s.bottom - y;
+  }
+  /**
+   * Sets the size of the World based just large enough to encompass all the members.
+   */
+  public function set_from_members() {
+    var l = 0.0;
+    var r = 0.0;
+    var t = 0.0;
+    var b = 0.0;
+
+    for (m in members) {
+      for (s in m.shapes) {
+        if (s.left < l) l = s.left;
+        if (s.right > r) r = s.right;
+        if (s.top < t) t = s.top;
+        if (s.bottom > b) b = s.bottom;
+      }
+    }
+
+    set(l, t, r - l, b - t);
   }
 
   public inline function center(?rect:Rect):Rect {

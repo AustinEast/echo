@@ -374,6 +374,18 @@ inline function square_normal(v:Vector2):Vector2 {
   return v;
 }
 /**
+ * Reflects a `Vector2` (in place) against the given normal.
+ * @param v The `Vector2` to modify.
+ * @param n The normal to reflect this `Vector2` against.
+ * @return the modified `Vector2`
+ */
+inline function reflect(v:Vector2, n:Vector2) {
+  var dot = 2.0 * dot(v, n);
+  v.x = v.x - dot * n.x;
+  v.y = v.y - dot * n.y;
+  return v;
+}
+/**
  * Gets the arc tangent angle between two `Vector2`, in radians.
  * @param v 
  * @param o 

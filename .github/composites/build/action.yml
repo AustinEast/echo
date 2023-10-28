@@ -16,7 +16,7 @@ runs:
         shell: bash
         run: |
           haxelib git dox https://github.com/HaxeFoundation/dox.git
-          haxelib git heaps https://github.com/HeapsIO/heaps.git
+          haxelib git heaps https://github.com/HeapsIO/heaps.git 1.10.0
           haxelib dev echo .
           
       - name: Run Builds

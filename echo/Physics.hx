@@ -52,7 +52,7 @@ class Physics {
 
       // Apply Rotational Acceleration, Drag, and Max Velocity
       var accel_rot = body.torque * body.inverse_mass;
-      body.rotational_velocity = compute_velocity(body.rotational_velocity, body.rotational_drag, accel_rot, body.max_rotational_velocity, dt);
+      body.rotational_velocity = compute_velocity(body.rotational_velocity, accel_rot, body.rotational_drag, body.max_rotational_velocity, dt);
 
       // Apply Rotational Velocity
       body.rotation += body.rotational_velocity * dt;

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R0450P2K37"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-R0450P2K37');
+    </script>
+    <!-- Adds <include> tag -->
+    <script src="https://unpkg.com/htmlincludejs"></script>
+    <meta charset="utf-8">
+    <title>Echo Physics Library</title>
+    <meta name="description" content="Simple Arcade Physics for Haxe" />
+    <meta property="og:title" content="Echo Physics Library" />
+    <meta property="og:description" content="Simple Arcade Physics for Haxe" />
+    <meta property="og:url" content="https://austineast.dev/echo" />
+    <meta property="og:image" content=”https://raw.githubusercontent.com/austineast/echo/gh-pages/logo.png" />
+    <link rel="shortcut icon" href="https://raw.githubusercontent.com/austineast/echo/gh-pages/icon.ico" type="image/x-icon" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@austinweast" />
+    <meta name="twitter:title" content="Echo Physics Library" />
+    <meta name="twitter:description" content="Simple Arcade Physics for Haxe" />
+    <meta name="twitter:image:src" content="https://raw.githubusercontent.com/austineast/echo/gh-pages/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <style>
+        body,html { 
+            font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+            margin:0; 
+            padding:0; 
+            width:100%; 
+            height:100%;
+        }
+        main {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center; 
+        }
+        canvas#webgl { 
+            height:auto; 
+            width: 100%;
+            max-width: 720px;
+            max-height: 405px;
+        }
+        a:any-link {
+            color: white;
+        }
+        .theme {
+            color: white;
+            background: #45283c;
+        }
+        .buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-evenly;
+            width: 100%;
+            max-width: 720px;
+            margin: 40px;
+        }
+        .buttons a {
+            margin: 10px;
+            padding: 15px;
+            font-size: 1.5em;
+            color: #45283c;
+            background-color: white;
+            width: 50%;
+            max-width: 150px;
+            text-align: center;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body class="theme">
+    <main>
+        <include src="austineast.github.io.base/nav.html"></include>
+        <img style="margin-top: 3rem;" src="./logo.png"></img>
+        <h1>Echo</h1>
+        <p>Simple Arcade Physics Library for Haxe</p>
+        <canvas width="640" height="360" id="webgl"></canvas>
+        <p style="font-style: italic; font-size: x-small; margin-bottom: 0.1em">Known issue: the sample buttons do not work correctly! as a quick fix, resize your browser window and they'll work just fine ;)</a></p>
+
+        <div class="buttons">
+            <a href="https://github.com/AustinEast/echo/">Get Started</a>
+            <a href="./api/echo/Echo" target="_blank">API</a>
+        </div>
+        <!-- <footer style="font-style: italic; margin-bottom: 0.1em">Created by Austin East @ <a href="https://austineast.dev">austineast.dev</a></footer> -->
+    </main>
+</body>
+<script src="./sample.js"></script>
+<script>
+    // Resize the canvas on window resize
+    var canvas = document.getElementById('webgl');
+    canvas.style.width = '100%';
+    window.addEventListener('resize', () => canvas.style.width = '100%', false);
+</script>
+</html>

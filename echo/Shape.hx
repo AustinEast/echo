@@ -206,11 +206,11 @@ class Shape #if cog implements cog.IComponent #end {
 
   public function collides(s:Shape):Null<CollisionData> return null;
 
-  function collide_rect(r:Rect, flip:Bool = false):Null<CollisionData> return null;
+  function collide_rect(r:Rect):Null<CollisionData> return null;
 
-  function collide_circle(c:Circle, flip:Bool = false):Null<CollisionData> return null;
+  function collide_circle(c:Circle):Null<CollisionData> return null;
 
-  function collide_polygon(p:Polygon, flip:Bool = false):Null<CollisionData> return null;
+  function collide_polygon(p:Polygon):Null<CollisionData> return null;
 
   function toString() {
     var s = switch (type) {

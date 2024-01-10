@@ -5,8 +5,8 @@ import echo.shape.*;
 import echo.util.AABB;
 import echo.util.Poolable;
 
-using echo.math.Vector2;
 using echo.util.SAT;
+using echo.math.Vector2;
 
 class Polygon extends Shape implements Poolable {
   /**
@@ -197,16 +197,13 @@ class Polygon extends Shape implements Poolable {
     return false;
   }
 
-  // collision calculated as s against this. So flip result
-  override inline function collides(s:Shape):Null<CollisionData> return s.collide_polygon(this, true);
+  override inline function collides(s:Shape):Null<CollisionData> return s.collide_polygon(this);
 
-  // collision calculated as r against this. So invert flip value
-  override inline function collide_rect(r:Rect, flip:Bool = false):Null<CollisionData> return r.rect_and_polygon(this, !flip);
+  override inline function collide_rect(r:Rect):Null<CollisionData> return r.rect_and_polygon(this, true);
 
-  // collision calculated as c against this. So invert flip value
-  override inline function collide_circle(c:Circle, flip:Bool = false):Null<CollisionData> return c.circle_and_polygon(this, !flip);
+  override inline function collide_circle(c:Circle):Null<CollisionData> return c.circle_and_polygon(this);
 
-  override inline function collide_polygon(p:Polygon, flip:Bool = false):Null<CollisionData> return this.polygon_and_polygon(p, flip);
+  override inline function collide_polygon(p:Polygon):Null<CollisionData> return p.polygon_and_polygon(this, true);
 
   override inline function get_top():Float {
     if (count == 0 || vertices[0] == null) return y;

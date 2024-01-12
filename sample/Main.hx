@@ -46,7 +46,7 @@ class Main extends BaseApp {
 
     // Set up our Sample States
     sample_states = [
-      PolygonState, StackingState, MultiShapeState, ShapesState, GroupsState, StaticState, LinecastState, Linecast2State, TileMapState, TileMapState2,
+      ListenerState, PolygonState, StackingState, MultiShapeState, ShapesState, GroupsState, StaticState, LinecastState, Linecast2State, TileMapState, TileMapState2,
       BezierState, VerletState
     ];
     index = 0;

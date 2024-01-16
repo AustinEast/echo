@@ -20,31 +20,25 @@ class OverlappingSpawnState extends BaseState {
         rotation: 0,
         material: material,
         shape: {
-				type: POLYGON,
+				type: CIRCLE,
 				radius: 16,
-				width: 16,
-				height: 16,
-				sides: 5,
 				offset_y: 0,
 			}
       });
     world.add(body);
 
-	body = new Body({
-        x: 200,
-        y: 53,
-        rotation: 0,
-        material: material,
-        shape: {
-				type: POLYGON,
-				radius: 10,
-				width: 10,
-				height: 10,
-				sides: 5,
-				offset_y: 0,
-			}
-      });
-    world.add(body);
+	// body = new Body({
+  //       x: 200,
+  //       y: 53,
+  //       rotation: 0,
+  //       material: material,
+  //       shape: {
+	// 			type: CIRCLE,
+  //       radius: 12,
+	// 			offset_y: 0,
+	// 		}
+  //     });
+  //   world.add(body);
 
     // Add a Physics body at the bottom of the screen for the other Physics Bodies to stack on top of
     // This body has a mass of 0, so it acts as an immovable object
@@ -53,7 +47,7 @@ class OverlappingSpawnState extends BaseState {
 		x: world.width / 5,
 		y: world.height - 40,
 		material: material,
-		rotation: 5,
+		// rotation: 5,
 		shape: {
 		  type: RECT,
 		  width: world.width,

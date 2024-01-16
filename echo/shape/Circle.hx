@@ -89,11 +89,11 @@ class Circle extends Shape implements Poolable {
 
   override inline function collides(s:Shape):Null<CollisionData> return s.collide_circle(this);
 
-  override inline function collide_rect(r:Rect):Null<CollisionData> return r.rect_and_circle(this, true);
+  override inline function collide_rect(r:Rect, flip:Bool = false):Null<CollisionData> return r.rect_and_circle(this, !flip);
 
-  override inline function collide_circle(c:Circle):Null<CollisionData> return c.circle_and_circle(this);
+  override inline function collide_circle(c:Circle, flip:Bool = false):Null<CollisionData> return c.circle_and_circle(this, !flip);
 
-  override inline function collide_polygon(p:Polygon):Null<CollisionData> return this.circle_and_polygon(p, true);
+  override inline function collide_polygon(p:Polygon, flip:Bool = false):Null<CollisionData> return this.circle_and_polygon(p, flip);
 
   // getters
   inline function get_radius():Float return local_radius * scale_x;

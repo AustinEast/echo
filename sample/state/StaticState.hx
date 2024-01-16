@@ -31,8 +31,11 @@ class StaticState extends BaseState {
         y: (world.height * 0.5) * Math.sin(i) + world.height * 0.5,
         material: static_material,
         shape: {
-          type: CIRCLE,
-          radius: Random.range(2, 4),
+          // type: CIRCLE,
+          // radius: Random.range(2, 4),
+          type: RECT,
+          width: Random.range(2, 4),
+          height: Random.range(2, 4)
         }
       });
       world.add(b);

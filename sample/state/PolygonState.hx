@@ -21,7 +21,7 @@ class PolygonState extends BaseState {
       var b = new Body({
         x: Random.range(60, world.width - 60),
         y: Random.range(0, world.height / 2),
-        rotation: Random.range(0, 360),
+        rotation: 0,
         material: material,
         shape: {
           type: POLYGON,

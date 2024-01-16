@@ -6,7 +6,7 @@ import echo.Body;
 import echo.World;
 import util.Random;
 
-class ListenerState extends BaseState {
+class OverlappingSpawnState extends BaseState {
 
   override public function enter(world:World) {
     Main.instance.state_text.text = "Sample: Collision Listener";
@@ -14,35 +14,41 @@ class ListenerState extends BaseState {
     // Create a material for all the shapes to share
     var material:Material = {elasticity: 0.7};
 
-    var bodyA = new Body({
-        x: Random.range(60, world.width - 60),
-        y: Random.range(0, world.height / 2),
-        // rotation: Random.range(0, 360),
+    var body = new Body({
+        x: 200,
+        y: 50,
+        rotation: 0,
         material: material,
-        shapes: [
-			{
+        shape: {
 				type: POLYGON,
-				radius: Random.range(16, 32),
-				width: Random.range(16, 48),
-				height: Random.range(16, 48),
-				sides: Random.range_int(3, 8),
-				offset_y: -10,
-			},
-			{
-				type: POLYGON,
-				radius: Random.range(16, 32),
-				width: Random.range(16, 48),
-				height: Random.range(16, 48),
-				sides: Random.range_int(3, 8),
-				offset_y: 10,
+				radius: 16,
+				width: 16,
+				height: 16,
+				sides: 5,
+				offset_y: 0,
 			}
-		]
       });
-    world.add(bodyA);
+    world.add(body);
+
+	body = new Body({
+        x: 200,
+        y: 53,
+        rotation: 0,
+        material: material,
+        shape: {
+				type: POLYGON,
+				radius: 10,
+				width: 10,
+				height: 10,
+				sides: 5,
+				offset_y: 0,
+			}
+      });
+    world.add(body);
 
     // Add a Physics body at the bottom of the screen for the other Physics Bodies to stack on top of
     // This body has a mass of 0, so it acts as an immovable object
-	var bodyB = new Body({
+	var floor = new Body({
 		mass: STATIC,
 		x: world.width / 5,
 		y: world.height - 40,
@@ -54,20 +60,10 @@ class ListenerState extends BaseState {
 		  height: 20
 		}
 	  });
-    world.add(bodyB);
-
-    var dbgOpts:ListenerOptions = {
-      enter: (a, b, data) -> {
-		trace('bodyA == listener `a`: ${bodyA == a}');
-		// the second shape is our 'bottom' shape that is making the collision
-		trace('bodyA owns data `shape a`: ${bodyA.shapes.contains(data[0].sa)}');
-		trace('bodyB == listener `b`: ${bodyB == b}');
-		trace('bodyB owns `shape b`: ${bodyB.shapes.contains(data[0].sb)}');
-      },
-    };
+    world.add(floor);
 
     // Create a listener for collisions between the Physics Bodies
-    world.listen(bodyA, bodyB, dbgOpts);
+    world.listen();
   }
 
   override function step(world:World, dt:Float) {

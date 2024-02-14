@@ -198,11 +198,11 @@ class Body implements Disposable #if cog implements cog.IComponent #end {
   /**
    * If set, this method is called whenever the Body's X or Y changes.
    */
-  public var on_move:Null<Float->Float->Void>;
+  public var on_move:Null<(x:Float, y:Float) -> Void>;
   /**
    * If set, this method is called whenever the Body's rotation changes.
    */
-  public var on_rotate:Null<Float->Void>;
+  public var on_rotate:Null<(angle:Float) -> Void>;
 
   @:allow(echo.Physics.step_body)
   public var last_x(default, null):Float;

@@ -600,7 +600,7 @@ class Bezier implements Disposable {
   }
 }
 
-@:enum abstract BezierCurve(Int) to Int from Int {
+enum abstract BezierCurve(Int) to Int from Int {
   var Linear = 1;
   var Quadratic = 2;
   var Cubic = 3;

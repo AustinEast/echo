@@ -1,5 +1,6 @@
 {
     "[haxe]": {
-        "editor.formatOnSave": true
+        "editor.formatOnSave": true,
+        "files.trimTrailingWhitespace": false,
     }
 }

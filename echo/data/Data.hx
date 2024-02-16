@@ -244,7 +244,6 @@ class QuadTreeData {
   public var flag = false;
 }
 
-@:enum
-abstract Direction(Int) from Int to Int {
+enum abstract Direction(Int) from Int to Int {
   var TOP = 0;
 }

@@ -231,6 +231,7 @@ class Body implements Disposable #if cog implements cog.IComponent #end {
    * Sets a Body's values from a `BodyOptions` object.
    * @param options
    */
+  @:haxe.warning("-WDeprecated")
   public function load_options(?options:BodyOptions) {
     options = echo.util.JSON.copy_fields(options, defaults);
     clear_shapes();
@@ -241,13 +242,12 @@ class Body implements Disposable #if cog implements cog.IComponent #end {
     scale_y = options.scale_y;
     kinematic = options.kinematic;
 
-    final noWarnOptions:Dynamic = options;
     if (options.material != null) material = options.material;
-    else if (noWarnOptions.gravity_scale != null || noWarnOptions.elasticity != null) {
+    else if (options.gravity_scale != null || options.elasticity != null) {
       // Temp: Support deprecated values
       material = {
-        elasticity: noWarnOptions.elasticity,
-        gravity_scale: noWarnOptions.gravity_scale
+        elasticity: options.elasticity,
+        gravity_scale: options.gravity_scale
       }
     }
     else material = Material.global;

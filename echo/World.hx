@@ -52,6 +52,8 @@ class World implements Disposable {
 
   public var history:Null<History<Array<BodyState>>>;
 
+  public var accumulatedTime:Float = 0;
+
   var init:Bool;
 
   public function new(options:WorldOptions) {

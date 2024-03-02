@@ -76,31 +76,46 @@ class Echo {
   /**
    * Steps a `World` forward.
    * @param world
-   * @param dt
+   * @param dt The Delta Time to step the `World` Forward
+   * @param rate The target rate of Step-Per-Second. If set to 0, the target rate is unlimited.
    */
-  public static function step(world:World, dt:Float) {
-    // Save World State to History
-    if (world.history != null) world.history.add([
-      for (b in world.members) {
-        id: b.id,
-        x: b.x,
-        y: b.y,
-        rotation: b.rotation,
-        velocity_x: b.velocity.x,
-        velocity_y: b.velocity.y,
-        acceleration_x: b.acceleration.x,
-        acceleration_y: b.acceleration.y,
-        rotational_velocity: b.rotational_velocity
-      }
-    ]);
+  public static function step(world:World, dt:Float, rate:Float = 0) {
+    function step_world(world:World, dt:Float) {
+      // Save World State to History
+      if (world.history != null) world.history.add([
+        for (b in world.members) {
+          id: b.id,
+          x: b.x,
+          y: b.y,
+          rotation: b.rotation,
+          velocity_x: b.velocity.x,
+          velocity_y: b.velocity.y,
+          acceleration_x: b.acceleration.x,
+          acceleration_y: b.acceleration.y,
+          rotational_velocity: b.rotational_velocity
+        }
+      ]);
 
-    // Step the World incrementally based on the number of iterations
-    var fdt = dt / world.iterations;
-    for (i in 0...world.iterations) {
-      Physics.step(world, fdt);
-      Collisions.query(world);
-      Physics.separate(world);
-      Collisions.notify(world);
+      // Step the World incrementally based on the number of iterations
+      var fdt = dt / world.iterations;
+      for (i in 0...world.iterations) {
+        Physics.step(world, fdt);
+        Collisions.query(world);
+        Physics.separate(world);
+        Collisions.notify(world);
+      }
+    }
+
+    if (rate > 0) {
+      world.accumulatedTime += dt;
+      var step = 1.0 / rate;
+      while (world.accumulatedTime >= step) {
+        world.accumulatedTime -= step;
+        step_world(world, step);
+      }
+    }
+    else {
+      step_world(world, dt);
     }
   }
   /**

@@ -6,7 +6,7 @@ runs:
     steps:
       - uses: krdlab/setup-haxe@v1
         with:
-          haxe-version: 4.2.4
+          haxe-version: 4.3.2
           
       - uses: actions/checkout@v3
         with:
@@ -16,7 +16,7 @@ runs:
         shell: bash
         run: |
           haxelib git dox https://github.com/HaxeFoundation/dox.git
-          haxelib git heaps https://github.com/HeapsIO/heaps.git
+          haxelib install heaps 2.0.0
           haxelib dev echo .
           
       - name: Run Builds

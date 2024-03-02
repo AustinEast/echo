@@ -10,6 +10,6 @@
     "austineast"
   ],
   "url": "https://austineast.dev/echo",
-  "releasenote": "fix webpage gen",
-  "version": "4.2.2"
+  "releasenote": "revert regression",
+  "version": "4.2.4"
 }

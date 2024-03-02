@@ -1,7 +1,6 @@
 package;
 
-import state.test.ListenerState;
-import state.test.OverlappingSpawnState;
+import hxd.Window;
 import hxd.Key;
 import echo.Echo;
 import echo.World;
@@ -89,8 +88,8 @@ class Main extends BaseApp {
     var fdt = Key.isDown(Key.SHIFT) ? dt * 0.3 : dt;
     // Update the current Sample State
     fsm.step(fdt);
-    // Step the World Forward
-    if (playing) world.step(fdt);
+    // Step the World Forward, with a fixed step rate of 60 per second
+    if (playing) world.step(fdt, 60);
 
     // Update GUI text
     members_text.text = 'Bodies: ${world.count}';

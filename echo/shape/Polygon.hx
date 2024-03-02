@@ -197,13 +197,13 @@ class Polygon extends Shape implements Poolable {
     return false;
   }
 
-  override inline function collides(s:Shape):Null<CollisionData> return s.collide_polygon(this);
+  override inline function collides(s:Shape):Null<CollisionData> return s.collide_polygon(this, true);
 
-  override inline function collide_rect(r:Rect):Null<CollisionData> return r.rect_and_polygon(this, true);
+  override inline function collide_rect(r:Rect, flip:Bool = false):Null<CollisionData> return r.rect_and_polygon(this, !flip);
 
-  override inline function collide_circle(c:Circle):Null<CollisionData> return c.circle_and_polygon(this);
+  override inline function collide_circle(c:Circle, flip:Bool = false):Null<CollisionData> return c.circle_and_polygon(this, !flip);
 
-  override inline function collide_polygon(p:Polygon):Null<CollisionData> return p.polygon_and_polygon(this, true);
+  override inline function collide_polygon(p:Polygon, flip:Bool = false):Null<CollisionData> return this.polygon_and_polygon(p, flip);
 
   override inline function get_top():Float {
     if (count == 0 || vertices[0] == null) return y;

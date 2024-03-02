@@ -174,13 +174,13 @@ class Rect extends Shape implements Poolable {
     return false;
   }
 
-  override inline function collides(s:Shape):Null<CollisionData> return s.collide_rect(this);
+  override inline function collides(s:Shape):Null<CollisionData> return s.collide_rect(this, true);
 
-  override inline function collide_rect(r:Rect):Null<CollisionData> return r.rect_and_rect(this);
+  override inline function collide_rect(r:Rect, flip:Bool = false):Null<CollisionData> return this.rect_and_rect(r, flip);
 
-  override inline function collide_circle(c:Circle):Null<CollisionData> return this.rect_and_circle(c);
+  override inline function collide_circle(c:Circle, flip:Bool = false):Null<CollisionData> return this.rect_and_circle(c, flip);
 
-  override inline function collide_polygon(p:Polygon):Null<CollisionData> return this.rect_and_polygon(p);
+  override inline function collide_polygon(p:Polygon, flip:Bool = false):Null<CollisionData> return this.rect_and_polygon(p, flip);
 
   override function set_parent(?body:Body) {
     super.set_parent(body);

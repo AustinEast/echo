@@ -334,11 +334,8 @@ class SAT {
 
       // collisions used the transformed rect, set the collision data's shape back
       // to the original rect
-      if (!flip) {
-        col.sa = r;
-      } else {
-        col.sb = r;
-      }
+      if (!flip) col.sa = r;
+      else col.sb = r;
 
       return col;
     }
@@ -415,11 +412,8 @@ class SAT {
 
     // collisions were done with a polygon derrived from the provided rect
     // so we need to set our collision data shape back to the original rectangle
-    if (flip) {
-      col.sb = r;
-    } else {
-      col.sa = r;
-    }
+    if (flip) col.sb = r;
+    else col.sa = r;
 
     return col;
   }
@@ -506,7 +500,7 @@ class SAT {
       test1 = min1 - max2;
       test2 = min2 - max1;
 
-      // Preform another test // TODO: What is this test doing, exactly?
+      // Perform another test
       if (test1 > 0 || test2 > 0) {
         col.put();
         return null;

@@ -1,5 +1,7 @@
 package;
 
+import state.test.ListenerState;
+import state.test.OverlappingSpawnState;
 import hxd.Key;
 import echo.Echo;
 import echo.World;
@@ -46,9 +48,10 @@ class Main extends BaseApp {
 
     // Set up our Sample States
     sample_states = [
-      OverlappingSpawnState, ListenerState, PolygonState, StackingState, MultiShapeState, ShapesState, GroupsState, StaticState, LinecastState, Linecast2State, TileMapState, TileMapState2,
+      PolygonState, StackingState, MultiShapeState, ShapesState, GroupsState, StaticState, LinecastState, Linecast2State, TileMapState, TileMapState2,
       BezierState, VerletState
     ];
+
     index = 0;
     // Create a State Manager and pass it the World and the first Sample
     fsm = new FSM<World>(world, Type.createInstance(sample_states[index], []));

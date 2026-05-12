@@ -11,5 +11,5 @@
   ],
   "url": "https://austineast.dev/echo",
   "releasenote": "Fix Collision data shape ordering (Thanks @MondayHopscotch)",
-  "version": "4.2.5"
+  "version": "4.2.6"
 }

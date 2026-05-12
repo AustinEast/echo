@@ -12,6 +12,7 @@ class Linecast2State extends BaseState {
   var cast_count:Int = 100;
   var cast_length:Float = 90;
   var dynamics:Array<Body> = [];
+  var endpoints:Array<Vector2>;
 
   override public function enter(world:World) {
     Main.instance.state_text.text = "Sample: Linecasting 2";
@@ -35,6 +36,12 @@ class Linecast2State extends BaseState {
     }
 
     // world.listen();
+
+    endpoints = [];
+    // initialize to cast count number of endpoints at (0, 0)
+    for (i in 0...cast_count) {
+      endpoints.push(new Vector2(0, 0));
+    }
   }
 
   override function step(world:World, dt:Float) {
@@ -43,9 +50,22 @@ class Linecast2State extends BaseState {
     for (i in 0...cast_count) {
       line.set_from_vector(mouse, 360 * (i / cast_count), cast_length);
       var result = line.linecast(dynamics, world);
-      if (result != null) Main.instance.debug.draw_intersection(result, false);
-      else Main.instance.debug.draw_line(line.start.x, line.start.y, line.end.x, line.end.y, Main.instance.debug.intersection_color);
+      // if (result != null) Main.instance.debug.draw_intersection(result, false);
+      // else Main.instance.debug.draw_line(line.start.x, line.start.y, line.end.x, line.end.y, Main.instance.debug.intersection_color);
+
+      if (result != null) {
+        var closest = result.closest;
+        endpoints[i].set(closest.hit.x, closest.hit.y);
+      }
+      else endpoints[i].set(line.end.x, line.end.y);
     }
+
+    // draw an outline of the linecasts formed by the endpoints
+    for (i in 0...cast_count) {
+      var next = (i + 1) % cast_count;
+      Main.instance.debug.draw_line(endpoints[i].x, endpoints[i].y, endpoints[next].x, endpoints[next].y, Main.instance.debug.intersection_color);
+    }
+
     line.put();
   }
 }

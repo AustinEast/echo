@@ -84,7 +84,6 @@
         <h1>Echo</h1>
         <p>Simple Arcade Physics Library for Haxe</p>
         <canvas width="640" height="360" id="webgl"></canvas>
-        <p style="font-style: italic; font-size: x-small; margin-bottom: 0.1em">Known issue: the sample buttons do not work correctly! as a quick fix, resize your browser window and they'll work just fine ;)</a></p>
 
         <div class="buttons">
             <a href="https://github.com/AustinEast/echo/">Get Started</a>
@@ -95,9 +94,40 @@
 </body>
 <script src="./sample.js"></script>
 <script>
-    // Resize the canvas on window resize
     var canvas = document.getElementById('webgl');
-    canvas.style.width = '100%';
-    window.addEventListener('resize', () => canvas.style.width = '100%', false);
+
+    function resyncHeapsCanvas() {
+        canvas.style.width = '100%';
+        // Heaps recalculates pointer/canvas transform on resize.
+        window.dispatchEvent(new Event('resize'));
+    }
+
+    window.addEventListener('resize', function() {
+        canvas.style.width = '100%';
+    }, false);
+
+    // Initial sync for first paint.
+    resyncHeapsCanvas();
+
+    // includejs inserts navbar markup asynchronously and shifts canvas position.
+    window.addEventListener('load', function() {
+        requestAnimationFrame(function() {
+            requestAnimationFrame(resyncHeapsCanvas);
+        });
+        setTimeout(resyncHeapsCanvas, 150);
+    });
+
+    // Watch early DOM mutations (navbar include) and resync once layout changes.
+    var pendingResync = false;
+    var observer = new MutationObserver(function() {
+        if (pendingResync) return;
+        pendingResync = true;
+        requestAnimationFrame(function() {
+            pendingResync = false;
+            resyncHeapsCanvas();
+        });
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    setTimeout(function() { observer.disconnect(); }, 4000);
 </script>
 </html>

@@ -190,17 +190,17 @@ class SAT {
     var col:CollisionData = null;
     if (rect1.rotation != 0 || rect2.rotation != 0) {
       if (rect1.transformed_rect != null) {
-        col = rect_and_polygon(rect2, rect1.transformed_rect, flip);
+        col = rect_and_polygon(rect2, rect1.transformed_rect, !flip);
 
         if (col == null) return null;
 
-        if (flip) col.sa = rect1;
+        if (flip) col.sa = rect2;
         else col.sb = rect1;
 
         return col;
       }
       if (rect2.transformed_rect != null) {
-        col = rect_and_polygon(rect1, rect2.transformed_rect, !flip);
+        col = rect_and_polygon(rect1, rect2.transformed_rect, flip);
 
         if (col == null) return null;
 
@@ -318,6 +318,7 @@ class SAT {
     data1.put();
     return data2;
   }
+
   /**
    * Test a Rect and a Circle for a Collision.
    * @param r
@@ -327,19 +328,21 @@ class SAT {
    */
   public static function rect_and_circle(r:Rect, c:Circle, flip:Bool = false):Null<CollisionData> {
     if (r.transformed_rect != null && r.rotation != 0) {
-      var col = circle_and_polygon(c, r.transformed_rect, flip);
+      var col = circle_and_polygon(c, r.transformed_rect, !flip);
 
       if (col == null) return null;
 
-      if (flip) col.sa = r;
+      // collisions used the transformed rect, set the collision data's shape back
+      // to the original rect
+      if (!flip) col.sa = r;
       else col.sb = r;
 
       return col;
     }
 
     // Vector from A to B
-    var nx = flip ? c.x - r.x : r.x - c.x;
-    var ny = flip ? c.y - r.y : r.y - c.y;
+    var nx = flip ? r.x - c.x : c.x - r.x;
+    var ny = flip ? r.y - c.y : c.y - r.y;
     // Closest point on A to center of B
     var cx = nx;
     var cy = ny;
@@ -407,6 +410,8 @@ class SAT {
 
     if (col == null) return null;
 
+    // collisions were done with a polygon derrived from the provided rect
+    // so we need to set our collision data shape back to the original rectangle
     if (flip) col.sb = r;
     else col.sa = r;
 
@@ -495,7 +500,7 @@ class SAT {
       test1 = min1 - max2;
       test2 = min2 - max1;
 
-      // Preform another test
+      // Perform another test
       if (test1 > 0 || test2 > 0) {
         col.put();
         return null;
@@ -579,7 +584,9 @@ class SAT {
     col.sa = flip ? polygon2 : polygon1;
     col.sb = flip ? polygon1 : polygon2;
 
-    if (flip) {
+    // collision normal is calculated as resolution for poly2, so we need to
+    // negate the normal if we are not flipping the collision check.
+    if (!flip) {
       col.normal.negate();
     }
 

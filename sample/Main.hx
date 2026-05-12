@@ -50,6 +50,7 @@ class Main extends BaseApp {
       PolygonState, StackingState, MultiShapeState, ShapesState, GroupsState, StaticState, LinecastState, Linecast2State, TileMapState, TileMapState2,
       BezierState, VerletState
     ];
+
     index = 0;
     // Create a State Manager and pass it the World and the first Sample
     fsm = new FSM<World>(world, Type.createInstance(sample_states[index], []));

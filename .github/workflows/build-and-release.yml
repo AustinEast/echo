@@ -79,7 +79,7 @@ jobs:
         run: unzip echo-web.zip
         
       - name: Deploy to Github Pages Branch
-        uses: crazy-max/ghaction-github-pages@vv5.0.0
+        uses: crazy-max/ghaction-github-pages@v5.0.0
         with:
           target_branch: gh-pages
           build_dir: bin

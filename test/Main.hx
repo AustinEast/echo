@@ -9,7 +9,8 @@ class Main {
       width: 64, // Affects the bounds for collision checks.
       height: 64, // Affects the bounds for collision checks.
       gravity_y: 20, // Force of Gravity on the Y axis. Also available for the X axis.
-      iterations: 2 // Sets the number of Physics iterations that will occur each time the World steps.
+      iterations: 2, // Sets the number of Physics iterations that will occur each time the World steps.
+      arcade: false // Use full, Box2D-style physics (the default). Set to true for arcade physics (no rotation or friction from collisions).
     });
 
     // Create a Body with a Circle Collider and add it to the World

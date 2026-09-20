@@ -72,6 +72,11 @@ class Circle extends Shape implements Poolable {
     return Math.PI * r * r;
   }
 
+  override inline function inertia():Float {
+    var r = radius;
+    return Math.PI * r * r * r * r * 0.5;
+  }
+
   override function clone():Circle return Circle.get(local_x, local_y, radius);
 
   override function contains(v:Vector2):Bool return this.circle_contains(v);

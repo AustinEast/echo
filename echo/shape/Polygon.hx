@@ -187,6 +187,26 @@ class Polygon extends Shape implements Poolable {
     }
     return Math.abs(sum) * 0.5;
   }
+  /**
+   * Area moment of inertia about the Polygon's position. Vertices are taken relative to the position so that offset vertex sets are handled correctly.
+   */
+  override inline function inertia():Float {
+    var sum = 0.;
+    var verts = vertices;
+    var px = x;
+    var py = y;
+    var vx = verts[count - 1].x - px;
+    var vy = verts[count - 1].y - py;
+    for (i in 0...count) {
+      var ix = verts[i].x - px;
+      var iy = verts[i].y - py;
+      var cross = vx * iy - ix * vy;
+      sum += cross * (vx * vx + vx * ix + ix * ix + vy * vy + vy * iy + iy * iy);
+      vx = ix;
+      vy = iy;
+    }
+    return Math.abs(sum) / 12;
+  }
 
   override function clone():Polygon return Polygon.get_from_vertices(x, y, rotation, local_vertices);
 

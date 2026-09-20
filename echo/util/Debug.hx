@@ -18,6 +18,11 @@ class Debug {
   public var draw_shape_bounds:Bool = false;
   public var draw_world_bounds:Bool = false;
   public var draw_quadtree:Bool = true;
+  /**
+   * Draws the contact points of the latest Collisions found by the World's Listeners. Useful for debugging full physics resolution.
+   */
+  public var draw_contacts:Bool = false;
+  public var contact_radius:Float = 2;
   public var shape_outline_width:Float = 1;
   public var shape_fill_alpha:Float = 0;
 
@@ -30,6 +35,10 @@ class Debug {
   public var quadtree_color:Int;
   public var quadtree_fill_color:Int;
   public var world_bounds_color:Int;
+  /**
+   * Color used to draw Collision contact points. If `null`, `shape_collided_color` is used.
+   */
+  public var contact_color:Null<Int>;
 
   public var camera:Null<AABB>;
 
@@ -74,6 +83,23 @@ class Debug {
         b.put();
       }
     });
+    if (draw_contacts) draw_world_contacts(world);
+  }
+  /**
+   * Draws the contact points of the latest Collisions found by the World's Listeners.
+   */
+  public function draw_world_contacts(world:World) {
+    var color = contact_color == null ? shape_collided_color : contact_color;
+    for (listener in world.listeners) {
+      for (collision in listener.collisions) {
+        for (data in collision.data) {
+          for (i in 0...data.contact_count) {
+            var c = data.contacts[i];
+            draw_circle(c.x, c.y, contact_radius, color);
+          }
+        }
+      }
+    }
   }
 
   public function draw_shape(shape:Shape) {

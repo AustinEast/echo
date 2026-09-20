@@ -100,6 +100,8 @@ class Body implements Disposable #if cog implements cog.IComponent #end {
    * A measure of how fast a `Body` will change it's rotational velocity.
    *
    * Can be thought of the sum of all external rotation forces on an object during a step.
+   *
+   * In arcade physics, torque is scaled by the Body's `inverse_mass`. In full physics (`arcade = false`), it is scaled by the Body's `inverse_inertia`.
    */
   public var torque:Float = 0;
   /**
@@ -145,6 +147,19 @@ class Body implements Disposable #if cog implements cog.IComponent #end {
    * Cached value of 1 divided by the Body's mass. Used in Internal calculations.
    */
   public var inverse_mass(default, null):Float;
+  /**
+   * The Body's moment of inertia - how much the Body resists changes to its `rotational_velocity`. The higher the inertia, the harder it is to spin the Body.
+   *
+   * This is automatically calculated from the Body's shapes and mass (see `calculate_inertia()`), but can be set manually.
+   * Setting this to `0` prevents Collisions and `torque` from rotating the Body at all (useful for things like a player character).
+   *
+   * Only used when Collisions are resolved with full physics (`arcade = false`).
+   */
+  public var inertia(default, set):Float;
+  /**
+   * Cached value of 1 divided by the Body's inertia. Used in Internal calculations. Always `0` for static Bodies or Bodies with an inertia of `0`.
+   */
+  public var inverse_inertia(get, never):Float;
   /**
    * Flag to set if the Body is active and will participate in a World's Physics calculations or Collision querys.
    */
@@ -220,6 +235,8 @@ class Body implements Disposable #if cog implements cog.IComponent #end {
   @:dox(hide)
   @:allow(echo.Collisions)
   var collision_mask:Int = 0;
+
+  var cached_inverse_inertia:Float = 0;
   /**
    * Creates a new Body.
    * @param options Optional values to configure the new Body
@@ -280,9 +297,12 @@ class Body implements Disposable #if cog implements cog.IComponent #end {
         calculate_mass();
       case STATIC:
         mass = STATIC;
+        calculate_inertia();
       default:
         mass = options.mass;
+        calculate_inertia();
     }
+    if (options.inertia != null) inertia = options.inertia;
   }
 
   public function clone():Body {
@@ -295,6 +315,7 @@ class Body implements Disposable #if cog implements cog.IComponent #end {
     b.material = material;
     b.kinematic = kinematic;
     b.mass = mass;
+    b.inertia = inertia;
     b.velocity.set(velocity.x, velocity.y);
     b.rotational_velocity = rotational_velocity;
     b.max_velocity.set(max_velocity.x, max_velocity.y);
@@ -465,6 +486,30 @@ class Body implements Disposable #if cog implements cog.IComponent #end {
       sum += shape.volume() * material.density;
     }
     mass = sum;
+    calculate_inertia();
+  }
+  /**
+   * Calculates the Body's moment of inertia (about the Body's position) from the volume and placement of it's shapes, scaled to match the Body's current `mass`.
+   *
+   * This is called automatically by `calculate_mass()`, but should be called manually if the Body's `mass` is set directly after its shapes have changed.
+   * If the Body has no shapes, its inertia is set equal to its mass.
+   */
+  public function calculate_inertia() {
+    if (shapes.length == 0) {
+      inertia = mass;
+      return;
+    }
+    var volume = 0.;
+    var sum = 0.;
+    for (shape in shapes) {
+      var v = shape.volume();
+      // Parallel axis theorem - shift each shape's inertia from its own center to the Body's position
+      var dx = shape.x - x;
+      var dy = shape.y - y;
+      volume += v;
+      sum += shape.inertia() + v * (dx * dx + dy * dy);
+    }
+    inertia = volume > 0 ? sum * (mass / volume) : 0;
   }
   /**
    * Returns true if the Body has moved since the last `Physics.step()`.
@@ -510,6 +555,8 @@ class Body implements Disposable #if cog implements cog.IComponent #end {
   inline function get_elasticity() return material.elasticity;
 
   inline function get_gravity_scale() return material.gravity_scale;
+
+  inline function get_inverse_inertia() return is_static() ? 0 : cached_inverse_inertia;
 
   // setters
   inline function set_x(value:Float):Float {
@@ -564,6 +611,17 @@ class Body implements Disposable #if cog implements cog.IComponent #end {
       inverse_mass = 1 / mass;
     }
     return mass;
+  }
+
+  inline function set_inertia(value:Float):Float {
+    if (value <= 0 || !Math.isFinite(value)) {
+      inertia = cached_inverse_inertia = 0;
+    }
+    else {
+      inertia = value;
+      cached_inverse_inertia = 1 / value;
+    }
+    return inertia;
   }
 
   inline function set_elasticity(value:Float) {

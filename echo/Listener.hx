@@ -25,6 +25,13 @@ class Listener {
    */
   public var separate:Bool;
   /**
+   * Flag that determines how Collisions found by this Listener are resolved. If `null`, the World's `arcade` setting is used.
+   *
+   * When `true` (arcade physics), Collisions only affect the Bodies' positions and velocities - Bodies are never rotated by a Collision.
+   * When `false` (full physics), Collisions are resolved at their contact points, so that Bodies are also spun by off-center impacts and friction is applied along surfaces.
+   */
+  @:optional public var arcade:Null<Bool>;
+  /**
    * Store of the latest Collisions.
    */
   public var collisions:Array<Collision>;
@@ -97,6 +104,7 @@ class Listeners implements Disposable {
       correction_threshold: options.correction_threshold,
       percent_correction: options.percent_correction
     };
+    if (options.arcade != null) listener.arcade = options.arcade;
     if (options.enter != null) listener.enter = options.enter;
     if (options.stay != null) listener.stay = options.stay;
     if (options.exit != null) listener.exit = options.exit;

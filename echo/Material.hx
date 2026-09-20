@@ -13,21 +13,21 @@ class Material {
    */
   public var elasticity:Float = 0;
   /**
-   * 
+   * The density of the Body. Used to automatically calculate the Body's `mass` and `inertia` from the volume of it's shapes.
    */
   public var density:Float = 1;
   /**
-   * TODO
+   * Coefficient of dynamic (kinetic) friction. Determines how much a Body resists sliding along a surface it is already moving across.
+   *
+   * Only used when Collisions are resolved with full physics (`arcade = false`).
    */
-  @:dox(hide)
-  @:noCompletion
-  public var friction:Float = 0;
+  public var friction:Float = 0.3;
   /**
-   * TODO
+   * Coefficient of static friction. Determines how much force is required to get a resting Body to start sliding along a surface.
+   *
+   * Only used when Collisions are resolved with full physics (`arcade = false`).
    */
-  @:dox(hide)
-  @:noCompletion
-  public var static_friction:Float = 0;
+  public var static_friction:Float = 0.4;
   /**
    * Percentage value that represents how much a World's gravity affects the Body.
    */

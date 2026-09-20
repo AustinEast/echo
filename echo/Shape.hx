@@ -181,6 +181,12 @@ class Shape #if cog implements cog.IComponent #end {
 
   public function volume():Float return 0;
   /**
+   * Returns the Shape's area moment of inertia about its position (ie for a density of `1`). Multiply by density to get the mass moment of inertia.
+   *
+   * Used by `Body.calculate_inertia()` to determine how much a Body resists rotation.
+   */
+  public function inertia():Float return 0;
+  /**
    * Clones the Shape into a new Shape
    * @return Shape return new Shape(x, y)
    */

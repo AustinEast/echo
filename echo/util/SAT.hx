@@ -13,6 +13,13 @@ class SAT {
   static final norm = new Vector2(0, 0);
   static final closest = new Vector2(0, 0);
 
+  // Scratch vectors used during contact point generation
+  static final ref_normal = new Vector2(0, 0);
+  static final inc_normal = new Vector2(0, 0);
+  static final side_normal = new Vector2(0, 0);
+  static final inc0 = new Vector2(0, 0);
+  static final inc1 = new Vector2(0, 0);
+
   public static inline function point_in_rect(p:Vector2, r:Rect):Bool {
     if (r.transformed_rect != null && r.rotation != 0) return p.point_in_polygon(r.transformed_rect);
     return r.left <= p.x && r.right >= p.x && r.top <= p.y && r.bottom >= p.y;
@@ -228,13 +235,24 @@ class SAT {
       // If both axis overlap, the boxes are colliding
       if (y_overlap > 0) {
         // Find out which axis is axis of least penetration
+        // The contact points lie on the edges of the overlapping region, perpendicular to the normal
+        var ox_min = Math.max(sa.left, sb.left);
+        var ox_max = Math.min(sa.right, sb.right);
+        var oy_min = Math.max(sa.top, sb.top);
+        var oy_max = Math.min(sa.bottom, sb.bottom);
         if (x_overlap < y_overlap) {
           // Point towards B knowing that n points from A to B
           col = CollisionData.get(x_overlap, nx < 0 ? -1 : 1, 0);
+          var cx = (ox_min + ox_max) * 0.5;
+          col.add_contact(cx, oy_min);
+          if (oy_max > oy_min) col.add_contact(cx, oy_max);
         }
         else {
           // Point toward B knowing that n points from A to B
           col = CollisionData.get(y_overlap, 0, ny < 0 ? -1 : 1);
+          var cy = (oy_min + oy_max) * 0.5;
+          col.add_contact(ox_min, cy);
+          if (ox_max > ox_min) col.add_contact(ox_max, cy);
         }
         col.sa = sa;
         col.sb = sb;
@@ -269,6 +287,7 @@ class SAT {
     // If distance between circles is zero, make up a number
     else if (d.equals(0)) {
       col = CollisionData.get(sa.radius, 1, 0);
+      col.add_contact(sa.x, sa.y);
     }
     else {
       // Get actual square root
@@ -277,6 +296,9 @@ class SAT {
       nx /= d;
       ny /= d;
       col = CollisionData.get(r - d, nx, ny);
+      // Contact point is halfway into the penetration, along the normal from A's center
+      var cd = sa.radius - col.overlap * 0.5;
+      col.add_contact(sa.x + nx * cd, sa.y + ny * cd);
     }
 
     col.sa = sa;
@@ -310,7 +332,117 @@ class SAT {
     col.sa = flip ? polygon2 : polygon1;
     col.sb = flip ? polygon1 : polygon2;
 
+    clip_polygons(cast col.sa, cast col.sb, col);
     return col;
+  }
+  /**
+   * Generates the contact points for a Collision between two Polygons, by clipping the incident face of one Polygon against the reference face of the other (the same approach used by Box2D).
+   * @param a The first Polygon (`cd.sa`).
+   * @param b The second Polygon (`cd.sb`).
+   * @param cd The Collision, whose `normal` must point from `a` to `b`. Up to 2 contact points are added to it.
+   */
+  public static function clip_polygons(a:Polygon, b:Polygon, cd:CollisionData) {
+    var nx = cd.normal.x;
+    var ny = cd.normal.y;
+    var face_a = best_face(a, nx, ny, ref_normal);
+    var face_b = best_face(b, -nx, -ny, inc_normal);
+    if (face_a < 0 || face_b < 0) return;
+
+    // The reference face is the one whose normal is most parallel with the collision normal. The other face is the incident face.
+    var dot_a = ref_normal.x * nx + ref_normal.y * ny;
+    var dot_b = -(inc_normal.x * nx + inc_normal.y * ny);
+    var ref:Polygon;
+    var inc:Polygon;
+    var ref_face:Int;
+    var inc_face:Int;
+    if (dot_b > dot_a + 0.0001) {
+      ref = b;
+      inc = a;
+      ref_face = face_b;
+      inc_face = face_a;
+      ref_normal.set(inc_normal.x, inc_normal.y);
+    }
+    else {
+      ref = a;
+      inc = b;
+      ref_face = face_a;
+      inc_face = face_b;
+    }
+
+    var rv = ref.vertices;
+    var r1 = rv[ref_face];
+    var r2 = rv[(ref_face + 1) % ref.count];
+    var iv = inc.vertices;
+    var i1 = iv[inc_face];
+    var i2 = iv[(inc_face + 1) % inc.count];
+    inc0.set(i1.x, i1.y);
+    inc1.set(i2.x, i2.y);
+
+    // Clip the incident face to the sides of the reference face
+    side_normal.set(r2.x - r1.x, r2.y - r1.y);
+    side_normal.normalize();
+    var neg_side = -(side_normal.x * r1.x + side_normal.y * r1.y);
+    var pos_side = side_normal.x * r2.x + side_normal.y * r2.y;
+    if (clip_segment(-side_normal.x, -side_normal.y, neg_side) < 2) return;
+    if (clip_segment(side_normal.x, side_normal.y, pos_side) < 2) return;
+
+    // Keep the clipped points that are behind the reference face, positioned halfway into the penetration
+    var ref_c = ref_normal.x * r1.x + ref_normal.y * r1.y;
+    var sep0 = ref_normal.x * inc0.x + ref_normal.y * inc0.y - ref_c;
+    var sep1 = ref_normal.x * inc1.x + ref_normal.y * inc1.y - ref_c;
+    if (sep0 <= 0) cd.add_contact(inc0.x - ref_normal.x * sep0 * 0.5, inc0.y - ref_normal.y * sep0 * 0.5);
+    if (sep1 <= 0 && !(inc1.x == inc0.x && inc1.y == inc0.y)) cd.add_contact(inc1.x - ref_normal.x * sep1 * 0.5, inc1.y - ref_normal.y * sep1 * 0.5);
+
+    // If numerical error left no contacts, fall back to the deepest incident vertex
+    if (cd.contact_count == 0) {
+      if (sep0 < sep1) cd.add_contact(inc0.x, inc0.y);
+      else cd.add_contact(inc1.x, inc1.y);
+    }
+  }
+  /**
+   * Finds the face of a Polygon whose outward normal is most aligned with the direction (`dx`, `dy`).
+   *
+   * Face normals are computed here (rather than using `Polygon.normals`) so that the result is independent of the Polygon's winding order.
+   * @return The index of the face's first vertex, or -1 if the Polygon is degenerate. The face's outward normal is written to `out_normal`.
+   */
+  static function best_face(p:Polygon, dx:Float, dy:Float, out_normal:Vector2):Int {
+    var norms = p.normals;
+    var count = p.count;
+    if (count < 2) return -1;
+
+    // The cached normals may point into or out of the polygon depending on its winding - flip them to point outward
+    var sign = p.normals_outward ? 1. : -1.;
+    var best = -1;
+    var best_dot = Math.NEGATIVE_INFINITY;
+    for (i in 0...count) {
+      var fnx = norms[i].x * sign;
+      var fny = norms[i].y * sign;
+      if (fnx == 0 && fny == 0) continue;
+      var dot = fnx * dx + fny * dy;
+      if (dot > best_dot) {
+        best_dot = dot;
+        best = i;
+        out_normal.set(fnx, fny);
+      }
+    }
+    return best;
+  }
+  /**
+   * Clips the segment (`inc0`, `inc1`) against the half-plane `dot(n, p) - c <= 0`, storing the results back into `inc0`/`inc1`.
+   * @return The number of points remaining after the clip.
+   */
+  static function clip_segment(nx:Float, ny:Float, c:Float):Int {
+    var d0 = nx * inc0.x + ny * inc0.y - c;
+    var d1 = nx * inc1.x + ny * inc1.y - c;
+    if (d0 <= 0 && d1 <= 0) return 2;
+    if (d0 > 0 && d1 > 0) return 0;
+    // One point is inside and one is out - replace the outside point with the intersection
+    var alpha = d0 / (d0 - d1);
+    var ix = inc0.x + alpha * (inc1.x - inc0.x);
+    var iy = inc0.y + alpha * (inc1.y - inc0.y);
+    if (d0 > 0) inc0.set(ix, iy);
+    else inc1.set(ix, iy);
+    return 2;
   }
 
   /**
@@ -385,6 +517,11 @@ class SAT {
     var col = CollisionData.get(Math.abs(rad - d), nx, ny);
     col.sa = flip ? c : r;
     col.sb = flip ? r : c;
+
+    // Contact point is the closest point on the Rect to the Circle (or the Circle's center, if it's inside the Rect)
+    if (inside) col.add_contact(c.x, c.y);
+    else if (flip) col.add_contact(r.x - cx, r.y - cy);
+    else col.add_contact(r.x + cx, r.y + cy);
 
     return col;
   }
@@ -520,6 +657,11 @@ class SAT {
     if (flip) {
       col.normal.negate();
     }
+
+    // Contact point is halfway into the penetration, along the normal from the Circle's center towards the Polygon
+    var dir = flip ? -1 : 1;
+    var cd = c_rad - col.overlap * 0.5;
+    col.add_contact(c_pos.x + col.normal.x * dir * cd, c_pos.y + col.normal.y * dir * cd);
 
     return col;
   }

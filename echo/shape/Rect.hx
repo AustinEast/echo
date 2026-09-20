@@ -159,6 +159,12 @@ class Rect extends Shape implements Poolable {
 
   override inline function volume() return width * height;
 
+  override inline function inertia():Float {
+    var w = width;
+    var h = height;
+    return w * h * (w * w + h * h) / 12;
+  }
+
   override inline function clone():Rect return Rect.get(local_x, local_y, width, height, local_rotation);
 
   override inline function contains(p:Vector2):Bool return this.rect_contains(p);

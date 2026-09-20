@@ -82,9 +82,15 @@ class CollisionData implements Poolable {
    * The length of Shape A's penetration into Shape B.
    */
   public var overlap = 0.;
-
+  /**
+   * The number of valid contact points stored in `contacts` (0 to 2).
+   *
+   * Contact points are only required for full (non-arcade) physics resolution, where they act as the lever arms for rotational impulses.
+   */
   public var contact_count = 0;
-
+  /**
+   * The world-space contact points of the Collision. Only the first `contact_count` entries are valid.
+   */
   public final contacts = Vector.fromArrayCopy([Vector2.zero, Vector2.zero]);
   /**
    * The normal vector (direction) of Shape A's penetration into Shape B.
@@ -107,6 +113,12 @@ class CollisionData implements Poolable {
   public inline function set(overlap:Float, x:Float, y:Float) {
     this.overlap = overlap;
     normal.set(x, y);
+  }
+  /**
+   * Adds a world-space contact point to the Collision. A maximum of 2 contact points are stored; any further points are ignored.
+   */
+  public inline function add_contact(x:Float, y:Float) {
+    if (contact_count < contacts.length) contacts[contact_count++].set(x, y);
   }
 
   public function put() {

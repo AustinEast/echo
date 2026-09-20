@@ -18,6 +18,7 @@ Check out the [API 📖](https://austineast.dev/echo/api/echo/Echo)!
 * SAT-powered collision detection
 * Quadtree for broadphase collision querying
 * Collision listeners to provide collision callbacks
+* Full physics (contact-based resolution with rotation and friction) or Arcade physics (position/velocity separation only), configurable per World or per Listener
 * Physics State History Management with Built-in Undo/Redo functionality
 * Extendable debug drawing
 
@@ -87,6 +88,27 @@ Use Lines to perform Linecasts against other Lines, Bodies, and Shapes. Check ou
 ### Listeners
 
 Listeners keep track of collisions between Bodies - enacting callbacks and physics responses depending on their configurations. Once you add a `Listener` to a `World`, it will automatically update itself as the `World` is stepped forward.
+
+### Arcade vs Full Physics
+
+Echo can resolve collisions in one of two modes:
+
+* **Full** (the default) - Collisions are resolved at their contact points, like in Box2D. Off-center impacts spin Bodies, circles roll down slopes, and friction (from each Body's `Material`) slows Bodies sliding along surfaces.
+* **Arcade** - Collisions only push Bodies apart and adjust their velocities along the collision normal. Bodies are never rotated by a collision and there is no friction, which is ideal for platformers, top-down games, and anything where you want predictable, "video-gamey" movement.
+
+The mode is set on the `World` with the `arcade` flag, and can be overridden by individual Listeners:
+
+```haxe
+// Every collision in this World uses arcade physics
+var world = Echo.start({width: 640, height: 360, gravity_y: 100, arcade: true});
+
+// ...except collisions between the crates and the ground, which use full physics
+world.listen(crates, ground, {arcade: false});
+```
+
+In full physics, each Body has an `inertia` (its resistance to being spun) that is automatically calculated from its shapes, mass, and `Material.density` - just like `mass`. Setting a Body's `inertia` to `0` stops it from being rotated by collisions entirely, which is handy for things like a player character. A `Material`'s `friction` and `static_friction` values only take effect in full physics.
+
+Full physics uses the contact points generated during collision detection, which are available on `CollisionData.contacts` (and can be visualized with `Debug.draw_contacts`).
 
 ## Integration
 
@@ -164,7 +186,8 @@ class Main {
       width: 64, // Affects the bounds for collision checks.
       height: 64, // Affects the bounds for collision checks.
       gravity_y: 20, // Force of Gravity on the Y axis. Also available for the X axis.
-      iterations: 2 // Sets the number of Physics iterations that will occur each time the World steps.
+      iterations: 2, // Sets the number of Physics iterations that will occur each time the World steps.
+      arcade: false // Use full, Box2D-style physics (the default). Set to true for arcade physics (no rotation or friction from collisions).
     });
 
     // Create a Body with a Circle Collider and add it to the World
@@ -229,4 +252,5 @@ Check out the source code for the [Echo Samples](https://austineast.dev/echo/) h
 * Allow Concave Polygons (through Convex Decomposition)
 * Sleeping Body optimations
 * Constraints
+* Persistent contacts with warm-starting (improves stacking stability in full physics)
 * Compiler Flag to turn off a majority of inlined functions (worse performance, but MUCH smaller filesize)

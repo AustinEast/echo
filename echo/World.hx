@@ -49,6 +49,15 @@ class World implements Disposable {
    * The amount of iterations that occur each time the World is stepped. The higher the number, the more stable the Physics Simulation will be, at the cost of performance.
    */
   public var iterations:Int;
+  /**
+   * Flag that determines how Collisions in the World are resolved. Defaults to `false`.
+   *
+   * When `true` (arcade physics), Collisions only affect the Bodies' positions and velocities - Bodies are never rotated by a Collision.
+   * When `false` (full physics), Collisions are resolved at their contact points, so that Bodies are also spun by off-center impacts and friction is applied along surfaces.
+   *
+   * Individual Listeners can override this setting with their own `arcade` option.
+   */
+  public var arcade:Bool;
 
   public var history:Null<History<Array<BodyState>>>;
 
@@ -68,6 +77,7 @@ class World implements Disposable {
 
     listeners = new Listeners(options.listeners);
     iterations = options.iterations == null ? 5 : options.iterations;
+    arcade = options.arcade == null ? false : options.arcade;
     if (options.history != null) history = new History(options.history);
   }
   /**

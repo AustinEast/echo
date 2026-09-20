@@ -119,6 +119,63 @@ In full physics, each Body has an `inertia` (its resistance to being spun) that 
 
 Full physics uses the contact points generated during collision detection, which are available on `CollisionData.contacts` (and can be visualized with `Debug.draw_contacts`).
 
+## Utilities
+
+Echo ships with a handful of utilities in `echo.util` that build on the core simulation.
+
+### TileMap Colliders
+
+`echo.util.TileMap` turns an `Array<Int>` of tile data into static collider Bodies, so a tile-based level can be dropped straight into a `World`:
+
+```haxe
+// `data` is a flat Array of tile indices, row by row. Tiles with an index >= start_index (1 by default) are solid.
+var tiles = echo.util.TileMap.generate(data, tile_width, tile_height, width_in_tiles, height_in_tiles, offset_x, offset_y);
+for (b in tiles) world.add(b);
+
+world.listen(player, tiles);
+```
+
+`generate()` merges runs of neighboring tiles into as few Rects as possible, which keeps the Body count (and the broadphase) small. Pass a `shapes` Array of `TileShape`s to give particular tile indices a slope (`slope_direction` plus a `Gentle`/`Sharp` and `Thick`/`Thin` `slope_shape`) or any custom `ShapeOptions`, and an `ignore` Array for indices that shouldn't collide at all. `generate_grid()` skips the merging and produces one Body per tile, which is handy when tiles need to be removed individually at runtime.
+
+### Bezier Curves
+
+`echo.util.Bezier` is a path made of `Linear`, `Quadratic`, or `Cubic` Bezier curves defined by control points. The curve is flattened into a cached `points` Array and a `lines` Array of `Line`s, so it can be drawn, walked along, or used with Linecasts:
+
+```haxe
+var bezier = new Bezier([new Vector2(0, 0), new Vector2(50, -80), new Vector2(100, -80), new Vector2(150, 0)], Cubic);
+
+var midpoint = bezier.get_point(0.5); // a point on the curve, from 0.0 (start) to 1.0 (end)
+var quarter = bezier.get_point_at_length(bezier.length * 0.25);
+for (line in bezier.lines) line.linecast(world.members, world);
+```
+
+Control points can be added, moved (`set_control_point()` optionally drags a cubic curve's neighboring handles along), and removed at any time; the cached lines are rebuilt lazily. `line_mode` chooses how the curve is flattened: `Segments(amount)` for a fixed number of Lines per curve, or `Subdivisions(options)` (the default) for adaptive subdivision that puts more Lines where the curve bends. Static helpers such as `Bezier.point_on_cubic_curve()` are available for one-off calculations.
+
+### History (Undo/Redo)
+
+Passing a `history` size to a World's options makes it record every Body's transform and velocities each step in a ring buffer of that many states. `world.undo()` and `world.redo()` then step the simulation backwards and forwards through the recorded states - useful for debugging (the sample app binds them to the arrow keys) or for rewind mechanics:
+
+```haxe
+var world = Echo.start({width: 640, height: 360, history: 600}); // keep the last 10 seconds at 60 steps/second
+world.undo();
+world.redo();
+```
+
+`echo.util.History` (and the `Ring` buffer it is built on) can also be used on their own for any undo/redo stack.
+
+### Debug Drawing
+
+`echo.util.Debug` draws a World's Bodies, Shapes, bounds, QuadTrees, Collision contact points, Linecast/Raycast results, Bezier curves, and Verlet composites. It only depends on a few drawing primitives, so any renderer can be supported by extending it and overriding `draw_line()`, `draw_rect()`, `draw_circle()`, and `clear()`. Ready-made `HeapsDebug` and `OpenFLDebug` subclasses are included (compiled in when the `heaps` or `openfl` defines are present):
+
+```haxe
+var debug = new echo.util.HeapsDebug(s2d);
+debug.draw_quadtree = false;
+debug.draw_contacts = true;
+
+// In your render loop
+debug.draw(world);
+```
+
 ### Verlet (Softbody) Simulation
 
 `echo.util.verlet.Verlet` is a standalone Verlet integration simulation for softbody effects (ropes, cloth, jelly boxes). It is built from `Dot`s (points), `Constraint`s (distance, pin, rotation), and `Composite`s (groups of Dots and Constraints, roughly analogous to a `Body`).
@@ -289,8 +346,6 @@ haxe bench.hxml
 The suite cross-checks the broadphase against a brute force scan, and covers full physics resolution, verlet collisions, and raycasting. The benchmark reports milliseconds per step for the sample's stacking scenes in both arcade and full physics.
 
 # Roadmap
-## Sooner
-* Update Readme with info on the various utilities (Tilemap, Bezier, etc)
 ## Later
 * Allow Concave Polygons (through Convex Decomposition)
 * Sleeping Body optimations

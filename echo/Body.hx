@@ -215,6 +215,12 @@ class Body implements Disposable #if cog implements cog.IComponent #end {
   @:allow(echo.World, echo.Collisions, echo.util.Debug)
   var quadtree_data:QuadTreeData;
   /**
+   * Scratch bitmask used by `Collisions` during broadphase queries to track which of a Listener's Body groups this Body belongs to.
+   */
+  @:dox(hide)
+  @:allow(echo.Collisions)
+  var collision_mask:Int = 0;
+  /**
    * Creates a new Body.
    * @param options Optional values to configure the new Body
    */
@@ -404,7 +410,9 @@ class Body implements Disposable #if cog implements cog.IComponent #end {
    * @return Null<AABB>
    */
   public function bounds(?aabb:AABB):AABB {
-    if (shapes.length == 0) return AABB.get(x, y, 1, 1);
+    if (shapes.length == 0) return aabb == null ? AABB.get(x, y, 1, 1) : aabb.set(x, y, 1, 1);
+    // Single shape - skip the intermediate AABB
+    if (shapes.length == 1) return shapes[0].bounds(aabb);
     var b1 = shapes[0].bounds();
 
     if (shapes.length > 1) for (i in 1...shapes.length) {

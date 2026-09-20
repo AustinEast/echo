@@ -27,8 +27,14 @@ class Polygon extends Shape implements Poolable {
    * Use `set_vertice()` or `set_vertices()` to edit this Polygon's normals.
    */
   public var normals(get, never):Array<Vector2>;
+  /**
+   * `true` if the Polygon's computed `normals` point out of the Polygon, `false` if they point into it. Depends on the winding order of the vertices.
+   */
+  public var normals_outward(get, never):Bool;
 
   var local_vertices:Array<Vector2>;
+
+  var _normals_outward:Bool = false;
 
   var _vertices:Array<Vector2>;
 
@@ -301,17 +307,21 @@ class Polygon extends Shape implements Poolable {
     // clear any extra vertices
     while (_vertices.length > count) _vertices.pop();
 
+    // Apply the local-to-world matrix directly (equivalent to `transform.point_to_world()`, without allocating per vertex)
+    var m = transform.get_local_to_world_matrix();
     for (i in 0...count) {
-      if (local_vertices[i] == null) continue;
+      var v = local_vertices[i];
+      if (v == null) continue;
       if (_vertices[i] == null) _vertices[i] = new Vector2(0, 0);
-      var pos = transform.point_to_world(local_vertices[i].x, local_vertices[i].y);
-      _vertices[i].set(pos.x, pos.y);
+      _vertices[i].set(m.m00 * v.x + m.m10 * v.y + m.m20, m.m01 * v.x + m.m11 * v.y + m.m21);
     }
   }
   /**
    *  Compute face normals
    */
   inline function compute_normals():Void {
+    var cx = 0.;
+    var cy = 0.;
     for (i in 0...count) {
       var v = _vertices[(i + 1) % count].clone();
       v -= _vertices[i];
@@ -321,6 +331,15 @@ class Polygon extends Shape implements Poolable {
       if (_normals[i] == null) _normals[i] = v.clone();
       else _normals[i].copy_from(v);
       _normals[i].normalize();
+
+      cx += _vertices[i].x;
+      cy += _vertices[i].y;
+    }
+    // Determine which way the normals face by testing one against the direction from the polygon's center to its face
+    if (count > 0) {
+      cx /= count;
+      cy /= count;
+      _normals_outward = _normals[0].x * (_vertices[0].x - cx) + _normals[0].y * (_vertices[0].y - cy) > 0;
     }
   }
 
@@ -344,6 +363,16 @@ class Polygon extends Shape implements Poolable {
     }
 
     return _normals;
+  }
+
+  inline function get_normals_outward():Bool {
+    if (dirty_vertices) {
+      dirty_vertices = false;
+      transform_vertices();
+      compute_normals();
+    }
+
+    return _normals_outward;
   }
 
   // setters

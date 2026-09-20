@@ -242,6 +242,10 @@ class QuadTreeData {
    * Helper flag to check if this Data has been counted during queries.
    */
   public var flag = false;
+  /**
+   * The Body this Data belongs to, so that broadphase query results can be mapped straight back to their Bodies.
+   */
+  public var body:Null<Body> = null;
 }
 
 enum abstract Direction(Int) from Int to Int {

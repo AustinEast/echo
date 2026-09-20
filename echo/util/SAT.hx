@@ -292,31 +292,25 @@ class SAT {
    * @return Null<CollisionData>
    */
   public static function polygon_and_polygon(polygon1:Polygon, polygon2:Polygon, flip:Bool = false):Null<CollisionData> {
-    var data1:Null<CollisionData>;
-    var data2:Null<CollisionData>;
+    // Test polygon1's face normals
+    if (!check_polygons(polygon1, polygon2)) return null;
+    var overlap1 = sat_overlap;
+    var nx1 = sat_nx;
+    var ny1 = sat_ny;
 
-    data1 = check_polygons(polygon1, polygon2, flip);
-    if (data1 == null) return null;
+    // Test polygon2's face normals
+    if (!check_polygons(polygon2, polygon1)) return null;
 
-    data2 = check_polygons(polygon2, polygon1, !flip);
-    if (data2 == null) return null;
+    // Use the axis of least penetration. The stored normals point into the polygon that owns the face, so they are oriented here to
+    // point from Shape A to Shape B (where A is polygon1, unless flipped).
+    var col:CollisionData;
+    if (overlap1 < sat_overlap) col = flip ? CollisionData.get(overlap1, nx1, ny1) : CollisionData.get(overlap1, -nx1, -ny1);
+    else col = flip ? CollisionData.get(sat_overlap, -sat_nx, -sat_ny) : CollisionData.get(sat_overlap, sat_nx, sat_ny);
 
-    // trace('data1: ${data1.overlap}, data2: ${data2.overlap}');
+    col.sa = flip ? polygon2 : polygon1;
+    col.sb = flip ? polygon1 : polygon2;
 
-    if (data1.overlap < 0) {
-      data1.overlap = Math.abs(data1.overlap);
-    }
-    if (data2.overlap < 0) {
-      data2.overlap = Math.abs(data2.overlap);
-    }
-
-    if (data1.overlap < data2.overlap) {
-      data2.put();
-      return data1;
-    }
-
-    data1.put();
-    return data2;
+    return col;
   }
 
   /**
@@ -530,66 +524,62 @@ class SAT {
     return col;
   }
 
-  static function check_polygons(polygon1:Polygon, polygon2:Polygon, flip:Bool = false):Null<CollisionData> {
-    var test1:Float = 0;
-    var test2:Float = 0;
-    var testNum:Float = 0;
-    var min1:Float = 0;
-    var max1:Float = 0;
-    var min2:Float = 0;
-    var max2:Float = 0;
-    var closest:Float = 0x3FFFFFFF;
-    var col:Null<CollisionData> = null;
-    var normal = new Vector2(0, 0);
+  // Results of the last `check_polygons()` call - the axis of least penetration
+  static var sat_overlap:Float = 0;
+  static var sat_nx:Float = 0;
+  static var sat_ny:Float = 0;
+  /**
+   * Projects both Polygons onto each of `polygon1`'s face normals, looking for a separating axis.
+   * @return `false` if a separating axis was found (the Polygons don't overlap). Otherwise `true`, with the axis of least penetration stored in
+   * `sat_overlap`, `sat_nx`, and `sat_ny` (the normal as stored in `polygon1.normals`, which points into `polygon1`).
+   */
+  static function check_polygons(polygon1:Polygon, polygon2:Polygon):Bool {
+    var verts1 = polygon1.vertices;
+    var norms1 = polygon1.normals;
+    var verts2 = polygon2.vertices;
+    var count1 = polygon1.count;
+    var count2 = polygon2.count;
+    var closest = Math.POSITIVE_INFINITY;
 
-    // loop to begin projection
-    for (i in 0...polygon1.count) {
-      normal.set(polygon1.normals[i].x, polygon1.normals[i].y);
+    for (i in 0...count1) {
+      var nx = norms1[i].x;
+      var ny = norms1[i].y;
 
       // project polygon1
-      max1 = min1 = normal.dot(polygon1.vertices[0]);
-
-      for (j in 1...polygon1.count) {
-        testNum = normal.dot(polygon1.vertices[j]);
-        if (testNum < min1) min1 = testNum;
-        if (testNum > max1) max1 = testNum;
+      var v = verts1[0];
+      var min1 = nx * v.x + ny * v.y;
+      var max1 = min1;
+      for (j in 1...count1) {
+        v = verts1[j];
+        var t = nx * v.x + ny * v.y;
+        if (t < min1) min1 = t;
+        if (t > max1) max1 = t;
       }
 
       // project polygon2
-      max2 = min2 = normal.dot(polygon2.vertices[0]);
-
-      for (j in 1...polygon2.count) {
-        testNum = normal.dot(polygon2.vertices[j]);
-        if (testNum < min2) min2 = testNum;
-        if (testNum > max2) max2 = testNum;
+      v = verts2[0];
+      var min2 = nx * v.x + ny * v.y;
+      var max2 = min2;
+      for (j in 1...count2) {
+        v = verts2[j];
+        var t = nx * v.x + ny * v.y;
+        if (t < min2) min2 = t;
+        if (t > max2) max2 = t;
       }
 
-      test1 = min1 - max2;
-      test2 = min2 - max1;
+      // Separating axis found - no collision
+      if (min1 - max2 > 0 || min2 - max1 > 0) return false;
 
-      if (test1 > 0 || test2 > 0) return null;
-
-      var overlap = -(max2 - min1);
-      if (flip) overlap *= -1;
-
-      if (Math.abs(overlap) < closest) {
-        if (col == null) col = CollisionData.get(overlap, normal.x, normal.y);
-        else col.set(overlap, normal.x, normal.y);
-        closest = Math.abs(overlap);
+      var overlap = max2 - min1;
+      if (overlap < 0) overlap = -overlap;
+      if (overlap < closest) {
+        closest = overlap;
+        sat_nx = nx;
+        sat_ny = ny;
       }
     }
 
-    if (col == null) return null;
-
-    col.sa = flip ? polygon2 : polygon1;
-    col.sb = flip ? polygon1 : polygon2;
-
-    // collision normal is calculated as resolution for poly2, so we need to
-    // negate the normal if we are not flipping the collision check.
-    if (!flip) {
-      col.normal.negate();
-    }
-
-    return col;
+    sat_overlap = closest;
+    return true;
   }
 }

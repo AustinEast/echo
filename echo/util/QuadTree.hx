@@ -63,7 +63,7 @@ class QuadTree extends AABB {
   public static inline function get(x:Float = 0, y:Float = 0, width:Float = 1, height:Float = 1):QuadTree {
     var qt = pool.get();
     qt.set(x, y, width, height);
-    qt.clear();
+    qt.reset();
     qt.pooled = false;
     return qt;
   }
@@ -78,9 +78,19 @@ class QuadTree extends AABB {
   public static inline function get_from_min_max(min_x:Float, min_y:Float, max_x:Float, max_y:Float):QuadTree {
     var qt = pool.get();
     qt.set_from_min_max(min_x, min_y, max_x, max_y);
-    qt.clear();
+    qt.reset();
     qt.pooled = false;
     return qt;
+  }
+  /**
+   * Clears the QuadTree and restores it to a root node with default settings. Pooled QuadTrees may have previously been children of another
+   * tree, so their `depth` (and settings) must be reset before reuse - otherwise a recycled root may never split.
+   */
+  inline function reset() {
+    clear();
+    depth = 0;
+    @:bypassAccessor max_depth = 5;
+    @:bypassAccessor max_contents = 10;
   }
   /**
    * Puts the QuadTree back in the pool of available QuadTrees.
@@ -114,8 +124,13 @@ class QuadTree extends AABB {
   }
   /**
    * Attempts to remove the `QuadTreeData` from the QuadTree.
+   * @param data The `QuadTreeData` to remove.
+   * @param allow_shake If true, branches that become sparse after the removal are collapsed.
+   * @param prune If true, only nodes overlapping `data.bounds` are searched. This is much faster, but is only valid if `data.bounds` still holds
+   * the bounds the data was inserted with - if the bounds have changed since, use `update()` (or leave this false).
    */
-  public function remove(data:QuadTreeData, allow_shake:Bool = true):Bool {
+  public function remove(data:QuadTreeData, allow_shake:Bool = true, prune:Bool = false):Bool {
+    if (prune && (data == null || data.bounds == null || !data.bounds.overlaps(this))) return false;
     if (leaf) {
       var i = 0;
       while (i < contents.length) {
@@ -131,7 +146,7 @@ class QuadTree extends AABB {
     }
 
     var removed = false;
-    for (child in children) if (child != null && child.remove(data)) removed = true;
+    for (child in children) if (child != null && child.remove(data, allow_shake, prune)) removed = true;
     if (allow_shake && removed) shake();
 
     return removed;
@@ -150,14 +165,26 @@ class QuadTree extends AABB {
    * @param result An Array containing all `QuadTreeData` that collides with the shape.
    */
   public function query(aabb:AABB, result:Array<QuadTreeData>) {
+    var start = result.length;
+    query_node(aabb, result);
+    // Data that spans several leaves is stored in each of them - the flags kept it from being pushed more than once, so reset them now
+    for (i in start...result.length) result[i].flag = false;
+  }
+
+  function query_node(aabb:AABB, result:Array<QuadTreeData>) {
     if (!overlaps(aabb)) {
       return;
     }
     if (leaf) {
-      for (data in contents) if (data != null && data.bounds.overlaps(aabb)) result.push(data);
+      for (data in contents) {
+        if (data != null && !data.flag && data.bounds.overlaps(aabb)) {
+          data.flag = true;
+          result.push(data);
+        }
+      }
     }
     else {
-      for (child in children) child.query(aabb, result);
+      for (child in children) child.query_node(aabb, result);
     }
   }
   /**
@@ -171,6 +198,7 @@ class QuadTree extends AABB {
     var len = count;
     if (len == 0) {
       clear_children();
+      return true;
     }
     else if (len < max_contents) {
       nodes_list.resize(0);
@@ -192,7 +220,10 @@ class QuadTree extends AABB {
       clear_children();
       return true;
     }
-    return false;
+    // This branch is too full to collapse - try to collapse its child branches instead
+    var shaken = false;
+    for (child in children) if (child != null && !child.leaf && child.shake()) shaken = true;
+    return shaken;
   }
   /**
    * Splits the Quadtree into 4 Quadtree children, and disperses it's `QuadTreeData` contents into them.
@@ -290,6 +321,8 @@ class QuadTree extends AABB {
       }
       else for (i in 0...node.children.length) nodes_list.push(node.children[i]);
     }
+    // Leave the flags clear for `query()`, which relies on them to skip data stored in more than one leaf
+    reset_data_flags();
     return num;
   }
 
@@ -308,7 +341,7 @@ class QuadTree extends AABB {
   }
 
   inline function set_max_contents(value:Int) {
-    for (i in 0...children.length) if (children[i] != null) children[i].max_depth = value;
+    for (i in 0...children.length) if (children[i] != null) children[i].max_contents = value;
     max_contents = value;
     shake();
     return max_contents;

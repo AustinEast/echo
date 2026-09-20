@@ -127,7 +127,7 @@ class World implements Disposable {
     body.world = this;
     body.dirty = true;
     members.push(body);
-    body.quadtree_data = {id: body.id, bounds: body.bounds(), flag: false};
+    body.quadtree_data = {id: body.id, bounds: body.bounds(), flag: false, body: body};
     body.is_static() ? static_quadtree.insert(body.quadtree_data) : quadtree.insert(body.quadtree_data);
     return body;
   }
@@ -195,10 +195,21 @@ class World implements Disposable {
    */
   public function reset_quadtrees() {
     init = true;
+    // Carry over any tuned settings from the previous QuadTrees
+    var max_depth = quadtree == null ? -1 : quadtree.max_depth;
+    var max_contents = quadtree == null ? -1 : quadtree.max_contents;
+    var static_max_depth = static_quadtree == null ? -1 : static_quadtree.max_depth;
+    var static_max_contents = static_quadtree == null ? -1 : static_quadtree.max_contents;
     if (quadtree != null) quadtree.put();
     quadtree = QuadTree.get();
     if (static_quadtree != null) static_quadtree.put();
     static_quadtree = QuadTree.get();
+    if (max_depth > -1) {
+      quadtree.max_depth = max_depth;
+      quadtree.max_contents = max_contents;
+      static_quadtree.max_depth = static_max_depth;
+      static_quadtree.max_contents = static_max_contents;
+    }
     var r = center().to_aabb(true);
     quadtree.load(r);
     static_quadtree.load(r);

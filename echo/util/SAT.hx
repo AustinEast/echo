@@ -36,11 +36,85 @@ class SAT {
     for (i in 0...polygon.count) {
       var v = polygon.vertices;
       if ((v[i].y > point.y) != (v[j].y > point.y)
-        && (point.x < (v[j].x - v[i].x) * (point.y - v[i].y) / (v[j].y - v[i].y) + v[i].x)) inside != inside;
+        && (point.x < (v[j].x - v[i].x) * (point.y - v[i].y) / (v[j].y - v[i].y) + v[i].x)) inside = !inside;
       j = i;
     }
 
     return inside;
+  }
+  /**
+   * Finds the closest point on the line segment (`ax`, `ay`) -> (`bx`, `by`) to the point (`px`, `py`), storing the result in `out`.
+   */
+  public static inline function closest_point_on_segment(ax:Float, ay:Float, bx:Float, by:Float, px:Float, py:Float, out:Vector2):Vector2 {
+    var ex = bx - ax;
+    var ey = by - ay;
+    var len_sq = ex * ex + ey * ey;
+    var t = len_sq == 0 ? 0 : ((px - ax) * ex + (py - ay) * ey) / len_sq;
+    t = t.clamp(0, 1);
+    return out.set(ax + ex * t, ay + ey * t);
+  }
+  /**
+   * Finds the closest point on the edge of a Rect to the point `v`. If `v` is inside the Rect, the point is on the nearest edge.
+   */
+  public static function closest_point_on_rect_edge(r:Rect, v:Vector2):Vector2 {
+    if (r.transformed_rect != null && r.rotation != 0) return closest_point_on_polygon_edge(r.transformed_rect, v);
+
+    var l = r.left;
+    var rt = r.right;
+    var t = r.top;
+    var b = r.bottom;
+    var x = v.x.clamp(l, rt);
+    var y = v.y.clamp(t, b);
+
+    // Point is inside the Rect - snap it to the nearest edge
+    if (x == v.x && y == v.y) {
+      var dl = v.x - l;
+      var dr = rt - v.x;
+      var dt = v.y - t;
+      var db = b - v.y;
+      var m = Math.min(Math.min(dl, dr), Math.min(dt, db));
+      if (m == dl) x = l;
+      else if (m == dr) x = rt;
+      else if (m == dt) y = t;
+      else y = b;
+    }
+
+    return new Vector2(x, y);
+  }
+  /**
+   * Finds the closest point on the edge of a Circle to the point `v`.
+   */
+  public static function closest_point_on_circle_edge(c:Circle, v:Vector2):Vector2 {
+    var dx = v.x - c.x;
+    var dy = v.y - c.y;
+    var d = Math.sqrt(dx * dx + dy * dy);
+    // Point is at the Circle's center - pick an arbitrary direction
+    if (d == 0) return new Vector2(c.x + c.radius, c.y);
+    var s = c.radius / d;
+    return new Vector2(c.x + dx * s, c.y + dy * s);
+  }
+  /**
+   * Finds the closest point on the edge of a Polygon to the point `v`.
+   */
+  public static function closest_point_on_polygon_edge(p:Polygon, v:Vector2):Vector2 {
+    var verts = p.vertices;
+    var count = p.count;
+    var best = new Vector2(v.x, v.y);
+    if (count == 0) return best;
+    var best_dist = Math.POSITIVE_INFINITY;
+    var j = count - 1;
+    for (i in 0...count) {
+      closest_point_on_segment(verts[j].x, verts[j].y, verts[i].x, verts[i].y, v.x, v.y, closest);
+      var dx = closest.x - v.x;
+      var dy = closest.y - v.y;
+      var dist = dx * dx + dy * dy;
+      if (dist < best_dist) {
+        best_dist = dist;
+        best.set(closest.x, closest.y);
+      }
+      j = i;
+    }
+    return best;
   }
 
   public static inline function rect_contains(r:Rect, v:Vector2):Bool {

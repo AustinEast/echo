@@ -6,6 +6,7 @@ import echo.util.verlet.Constraints;
 import echo.util.verlet.Composite;
 import echo.math.Vector2;
 import echo.util.verlet.Verlet;
+import echo.Body;
 import echo.World;
 
 using hxd.Math;
@@ -21,13 +22,50 @@ class VerletState extends BaseState {
     verlet = new Verlet({
       width: parent.width,
       height: parent.height,
-      gravity_y: 20
+      gravity_y: 20,
+      // Dots will collide with (be pushed out of) the Bodies in this World
+      world: parent
     });
 
     // Constrict composites into th simulation bounds
     verlet.bounds_bottom = true;
     verlet.bounds_left = true;
     verlet.bounds_right = true;
+
+    // Add some static Bodies to the World for the Verlet composites to drape over and slide off of
+    // A ramp under the falling boxes
+    parent.add(new Body({
+      mass: STATIC,
+      x: parent.width * 0.5,
+      y: parent.height * 0.8,
+      rotation: -12,
+      shape: {
+        type: RECT,
+        width: 220,
+        height: 12
+      }
+    }));
+    // A circle under the hanging cloth
+    parent.add(new Body({
+      mass: STATIC,
+      x: 300,
+      y: 160,
+      shape: {
+        type: CIRCLE,
+        radius: 28
+      }
+    }));
+    // A pentagon under the hanging rope
+    parent.add(new Body({
+      mass: STATIC,
+      x: 105,
+      y: 160,
+      shape: {
+        type: POLYGON,
+        sides: 5,
+        radius: 26
+      }
+    }));
 
     // Create a couple random rectangles
     for (i in 0...4) {

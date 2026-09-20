@@ -200,10 +200,10 @@ class Shape #if cog implements cog.IComponent #end {
 
   public function contains(v:Vector2):Bool return get_position() == v;
   /**
-   * TODO
+   * Finds the closest point on the edge of the Shape to the point `v`. If `v` is inside the Shape, the returned point is on the nearest edge - useful for pushing points out of a Shape.
+   * @param v The point to check against.
+   * @return A new `Vector2` on the edge of the Shape.
    */
-  @:dox(hide)
-  @:noCompletion
   public function closest_point_on_edge(v:Vector2):Vector2 return get_position();
 
   public function intersect(l:Line):Null<IntersectionData> return null;

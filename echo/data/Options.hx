@@ -337,10 +337,18 @@ typedef VerletOptions = {
   var ?iterations:Int;
   /**
    * The fixed Step rate of the Verlet World. The Verlet simulation must be stepped forward at a consistent rate, or it's stability will quickly deteriorate.
-   * 
+   *
    * Default value is `60`.
    */
   var ?fixed_framerate:Float;
+  /**
+   * An optional `World` whose Bodies the Verlet World's Dots will collide with (Dots are pushed out of any solid Shape they end up inside of).
+   */
+  var ?world:World;
+  /**
+   * Shapes that the Verlet World's Dots will collide with (Dots are pushed out of any solid Shape they end up inside of).
+   */
+  var ?colliders:Array<Shape>;
 }
 
 typedef RectOptions = {

@@ -81,6 +81,8 @@ class Circle extends Shape implements Poolable {
 
   override function contains(v:Vector2):Bool return this.circle_contains(v);
 
+  override inline function closest_point_on_edge(v:Vector2):Vector2 return this.closest_point_on_circle_edge(v);
+
   override function intersect(l:Line):Null<IntersectionData> return this.circle_intersects(l);
 
   override inline function overlaps(s:Shape):Bool {

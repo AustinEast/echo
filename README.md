@@ -110,6 +110,30 @@ In full physics, each Body has an `inertia` (its resistance to being spun) that 
 
 Full physics uses the contact points generated during collision detection, which are available on `CollisionData.contacts` (and can be visualized with `Debug.draw_contacts`).
 
+### Verlet (Softbody) Simulation
+
+`echo.util.verlet.Verlet` is a standalone Verlet integration simulation for softbody effects (ropes, cloth, jelly boxes). It is built from `Dot`s (points), `Constraint`s (distance, pin, rotation), and `Composite`s (groups of Dots and Constraints, roughly analogous to a `Body`).
+
+Dots can collide with Shapes and with the Bodies of a regular `World` - a Dot that ends up inside (or passes through) a solid Shape is pushed back out through the face it entered. This is a one-way interaction: Bodies affect Dots, but Dots do not push Bodies around.
+
+```haxe
+var verlet = new Verlet({
+  width: 640,
+  height: 360,
+  gravity_y: 20,
+  world: world // Dots collide with this World's Bodies
+});
+
+// Dots can also collide with standalone Shapes
+verlet.colliders.push(Shape.circle(320, 180, 32));
+
+var rope = Verlet.rope([for (i in 0...10) new Vector2(80 + i * 10, 70)], 0.7, [0]);
+verlet.add(rope);
+
+// In your update loop
+verlet.step(dt);
+```
+
 ## Integration
 
 ### Codebase Integration

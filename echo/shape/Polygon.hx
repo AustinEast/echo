@@ -212,6 +212,8 @@ class Polygon extends Shape implements Poolable {
 
   override function contains(v:Vector2):Bool return this.polygon_contains(v);
 
+  override inline function closest_point_on_edge(v:Vector2):Vector2 return this.closest_point_on_polygon_edge(v);
+
   override function intersect(l:Line):Null<IntersectionData> return this.polygon_intersects(l);
 
   override inline function overlaps(s:Shape):Bool {

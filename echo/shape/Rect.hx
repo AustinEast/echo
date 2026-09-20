@@ -169,6 +169,8 @@ class Rect extends Shape implements Poolable {
 
   override inline function contains(p:Vector2):Bool return this.rect_contains(p);
 
+  override inline function closest_point_on_edge(v:Vector2):Vector2 return this.closest_point_on_rect_edge(v);
+
   override inline function intersect(l:Line):Null<IntersectionData> return this.rect_intersects(l);
 
   override inline function overlaps(s:Shape):Bool {

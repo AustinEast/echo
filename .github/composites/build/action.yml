@@ -23,5 +23,6 @@ runs:
         shell: bash
         run: |
           haxe test.hxml
+          haxe test-suite.hxml
           haxe sample.hxml
           haxe dox.hxml

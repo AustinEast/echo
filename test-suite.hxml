@@ -1,0 +1,15 @@
+# Runs the test suite (see test/suite). Requires node to run the JS build.
+# For HashLink, swap the output lines for: -hl bin/test-suite.hl  and  -cmd hl bin/test-suite.hl
+
+# class paths
+-cp test
+
+# entry point
+-main suite.TestRunner
+
+# libraries
+-lib echo
+
+# output
+-js bin/test-suite.js
+-cmd node bin/test-suite.js

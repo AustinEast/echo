@@ -1,0 +1,19 @@
+# Runs the performance benchmark (see test/suite/Bench.hx). Requires node to run the JS build.
+# Pass "arcade" or "full" to only run one mode, and "stats" to print QuadTree occupancy: -cmd node bin/bench.js full stats
+# For HashLink, swap the output lines for: -hl bin/bench.hl  and  -cmd hl bin/bench.hl
+
+# class paths
+-cp test
+
+# entry point
+-main suite.Bench
+
+# libraries
+-lib echo
+
+# flags
+-dce full
+
+# output
+-js bin/bench.js
+-cmd node bin/bench.js

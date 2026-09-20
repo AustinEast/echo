@@ -277,6 +277,17 @@ Check out the source code for the [Echo Samples](https://austineast.dev/echo/) h
 * [HaxePunk](https://haxepunk.com): https://github.com/XANOZOID/EchoHaxePunk
 
 
+# Development
+
+Echo has a test suite and a benchmark under `test/suite`. Both build to JavaScript and run with node (edit the `.hxml` output lines to target HashLink instead):
+
+```
+haxe test-suite.hxml
+haxe bench.hxml
+```
+
+The suite cross-checks the broadphase against a brute force scan, and covers full physics resolution, verlet collisions, and raycasting. The benchmark reports milliseconds per step for the sample's stacking scenes in both arcade and full physics.
+
 # Roadmap
 ## Sooner
 * Update Readme with info on the various utilities (Tilemap, Bezier, etc)

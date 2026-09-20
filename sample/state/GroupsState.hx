@@ -26,7 +26,7 @@ class GroupsState extends BaseState {
         mass: STATIC,
         x: (world.width / 4) * i + (world.width / 8),
         y: world.height - 30,
-        material: {elasticity: 0.3},
+        material: {elasticity: 0.7, friction: 0.05, static_friction: 0.1},
         shape: {
           type: RECT,
           width: world.width / 8,

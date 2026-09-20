@@ -188,6 +188,10 @@ class IntersectionData implements Poolable {
    */
   public var line2:Null<Line>;
   /**
+   * The Ray that produced this Intersection. Only set by Raycasts - `line` then refers to the Ray's clipped `Ray.line`.
+   */
+  public var ray:Null<Ray>;
+  /**
    * The position along the line where the line hit the shape.
    */
   public final hit = Vector2.zero;
@@ -214,6 +218,7 @@ class IntersectionData implements Poolable {
     i.line = null;
     i.shape = null;
     i.line2 = null;
+    i.ray = null;
     i.set(distance, overlap, x, y, normal_x, normal_y, inverse_normal);
     i.pooled = false;
     return i;

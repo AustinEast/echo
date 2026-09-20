@@ -147,6 +147,15 @@ class Debug {
     draw_intersection_data(closest, draw_overlap, draw_normal);
   }
 
+  /**
+   * Draws a Ray as a line from its start. Since a Ray may be endless, `length` sets how far to draw it - defaulting to the Ray's `max_distance`, or `10000` if it has none.
+   */
+  public function draw_ray(ray:Ray, ?length:Float, ?color:Int) {
+    var l = length != null ? length : ray.max_distance > 0 ? ray.max_distance : 10000;
+    var end = ray.point_along(l);
+    draw_line(ray.start.x, ray.start.y, end.x, end.y, color == null ? intersection_color : color);
+  }
+
   public function draw_intersection_data(data:IntersectionData, draw_overlap:Bool = true, draw_normal:Bool = true) {
     draw_line(data.line.start.x, data.line.start.y, data.hit.x, data.hit.y, intersection_color);
     if (draw_overlap) draw_line(data.hit.x, data.hit.y, data.line.end.x, data.line.end.y, intersection_overlap_color);

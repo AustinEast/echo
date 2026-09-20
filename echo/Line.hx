@@ -82,7 +82,7 @@ class Line implements Proxy implements Poolable {
 
   public function contains(v:Vector2):Bool {
     // Find the slope
-    var m = (dy - y) / (dx - y);
+    var m = (dy - y) / (dx - x);
     var b = y - m * x;
     return v.y == m * v.x + b;
   }
@@ -155,7 +155,7 @@ class Line implements Proxy implements Poolable {
     }
 
     if (min_x - max_x == 0) max_x += 1;
-    if (min_y + max_y == 0) max_y += 1;
+    if (min_y - max_y == 0) max_y += 1;
 
     return (aabb == null) ? AABB.get_from_min_max(min_x, min_y, max_x, max_y) : aabb.set_from_min_max(min_x, min_y, max_x, max_y);
   }

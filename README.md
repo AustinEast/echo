@@ -81,9 +81,18 @@ When a Shape is added to a Body, it's transform (x, y, rotation) becomes relativ
 
 It's important to note that all Shapes (including Rectangles) have their origins centered.
 
-### Lines
+### Lines and Rays
 
 Use Lines to perform Linecasts against other Lines, Bodies, and Shapes. Check out the `Echo` class for various methods to preform Linecasts.
+
+A `Ray` is like a Line with a start point and a direction, but no end - it extends endlessly (or up to an optional `max_distance`). Rays are cast with `Echo.raycast()` / `Echo.raycast_all()`, and return the same `Intersection` results as Linecasts:
+
+```haxe
+// An endless Ray pointing right from (0, 0)
+var ray = Ray.get(0, 0, 1, 0);
+var hit = ray.raycast(world.members, world);
+if (hit != null) trace('hit ${hit.body} at ${hit.closest.hit}, ${hit.closest.distance} units away');
+```
 
 ### Listeners
 
@@ -270,7 +279,6 @@ Check out the source code for the [Echo Samples](https://austineast.dev/echo/) h
 
 # Roadmap
 ## Sooner
-* Endless length Line support
 * Update Readme with info on the various utilities (Tilemap, Bezier, etc)
 ## Later
 * Allow Concave Polygons (through Convex Decomposition)

@@ -236,6 +236,98 @@ class Echo {
     return closest;
   }
   /**
+   * Casts a Ray created from the supplied floats, returning the Intersection with the closest Body.
+   * @param x The X position the Ray starts from.
+   * @param y The Y position the Ray starts from.
+   * @param direction_x The X component of the Ray's direction.
+   * @param direction_y The Y component of the Ray's direction.
+   * @param test The Body or Array of Bodies to Cast the Ray at.
+   * @param max_distance The furthest distance the Ray reaches. `0` means no limit.
+   * @return Null<Intersection> the Intersection with the closest Body, if any occured.
+   */
+  public static inline function raycast_floats(x:Float, y:Float, direction_x:Float, direction_y:Float, test:BodyOrBodies, ?world:World,
+      update_world_quadtree:Bool = true, max_distance:Float = 0):Null<Intersection> {
+    var ray = Ray.get(x, y, direction_x, direction_y, max_distance);
+    var result = raycast(ray, test, world, update_world_quadtree);
+    ray.put();
+    return result;
+  }
+  /**
+   * Casts a Ray created from the supplied vector and angle, returning the Intersection with the closest Body.
+   * @param start The position the Ray starts from.
+   * @param angle The angle of the Ray, in degrees.
+   * @param test The Body or Array of Bodies to Cast the Ray at.
+   * @param max_distance The furthest distance the Ray reaches. `0` means no limit.
+   * @return Null<Intersection> the Intersection with the closest Body, if any occured.
+   */
+  public static inline function raycast_vector(start:Vector2, angle:Float, test:BodyOrBodies, ?world:World, update_world_quadtree:Bool = true,
+      max_distance:Float = 0):Null<Intersection> {
+    var ray = Ray.get_from_vector(start, angle, max_distance);
+    var result = raycast(ray, test, world, update_world_quadtree);
+    ray.put();
+    return result;
+  }
+  /**
+   * Casts a Ray, returning the Intersection with the closest Body.
+   *
+   * The Ray is clipped to the World's bounds (or, without a World, to the bounds of the tested Bodies) and then cast like a Line, so the results
+   * are the same as `linecast()`'s. Each `IntersectionData` also has its `ray` set.
+   * @param ray Ray to Cast.
+   * @param test The Body or Array of Bodies to Cast the Ray at.
+   * @return Null<Intersection> the Intersection with the closest Body, if any occured.
+   */
+  public static function raycast(ray:Ray, test:BodyOrBodies, ?world:World, update_world_quadtree:Bool = true):Null<Intersection> {
+    var line = clip_ray(ray, test, world);
+    if (line == null) return null;
+    var result = linecast(line, test, world, update_world_quadtree);
+    if (result != null) for (data in result.data) data.ray = ray;
+    return result;
+  }
+  /**
+   * Casts a Ray, returning all Intersections.
+   *
+   * The Ray is clipped to the World's bounds (or, without a World, to the bounds of the tested Bodies) and then cast like a Line, so the results
+   * are the same as `linecast_all()`'s. Each `IntersectionData` also has its `ray` set.
+   * @param ray Ray to Cast.
+   * @param test The Body or Array of Bodies to Cast the Ray at.
+   * @return Array<Intersection> All Intersections found. if none occured, the length will be 0.
+   */
+  public static function raycast_all(ray:Ray, test:BodyOrBodies, ?world:World, update_world_quadtree:Bool = true):Array<Intersection> {
+    var line = clip_ray(ray, test, world);
+    if (line == null) return [];
+    var results = linecast_all(line, test, world, update_world_quadtree);
+    for (intersection in results) for (data in intersection.data) data.ray = ray;
+    return results;
+  }
+  /**
+   * Clips a Ray to the region that could contain the tested Bodies - the World's bounds when a World is given (Bodies outside of it aren't tracked
+   * by the World's QuadTree anyway), or the combined bounds of the tested Bodies otherwise.
+   * @return The clipped `Line` (owned by the Ray), or `null` if the Ray can't reach anything.
+   */
+  static function clip_ray(ray:Ray, test:BodyOrBodies, ?world:World):Null<Line> {
+    var aabb:Null<AABB> = null;
+    if (world != null) aabb = world.center().to_aabb(true);
+    else switch (cast test : Either<Body, Array<Body>>) {
+      case Left(body):
+        if (body.disposed || !body.active) return null;
+        aabb = body.bounds();
+      case Right(arr):
+        for (body in arr) {
+          if (body == null || body.disposed || !body.active) continue;
+          var b = body.bounds();
+          if (aabb == null) aabb = b;
+          else {
+            aabb.add(b);
+            b.put();
+          }
+        }
+        if (aabb == null) return null;
+    }
+    var line = ray.clip(aabb);
+    aabb.put();
+    return line;
+  }
+  /**
    * Casts a Line, returning all Intersections.
    * @param line Line to Cast.
    * @param test The Body or Array of Bodies to Cast the Line at.

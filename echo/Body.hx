@@ -287,8 +287,8 @@ class Body implements Disposable #if cog implements cog.IComponent #end {
     last_y = Math.NaN;
     last_rotation = Math.NaN;
     dirty = true;
-    if (options.shape != null) create_shape(options.shape);
-    if (options.shapes != null) for (shape in options.shapes) create_shape(shape);
+    if (options.shape != null) create_shapes(options.shape);
+    if (options.shapes != null) for (shape in options.shapes) create_shapes(shape);
     if (options.shape_instance != null) add_shape(options.shape_instance);
     if (options.shape_instances != null) for (shape in options.shape_instances) add_shape(shape);
 
@@ -346,6 +346,21 @@ class Body implements Disposable #if cog implements cog.IComponent #end {
   public inline function create_shape(options:ShapeOptions, position:Int = -1):Shape {
     var s = Shape.get(options);
     return add_shape(s, position);
+  }
+  /**
+   * Adds every new `Shape` described by the `ShapeOptions` passed in to the Body.
+   *
+   * This adds a single `Shape` for everything except a `POLYGON` with `decompose` set, which adds one convex `Shape`
+   * for each piece the vertices were decomposed into - letting the Body use a concave collider.
+   *
+   * If `mass` has not been manually set, It's recommended to call `calculate_mass()` after adding/removing a Body's shapes.
+   * @param options
+   * @return The newly created `Shape`s.
+   */
+  public inline function create_shapes(options:ShapeOptions):Array<Shape> {
+    var s = Shape.get_all(options);
+    for (shape in s) add_shape(shape);
+    return s;
   }
   /**
    * Adds a `Shape` to the Body.

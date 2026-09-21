@@ -16,6 +16,7 @@ Check out the [API 📖](https://austineast.dev/echo/api/echo/Echo)!
 # Features
 * Semi-implicit euler integration physics
 * SAT-powered collision detection
+* Concave colliders through convex decomposition
 * Quadtree for broadphase collision querying
 * Collision listeners to provide collision callbacks
 * Full physics (contact-based resolution with rotation and friction) or Arcade physics (position/velocity separation only), configurable per World or per Listener
@@ -75,7 +76,29 @@ A Body's collider is represented by different Shapes. Without a `Shape` to defin
 Available Shapes:
 * Rectangle
 * Circle
-* Polygon (Convex Only)
+* Polygon (Convex)
+
+SAT only works with convex Shapes, so a concave collider is built out of several convex ones. Set `decompose` on a Polygon's options and Echo splits the vertices into convex pieces for you, adding one Shape to the Body per piece (see [Convex Decomposition](#convex-decomposition)):
+
+```haxe
+// An "L" shaped Body
+var b = new Body({
+  x: 100,
+  y: 100,
+  shape: {
+    type: POLYGON,
+    decompose: true,
+    vertices: [
+      new Vector2(0, 0),
+      new Vector2(40, 0),
+      new Vector2(40, 10),
+      new Vector2(10, 10),
+      new Vector2(10, 40),
+      new Vector2(0, 40)
+    ]
+  }
+});
+```
 
 When a Shape is added to a Body, it's transform (x, y, rotation) becomes relative to its parent Body. In this case, a Shape's local transform can still be accessed through `shape.local_x`, `shape.local_y`, and `shape.local_rotation`.
 
@@ -136,6 +159,23 @@ world.listen(player, tiles);
 ```
 
 `generate()` merges runs of neighboring tiles into as few Rects as possible, which keeps the Body count (and the broadphase) small. Pass a `shapes` Array of `TileShape`s to give particular tile indices a slope (`slope_direction` plus a `Gentle`/`Sharp` and `Thick`/`Thin` `slope_shape`) or any custom `ShapeOptions`, and an `ignore` Array for indices that shouldn't collide at all. `generate_grid()` skips the merging and produces one Body per tile, which is handy when tiles need to be removed individually at runtime.
+
+### Convex Decomposition
+
+`echo.util.Decompose` splits a concave set of vertices into convex ones, which is what backs the `decompose` Shape option. Call it directly when the pieces are needed outside of a `Body` (to render them, cache them, or build the Shapes by hand):
+
+```haxe
+// An Array of convex vertex Arrays
+var pieces = Decompose.convex(vertices);
+
+// The same thing, as an Array of Polygons ready to be added to a Body
+var polygons = Polygon.get_from_concave_vertices(0, 0, 0, vertices);
+for (p in polygons) body.add_shape(p);
+```
+
+The decomposition uses [Mark Bayazit's algorithm](https://mpen.ca/406/bayazit), which keeps the piece count low without adding many extra vertices. It expects a **simple** polygon - one whose edges don't cross each other, with no holes - so vertices coming from an editor or a file are worth validating with `Decompose.is_simple()` first. `Decompose` also provides `is_convex()`, `signed_area()`, `centroid()`, `remove_collinear()` and `remove_duplicates()` for working with raw vertices.
+
+Since a decomposed collider is just a `Body` with several Shapes, the pieces are laid out once when the Body is created - deforming a collider at runtime means decomposing the new vertices again. Note that Bodies still collide against each piece separately, so a Shape sliding across the seam between two pieces can catch on the internal edge.
 
 ### Bezier Curves
 
@@ -347,7 +387,6 @@ The suite cross-checks the broadphase against a brute force scan, and covers ful
 
 # Roadmap
 ## Later
-* Allow Concave Polygons (through Convex Decomposition)
 * Sleeping Body optimations
 * Constraints
 * Persistent contacts with warm-starting (improves stacking stability in full physics)

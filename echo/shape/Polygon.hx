@@ -3,6 +3,7 @@ package echo.shape;
 import echo.data.Data;
 import echo.shape.*;
 import echo.util.AABB;
+import echo.util.Decompose;
 import echo.util.Poolable;
 
 using echo.util.SAT;
@@ -88,6 +89,49 @@ class Polygon extends Shape implements Poolable {
     polygon.set(x, y, rotation, vertices, scale_x, scale_y);
     polygon.pooled = false;
     return polygon;
+  }
+  /**
+   * Decomposes a concave set of vertices into convex pieces, returning a `Polygon` for each one.
+   *
+   * SAT (and therefore Echo's collision detection) only works with convex Shapes, so a concave collider has to be built
+   * out of several convex Shapes. Add every returned `Polygon` to the same `Body` and it will collide as one concave form.
+   *
+   * Each returned `Polygon` is positioned at the centroid of its piece, with its vertices relative to that position -
+   * so their `volume()` and `inertia()` (and in turn the parent `Body`'s mass and inertia) come out correct.
+   *
+   * The vertices are expected to describe a simple polygon - one whose edges don't cross each other, with no holes.
+   * See `echo.util.Decompose` for the decomposition itself.
+   * @param x The X position of the vertex set (each vertex is relative to this).
+   * @param y The Y position of the vertex set (each vertex is relative to this).
+   * @param rotation The rotation to apply to the vertex set, around (`x`, `y`).
+   * @param vertices The concave (or convex) vertices to decompose.
+   * @param scale_x The scale to apply to the vertex set on the X axis.
+   * @param scale_y The scale to apply to the vertex set on the Y axis.
+   * @return An Array of convex `Polygon`s. Returns an empty Array if the vertices describe no area.
+   */
+  public static function get_from_concave_vertices(x:Float = 0, y:Float = 0, rotation:Float = 0, ?vertices:Array<Vector2>, scale_x:Float = 1,
+      scale_y:Float = 1):Array<Polygon> {
+    if (vertices == null || vertices.length < 3) return [];
+
+    var polygons:Array<Polygon> = [];
+    var radians = rotation * Math.PI / 180;
+    var cos = Math.cos(radians);
+    var sin = Math.sin(radians);
+
+    for (piece in Decompose.convex(vertices)) {
+      // Move the piece's vertices to be relative to its own centroid, then offset the piece by that centroid -
+      // scaled and rotated the same way the vertices themselves are, so the pieces stay put relative to each other
+      var c = Decompose.centroid(piece);
+      for (v in piece) {
+        v.x -= c.x;
+        v.y -= c.y;
+      }
+      var ox = c.x * scale_x;
+      var oy = c.y * scale_y;
+      polygons.push(get_from_vertices(x + (ox * cos - oy * sin), y + (ox * sin + oy * cos), rotation, piece, scale_x, scale_y));
+    }
+
+    return polygons;
   }
   /**
    * Gets a Polygon from the pool, or creates a new one if none are available. Call `put()` on the Polygon to place it back in the pool.

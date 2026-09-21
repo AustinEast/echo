@@ -22,6 +22,17 @@ class Shape #if cog implements cog.IComponent #end {
    */
   public static function get(options:ShapeOptions):Shape {
     options = echo.util.JSON.copy_fields(options, defaults);
+    // A concave Polygon needs more than one Shape to describe it - keep the largest piece and discard the rest.
+    // Use `get_all()` (or `Body.create_shapes()`) to get the whole set.
+    if (decomposes(options)) {
+      var shapes = decompose(options);
+      if (shapes.length > 0) {
+        var largest = 0;
+        for (i in 1...shapes.length) if (shapes[i].volume() > shapes[largest].volume()) largest = i;
+        for (i in 0...shapes.length) if (i != largest) shapes[i].put();
+        return shapes[largest];
+      }
+    }
     var s:Shape;
     switch (options.type) {
       case RECT:
@@ -35,6 +46,38 @@ class Shape #if cog implements cog.IComponent #end {
     }
     s.solid = options.solid;
     return s;
+  }
+  /**
+   * Gets every Shape described by the options.
+   *
+   * This returns a single Shape for everything except a `POLYGON` with `decompose` set, which returns one convex Shape
+   * for each piece the vertices were decomposed into. Add all of them to the same `Body` (or just use
+   * `Body.create_shapes()`) and they will collide as one concave form.
+   * @param options
+   * @return Array<Shape>
+   */
+  public static function get_all(options:ShapeOptions):Array<Shape> {
+    options = echo.util.JSON.copy_fields(options, defaults);
+    if (decomposes(options)) {
+      var shapes = decompose(options);
+      if (shapes.length > 0) return shapes;
+    }
+    return [get(options)];
+  }
+
+  static inline function decomposes(options:ShapeOptions):Bool {
+    return options.type == POLYGON && options.decompose && options.vertices != null && options.vertices.length > 3;
+  }
+
+  static function decompose(options:ShapeOptions):Array<Shape> {
+    var shapes:Array<Shape> = [];
+    var polygons = Polygon.get_from_concave_vertices(options.offset_x, options.offset_y, options.rotation, options.vertices, options.scale_x,
+      options.scale_y);
+    for (polygon in polygons) {
+      polygon.solid = options.solid;
+      shapes.push(polygon);
+    }
+    return shapes;
   }
   /**
    * Gets a `Rect` from the Rect Classes' Object Pool. Shortcut for `Rect.get()`.
@@ -308,6 +351,7 @@ class Shape #if cog implements cog.IComponent #end {
     scale_y: 1,
     offset_x: 0,
     offset_y: 0,
-    solid: true
+    solid: true,
+    decompose: false
   }
 }

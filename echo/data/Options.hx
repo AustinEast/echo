@@ -279,6 +279,14 @@ typedef ShapeOptions = {
    */
   var ?vertices:Array<Vector2>;
   /**
+   * If the Shape is a Polygon defined by `vertices`, setting this to `true` will decompose those vertices into convex
+   * pieces - letting a `Body` use a concave collider. Otherwise this is ignored.
+   *
+   * The `Body` ends up with one Shape per piece, so `body.shape` will only be a part of the collider. The vertices are
+   * expected to describe a simple polygon - one whose edges don't cross each other, with no holes.
+   */
+  var ?decompose:Bool;
+  /**
    * The Shape's rotation.
    */
   var ?rotation:Float;

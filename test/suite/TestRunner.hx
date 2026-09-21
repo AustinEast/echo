@@ -11,6 +11,7 @@ class TestRunner {
     FullPhysicsTest.run();
     VerletTest.run();
     RaycastTest.run();
+    DecomposeTest.run();
     finish();
   }
 }

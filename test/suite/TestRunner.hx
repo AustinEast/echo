@@ -12,6 +12,7 @@ class TestRunner {
     VerletTest.run();
     RaycastTest.run();
     DecomposeTest.run();
+    SleepTest.run();
     finish();
   }
 }

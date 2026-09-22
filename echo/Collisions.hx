@@ -258,7 +258,7 @@ class Collisions {
    * Bodies that aren't in a World fall back to their exact bounds.
    */
   static inline function stored_bounds(body:Body):AABB {
-    return body.quadtree_data != null && body.quadtree_data.bounds != null ? body.quadtree_data.bounds : body.bounds(query_bounds);
+    return body.stored_bounds(query_bounds);
   }
   /**
    * Turns a QuadTree query into Collisions between `body` and each result that is marked as part of the Listener's `b` group.
@@ -272,6 +272,8 @@ class Collisions {
         || member.disposed
         || member.shapes.length == 0
         || !member.active
+        // Neither Body can move (both are static, asleep, or one of each), so neither could have moved into the other
+        || (!body.can_move() && !member.can_move())
         || !layer_match(body, member)) continue;
       // If both Bodies are in both groups, this pair will also be found from the other Body's side - only accept it from the Body with the lower id, so each pair is reported once
       if ((member.collision_mask & IN_A) != 0 && (body.collision_mask & IN_B) != 0 && body.id > member.id) continue;
@@ -280,8 +282,8 @@ class Collisions {
   }
 
   public static function overlap_body_and_body_bounds(a:Body, b:Body):Null<Collision> {
-    if (a.disposed || b.disposed || a.shapes.length == 0 || b.shapes.length == 0 || !a.active || !b.active || a == b || !layer_match(a, b) || a.is_static()
-      && b.is_static()) return null;
+    if (a.disposed || b.disposed || a.shapes.length == 0 || b.shapes.length == 0 || !a.active || !b.active || a == b || !layer_match(a, b) || !a.can_move()
+      && !b.can_move()) return null;
     var ab = a.bounds();
     var bb = b.bounds();
     var col = ab.overlaps(bb);

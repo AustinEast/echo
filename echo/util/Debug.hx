@@ -30,6 +30,11 @@ class Debug {
   public var shape_color:Int;
   public var shape_fill_color:Int;
   public var shape_collided_color:Int;
+  /**
+   * Color used to draw the Shapes of Bodies that have fallen asleep (see `World.sleeping_bodies`). If `null`,
+   * `quadtree_color` is used.
+   */
+  public var shape_sleeping_color:Null<Int>;
   public var intersection_color:Int;
   public var intersection_overlap_color:Int;
   public var quadtree_color:Int;
@@ -76,7 +81,7 @@ class Debug {
         if (!onscreen) return;
       }
       if (draw_body_centers) draw_rect(member.x - 1, member.y - 1, 1, 1, quadtree_color);
-      for (shape in member.shapes) draw_shape(shape);
+      for (shape in member.shapes) draw_shape(shape, member.sleeping);
       if (draw_bounds) {
         var b = member.bounds();
         draw_rect(b.min_x, b.min_y, b.width, b.height, shape_fill_color, shape_color, 0);
@@ -102,8 +107,9 @@ class Debug {
     }
   }
 
-  public function draw_shape(shape:Shape) {
+  public function draw_shape(shape:Shape, sleeping:Bool = false) {
     var shape_pos = shape.get_position();
+    var shape_color = sleeping ? (shape_sleeping_color == null ? quadtree_color : shape_sleeping_color) : this.shape_color;
     switch (shape.type) {
       case RECT:
         var r:Rect = cast shape;

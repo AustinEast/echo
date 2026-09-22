@@ -17,6 +17,7 @@ Check out the [API 📖](https://austineast.dev/echo/api/echo/Echo)!
 * Semi-implicit euler integration physics
 * SAT-powered collision detection
 * Concave colliders through convex decomposition
+* Sleeping Bodies, so a settled simulation costs almost nothing
 * Quadtree for broadphase collision querying
 * Collision listeners to provide collision callbacks
 * Full physics (contact-based resolution with rotation and friction) or Arcade physics (position/velocity separation only), configurable per World or per Listener
@@ -141,6 +142,32 @@ world.listen(crates, ground, {arcade: false});
 In full physics, each Body has an `inertia` (its resistance to being spun) that is automatically calculated from its shapes, mass, and `Material.density` - just like `mass`. Setting a Body's `inertia` to `0` stops it from being rotated by collisions entirely, which is handy for things like a player character. A `Material`'s `friction` and `static_friction` values only take effect in full physics.
 
 Full physics uses the contact points generated during collision detection, which are available on `CollisionData.contacts` (and can be visualized with `Debug.draw_contacts`).
+
+### Sleeping Bodies
+
+Most of the Bodies in a World spend most of their time sitting still, and re-simulating a pile of crates that hasn't moved in a minute is wasted work. Turn on the `sleeping_bodies` flag and a Body that stops moving falls asleep:
+
+```haxe
+var world = Echo.start({width: 640, height: 360, gravity_y: 100, sleeping_bodies: true});
+
+// A Body that always needs to be simulated (and to keep reporting Collisions) can opt out
+var player = new Body({can_sleep: false, shape: {type: RECT, width: 8, height: 16}});
+```
+
+A sleeping Body is skipped by the World's Physics calculations and is not collided against anything else that can't move - other sleeping Bodies and static Bodies. It still holds up whatever is resting on it, behaving like a static Body until it is woken back up by any of:
+
+* something that is still on the move running into it
+* being moved, rotated, or `push()`ed
+* the Body it was resting on being removed from the World, or moving
+* `body.wake()`, or `world.wake_bodies()` for the whole World (optionally limited to an `AABB`)
+
+Setting a Body's `velocity` directly doesn't go through the Body at all, so the World only notices it on the next step - `wake()` it if you need it to move right away.
+
+How readily Bodies drop off is tuned with three static values on `Body`: `sleep_velocity` (how slowly a Body has to be travelling to count as at rest, in units/second), `sleep_rotational_velocity` (the same, in degrees/second), and `time_to_sleep` (how long it has to stay that way). Whether a Body has settled is measured by how far it actually travels rather than by its `velocity` - a Body squashed under a stack keeps a bit of leftover velocity that never turns into movement, and one jittering against its neighbors averages out to going nowhere.
+
+The catch is that two Bodies that have both fallen asleep stop being collided at all, so they stop reporting Collisions to a `Listener` - a Listener's `exit` callback fires as they settle, and `enter` fires again when they wake. Set `can_sleep = false` on any Body that needs to keep reporting Collisions while at rest.
+
+Sleeping is off by default. It's worth roughly 35-45% of the step time in a World that settles down, but it costs up to ~15% in a World where Bodies never come to rest at all. `haxe bench.hxml` measures each of its scenes both ways.
 
 ## Utilities
 
@@ -387,7 +414,6 @@ The suite cross-checks the broadphase against a brute force scan, and covers ful
 
 # Roadmap
 ## Later
-* Sleeping Body optimations
 * Constraints
 * Persistent contacts with warm-starting (improves stacking stability in full physics)
 * Compiler Flag to turn off a majority of inlined functions (worse performance, but MUCH smaller filesize)

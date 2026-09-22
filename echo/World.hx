@@ -4,6 +4,7 @@ import echo.Listener;
 import echo.data.Data;
 import echo.data.Options;
 import echo.shape.Rect;
+import echo.util.AABB;
 import echo.util.Disposable;
 import echo.util.History;
 import echo.util.QuadTree;
@@ -58,12 +59,39 @@ class World implements Disposable {
    * Individual Listeners can override this setting with their own `arcade` option.
    */
   public var arcade:Bool;
+  /**
+   * Flag that determines whether the World optimizes Bodies that have come to rest by putting them to sleep. Defaults to `false`.
+   *
+   * A sleeping Body is skipped by the World's Physics calculations, and is not collided against other Bodies that
+   * cannot move (other sleeping Bodies and static Bodies) - which can save a lot of work in a World where most Bodies
+   * spend their time settled. It stays that way until something moving runs into it, it is moved or pushed, or it is
+   * woken manually with `Body.wake()`.
+   *
+   * Note that two Bodies that have both fallen asleep stop reporting Collisions to a `Listener` (the same way two
+   * static Bodies do), so a Listener's `exit` callback fires as they settle. Set `Body.can_sleep` to `false` on any
+   * Body that needs to keep reporting Collisions while at rest.
+   *
+   * Tune when Bodies fall asleep with `Body.sleep_velocity`, `Body.sleep_rotational_velocity` and `Body.time_to_sleep`.
+   */
+  public var sleeping_bodies:Bool;
 
   public var history:Null<History<Array<BodyState>>>;
 
   public var accumulatedTime:Float = 0;
 
   var init:Bool;
+  /**
+   * Set while the World is tearing itself down, so that removing every Body doesn't bother waking the others.
+   */
+  var clearing:Bool = false;
+  /**
+   * Scratch values reused by `wake_bodies()`.
+   */
+  var wake_query:Array<QuadTreeData> = [];
+
+  var woken:Array<Body> = [];
+
+  var wake_bounds:AABB = AABB.get();
 
   public function new(options:WorldOptions) {
     members = options.members == null ? [] : options.members;
@@ -78,6 +106,7 @@ class World implements Disposable {
     listeners = new Listeners(options.listeners);
     iterations = options.iterations == null ? 5 : options.iterations;
     arcade = options.arcade == null ? false : options.arcade;
+    sleeping_bodies = options.sleeping_bodies == null ? false : options.sleeping_bodies;
     if (options.history != null) history = new History(options.history);
   }
   /**
@@ -143,11 +172,47 @@ class World implements Disposable {
   }
 
   public function remove(body:Body):Body {
+    // Anything that was resting on this Body has to start falling again
+    if (sleeping_bodies && !clearing && body.shapes.length > 0) wake_bodies(body.stored_bounds());
     quadtree.remove(body.quadtree_data);
     static_quadtree.remove(body.quadtree_data);
     members.remove(body);
     body.world = null;
     return body;
+  }
+  /**
+   * Wakes every sleeping `Body` in the World, or just the ones overlapping the `bounds` passed in.
+   *
+   * Sleeping Bodies wake on their own when something moving runs into them, but the World cannot tell when the ground
+   * beneath them changes - so call this after moving a static Body (or otherwise rearranging the World) to get any
+   * Bodies that were resting on it moving again.
+   * @param bounds Optional bounds to limit which Bodies are woken.
+   */
+  public function wake_bodies(?bounds:AABB) {
+    if (bounds == null) {
+      for_each_dynamic(b -> b.wake());
+      return;
+    }
+
+    // Spread outwards from the bounds - whatever was resting on a Body that just woke up has to wake up too, or it
+    // would be left hanging in mid air. Each Body only wakes once, so this settles quickly.
+    woken.resize(0);
+    wake_overlapping(bounds);
+    var i = 0;
+    while (i < woken.length) {
+      var body = woken[i++];
+      wake_overlapping(body.stored_bounds(wake_bounds));
+    }
+    woken.resize(0);
+  }
+
+  inline function wake_overlapping(bounds:AABB) {
+    wake_query.resize(0);
+    quadtree.query(bounds, wake_query);
+    for (data in wake_query) if (data.body != null && data.body.sleeping) {
+      data.body.wake();
+      woken.push(data.body);
+    }
   }
 
   public inline function iterator():Iterator<Body> return members.iterator();
@@ -181,10 +246,12 @@ class World implements Disposable {
    * Clears the World's members and listeners.
    */
   public function clear() {
+    clearing = true;
     while (members.length > 0) {
       var m = members.pop();
       if (m != null) m.remove();
     }
+    clearing = false;
     reset_quadtrees();
     listeners.clear();
   }
@@ -192,6 +259,7 @@ class World implements Disposable {
    * Disposes the World. DO NOT use the World after disposing it, as it could lead to null reference errors.
    */
   public function dispose() {
+    clearing = true;
     for_each(b -> b.remove());
     members = null;
     gravity = null;

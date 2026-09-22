@@ -33,6 +33,14 @@ typedef BodyOptions = {
    */
   var ?kinematic:Bool;
   /**
+   * Flag to set whether the Body is allowed to fall asleep in a World with the `sleeping_bodies` optimization on.
+   * Defaults to `true`.
+   *
+   * Set this to `false` for Bodies that always need to be simulated and to keep reporting Collisions (a player
+   * character, for example).
+   */
+  var ?can_sleep:Bool;
+  /**
    * The Body's mass. Affects how the Body reacts to Collisions and Acceleration Forces. The higher a Body's mass, the more resistant it is to those forces.
    * 
    * Can be set to a `Float` value, `AUTO`, or `STATIC` (`mass = 5`, `mass = AUTO`, and `mass = STATIC` are all valid).
@@ -188,10 +196,13 @@ typedef WorldOptions = {
   var ?history:Int;
 
   /**
-   * Flag to set whether the World will provide optimizations for Bodies that have come to rest.
-   * This can help performance quite a bit, but may introduce inaccuracies in the physics simulation.
+   * Flag to set whether the World will provide optimizations for Bodies that have come to rest, by putting them to
+   * sleep. Defaults to `false`.
+   *
+   * This can help performance quite a bit in a World where most Bodies spend their time settled, but it stops sleeping
+   * Bodies from reporting Collisions against each other (see `World.sleeping_bodies`).
    */
-  // var ?sleeping_bodies:Bool;
+  var ?sleeping_bodies:Bool;
 }
 
 typedef ListenerOptions = {

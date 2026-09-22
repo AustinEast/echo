@@ -53,6 +53,7 @@ class Main extends BaseApp {
       MultiShapeState,
       ShapesState,
       ConcaveState,
+      SleepingState,
       GroupsState,
       StaticState,
       LinecastState,

@@ -26,6 +26,24 @@ class Body implements Disposable #if cog implements cog.IComponent #end {
   public static var default_mass = AUTO;
 
   public static final minimum_mass = 0.0001;
+  /**
+   * The speed a `Body` has to stay under to be considered at rest, in units/second.
+   *
+   * Only used by Worlds with the `sleeping_bodies` optimization turned on. See `has_settled()`.
+   */
+  public static var sleep_velocity:Float = 4;
+  /**
+   * The rotational speed a `Body` has to stay under to be considered at rest, in degrees/second.
+   *
+   * Only used by Worlds with the `sleeping_bodies` optimization turned on. See `has_settled()`.
+   */
+  public static var sleep_rotational_velocity:Float = 8;
+  /**
+   * The amount of seconds a `Body` has to stay at rest before it falls asleep.
+   *
+   * Only used by Worlds with the `sleeping_bodies` optimization turned on.
+   */
+  public static var time_to_sleep:Float = 0.5;
 
   static var ids:Int = 0;
   /**
@@ -179,14 +197,42 @@ class Body implements Disposable #if cog implements cog.IComponent #end {
 
   public var disposed(default, null):Bool;
   /**
-   * TODO - sleeping support
+   * Flag to check if the Body is in a sleeping state.
    *
-   * Flag to check if the Body is in a sleeping state. A Body is awake if it has any acceleration, velocity, or has changed its position/rotation since the last step.
-   * If the Body's World has the `sleeping_bodies` optimization on, this flag determines if the Body will participate in a World's Physics calculations or Collision querys.
+   * A sleeping Body has come to rest, so it is skipped by a World's Physics calculations and is not collided against
+   * other Bodies that cannot move (other sleeping Bodies and static Bodies) - it behaves like a static Body until
+   * something wakes it back up.
+   *
+   * Bodies only fall asleep in a World with the `sleeping_bodies` optimization turned on. Use `sleep()` and `wake()`
+   * to change this manually, or set `can_sleep` to `false` to keep a Body awake for good.
    */
-  @:dox(hide)
-  @:noCompletion
-  private var sleeping:Bool;
+  public var sleeping(default, null):Bool;
+  /**
+   * Flag to set whether the Body is allowed to fall asleep. Set this to `false` for Bodies that always need to be
+   * simulated and to keep reporting Collisions (a player character, for example).
+   */
+  public var can_sleep:Bool = true;
+  /**
+   * The amount of seconds the Body has been at rest for. Once this passes `Body.time_to_sleep`, the Body falls asleep.
+   */
+  @:allow(echo.Physics.update_sleeping)
+  public var sleep_time(default, null):Float = 0;
+  /**
+   * Flag to check if the Body has come to a stop, whether or not it has fallen asleep yet. See `has_settled()`.
+   *
+   * Only maintained by a World with the `sleeping_bodies` optimization on. Bodies that have settled leave the sleeping
+   * Bodies they are touching alone, so that a pile can come to rest together.
+   */
+  @:allow(echo.Physics.update_sleeping)
+  public var resting(default, null):Bool;
+  /**
+   * The Body's position and rotation when its countdown to sleep started, used to measure how far it has drifted since.
+   */
+  var sleep_x:Float = 0;
+
+  var sleep_y:Float = 0;
+
+  var sleep_rotation:Float = 0;
   /**
    * The `World` that this body is attached to. It can only be a part of one `World` at a time.
    */
@@ -238,6 +284,10 @@ class Body implements Disposable #if cog implements cog.IComponent #end {
 
   var cached_inverse_inertia:Float = 0;
   /**
+   * Scratch AABB used by `update_static_bounds()` to hold where a static Body used to be.
+   */
+  static var static_bounds:AABB = AABB.get();
+  /**
    * Creates a new Body.
    * @param options Optional values to configure the new Body
    */
@@ -264,6 +314,7 @@ class Body implements Disposable #if cog implements cog.IComponent #end {
     scale_x = options.scale_x;
     scale_y = options.scale_y;
     kinematic = options.kinematic;
+    can_sleep = options.can_sleep;
 
     if (options.material != null) material = options.material;
     else if (options.gravity_scale != null || options.elasticity != null) {
@@ -286,6 +337,9 @@ class Body implements Disposable #if cog implements cog.IComponent #end {
     last_x = Math.NaN;
     last_y = Math.NaN;
     last_rotation = Math.NaN;
+    sleeping = false;
+    resting = false;
+    restart_sleep_countdown();
     dirty = true;
     if (options.shape != null) create_shapes(options.shape);
     if (options.shapes != null) for (shape in options.shapes) create_shapes(shape);
@@ -314,6 +368,7 @@ class Body implements Disposable #if cog implements cog.IComponent #end {
     b.scale_y = scale_y;
     b.material = material;
     b.kinematic = kinematic;
+    b.can_sleep = can_sleep;
     b.mass = mass;
     b.inertia = inertia;
     b.velocity.set(velocity.x, velocity.y);
@@ -422,6 +477,7 @@ class Body implements Disposable #if cog implements cog.IComponent #end {
    * @param force_type Determines whether the forces are applied to the Body's acceleration, velocity, or position.
    */
   public function push(x:Float = 0, y:Float = 0, forward:Bool = false, force_type:ForceType = ACCELERATION) {
+    if (sleeping) wake();
     if (forward) {
       var rotated_acceleration = new Vector2(x, y).rotate(rotation.deg_to_rad());
       x = rotated_acceleration.x;
@@ -482,11 +538,96 @@ class Body implements Disposable #if cog implements cog.IComponent #end {
    */
   public inline function is_static() return mass <= 0;
   /**
+   * Checks if the Body is able to move on its own - ie if it is dynamic and awake.
+   *
+   * Two Bodies that both can't move are never collided against each other, as neither of them could have moved into
+   * the other.
+   */
+  public inline function can_move() return mass > 0 && !sleeping;
+  /**
+   * Checks if Collisions are allowed to move the Body. Static, `kinematic` and sleeping Bodies push other Bodies
+   * around, but are never moved themselves.
+   */
+  public inline function is_immovable() return kinematic || sleeping || mass <= 0;
+  /**
+   * Checks if the Body has gone anywhere since its countdown to sleep started - ie whether it has stayed within
+   * `Body.sleep_velocity * Body.time_to_sleep` units (and `Body.sleep_rotational_velocity * Body.time_to_sleep`
+   * degrees) of where the countdown began. A Body with any acceleration or torque on it has never settled.
+   *
+   * This is measured by how far the Body actually travelled rather than by its `velocity`, for two reasons: a Body
+   * held in place by a stack keeps a bit of leftover velocity that never turns into movement, and a Body that is
+   * jittering against its neighbors averages out to going nowhere.
+   *
+   * This is what a World with the `sleeping_bodies` optimization on uses to maintain `resting`.
+   */
+  public inline function has_settled():Bool {
+    var dx = x - sleep_x;
+    var dy = y - sleep_y;
+    var distance = sleep_velocity * time_to_sleep;
+    return acceleration.length_sq.equals(0)
+      && torque.equals(0)
+      && dx * dx + dy * dy <= distance * distance
+      && Math.abs(rotation - sleep_rotation) <= sleep_rotational_velocity * time_to_sleep;
+  }
+  /**
+   * Restarts the Body's countdown to sleep from wherever it is now.
+   */
+  @:allow(echo.Physics.update_sleeping)
+  inline function restart_sleep_countdown() {
+    sleep_time = 0;
+    sleep_x = x;
+    sleep_y = y;
+    sleep_rotation = rotation;
+  }
+  /**
+   * Checks if any velocity, acceleration or torque has been applied to the Body from outside of the simulation.
+   *
+   * Falling asleep brings a Body to a complete stop, so anything found on a sleeping Body got there from somewhere
+   * else - which is what a World uses to wake a Body whose `velocity` was set directly.
+   */
+  public inline function is_disturbed():Bool {
+    return !velocity.length_sq.equals(0) || !rotational_velocity.equals(0) || !acceleration.length_sq.equals(0) || !torque.equals(0);
+  }
+  /**
+   * Puts the Body to sleep, bringing it to a stop.
+   *
+   * A sleeping Body is skipped by a World's Physics calculations and is not collided against other Bodies that cannot
+   * move, until something wakes it back up (see `sleeping`).
+   */
+  public inline function sleep() {
+    if (sleeping) return;
+    sleeping = true;
+    resting = true;
+    sleep_time = 0;
+    velocity.set(0, 0);
+    rotational_velocity = 0;
+  }
+  /**
+   * Wakes the Body up if it is sleeping, restarting its countdown back to sleep.
+   *
+   * This is called automatically when the Body is moved, pushed, or run into by something that is moving - but a Body
+   * has to be woken manually after changing its `velocity` outside of a `World` step.
+   */
+  public inline function wake() {
+    // `resting` is left alone on purpose - waking a Body doesn't move it, so only the World gets to decide that it is
+    // on the move again. Clearing it here would let two neighbors keep waking each other awake forever.
+    restart_sleep_countdown();
+    if (!sleeping) return;
+    sleeping = false;
+    dirty = true;
+  }
+  /**
    * If the Body is Static, update it's Quadtree Bounds.
    */
   public inline function update_static_bounds() {
     if (is_static() && world != null) {
-      bounds(quadtree_data.bounds);
+      // A static Body that actually moved leaves behind whatever was resting on it, so those have to be woken up
+      if (world.sleeping_bodies && quadtree_data != null && quadtree_data.bounds != null) {
+        var was = static_bounds.load(quadtree_data.bounds);
+        var now = bounds(quadtree_data.bounds);
+        if (was.min_x != now.min_x || was.min_y != now.min_y || was.max_x != now.max_x || was.max_y != now.max_y) world.wake_bodies(was);
+      }
+      else bounds(quadtree_data.bounds);
       world.static_quadtree.update(quadtree_data);
     }
   }
@@ -552,7 +693,22 @@ class Body implements Disposable #if cog implements cog.IComponent #end {
 
   function on_dirty(t) {
     dirty = true;
+    // The simulation never moves a sleeping Body, so a transform change on one came from outside of it. Whatever was
+    // resting on it where it used to be has to be woken up too, or it would be left hanging in mid air.
+    if (sleeping) {
+      var was = world != null && world.sleeping_bodies ? stored_bounds() : null;
+      wake();
+      if (was != null) world.wake_bodies(was);
+    }
     update_static_bounds();
+  }
+  /**
+   * The bounds the Body was last given to its World's QuadTree, which is where the rest of the World still thinks it
+   * is. Falls back to its current bounds when it isn't in a World.
+   */
+  @:allow(echo.World, echo.Collisions)
+  inline function stored_bounds(?aabb:AABB):AABB {
+    return quadtree_data != null && quadtree_data.bounds != null ? quadtree_data.bounds : bounds(aabb);
   }
 
   inline function get_x() return transform.local_x;
@@ -649,6 +805,7 @@ class Body implements Disposable #if cog implements cog.IComponent #end {
 
   static function get_defaults():BodyOptions return {
     kinematic: false,
+    can_sleep: true,
     mass: default_mass,
     x: 0,
     y: 0,

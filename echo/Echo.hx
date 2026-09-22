@@ -104,6 +104,9 @@ class Echo {
         Physics.separate(world);
         Collisions.notify(world);
       }
+
+      // Look for Bodies that have come to rest once the whole step has played out
+      Physics.update_sleeping(world, dt);
     }
 
     if (rate > 0) {

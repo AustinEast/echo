@@ -19,7 +19,14 @@ class Physics {
   }
 
   public static inline function step_body(body:Body, dt:Float, gravity_x:Float, gravity_y:Float, arcade:Bool = false) {
-    if (!body.disposed && body.active) {
+    // A sleeping Body is left exactly where it is. Check it for any velocity or acceleration that was applied from
+    // outside of the simulation first, so that a Body that has been given a push gets moving again on its own.
+    var asleep = body.sleeping;
+    if (asleep && body.is_disturbed()) {
+      body.wake();
+      asleep = false;
+    }
+    if (!asleep && !body.disposed && body.active) {
       body.last_x = body.x;
       body.last_y = body.y;
       body.last_rotation = body.rotation;
@@ -77,6 +84,32 @@ class Physics {
     }
   }
   /**
+   * Updates how long each of a World's Bodies has been at rest, putting the ones that have settled to sleep.
+   *
+   * Does nothing unless the World has the `sleeping_bodies` optimization turned on.
+   * @param world The World to update.
+   * @param dt elapsed time since the last step.
+   */
+  public static function update_sleeping(world:World, dt:Float) {
+    if (!world.sleeping_bodies) return;
+    world.for_each_dynamic(body -> {
+      if (body.sleeping || body.disposed || !body.active) return;
+      // The Body wandered off - start the countdown over from where it is now
+      if (!body.has_settled()) {
+        body.resting = false;
+        body.restart_sleep_countdown();
+        return;
+      }
+      body.sleep_time += dt;
+      // The Body held still for a whole countdown, which is long enough to tell one that has settled apart from one
+      // that is just jittering against its neighbors
+      if (body.sleep_time < Body.time_to_sleep) return;
+      body.resting = true;
+      if (body.can_sleep) body.sleep();
+      else body.restart_sleep_countdown();
+    });
+  }
+  /**
    * Resolves a Collision between two Bodies, separating them if the conditions are correct.
    * @param a the first `Body` in the Collision
    * @param b the second `Body` in the Collision
@@ -88,7 +121,19 @@ class Physics {
   public static inline function resolve(a:Body, b:Body, cd:CollisionData, correction_threshold:Float = 0.013, percent_correction:Float = 0.9,
       arcade:Bool = false) {
     // Do not resolve if either objects arent solid
-    if (!cd.sa.solid || !cd.sb.solid || !a.active || !b.active || a.disposed || b.disposed || a.is_static() && b.is_static()) return;
+    if (!cd.sa.solid || !cd.sb.solid || !a.active || !b.active || a.disposed || b.disposed) return;
+
+    // Something that is still on the move ran into a sleeping Body - wake it up so it can be pushed around again.
+    // A Body that has settled against a sleeping one leaves it be, so that a pile which has come to rest stays asleep.
+    if (a.sleeping != b.sleeping) {
+      if (a.sleeping) {
+        if (b.can_move() && !b.resting) a.wake();
+      }
+      else if (a.can_move() && !a.resting) b.wake();
+    }
+
+    // Neither Body can move, so there is nothing to separate
+    if (!a.can_move() && !b.can_move()) return;
 
     // Full physics requires contact points to compute rotational impulses. Fall back to arcade resolution if none are available.
     if (!arcade && cd.contact_count > 0) resolve_contacts(a, b, cd);
@@ -99,11 +144,11 @@ class Physics {
     var correction = (Math.max(cd.overlap - correction_threshold, 0) / inv_mass_sum) * percent_correction;
     var cx = correction * cd.normal.x;
     var cy = correction * cd.normal.y;
-    if (!a.kinematic) {
+    if (!a.is_immovable()) {
       a.x -= a.inverse_mass * cx;
       a.y -= a.inverse_mass * cy;
     }
-    if (!b.kinematic) {
+    if (!b.is_immovable()) {
       b.x += b.inverse_mass * cx;
       b.y += b.inverse_mass * cy;
     }
@@ -131,11 +176,11 @@ class Physics {
       var impulse_y = -j * cd.normal.y;
 
       // Apply impulse
-      if (!a.kinematic) {
+      if (!a.is_immovable()) {
         a.velocity.x -= impulse_x * a.inverse_mass;
         a.velocity.y -= impulse_y * a.inverse_mass;
       }
-      if (!b.kinematic) {
+      if (!b.is_immovable()) {
         b.velocity.x += impulse_x * b.inverse_mass;
         b.velocity.y += impulse_y * b.inverse_mass;
       }
@@ -147,11 +192,11 @@ class Physics {
    * Based on the sequential impulse method used by Box2D and Randy Gaul's Impulse Engine.
    */
   public static function resolve_contacts(a:Body, b:Body, cd:CollisionData) {
-    // Kinematic bodies are treated as having infinite mass - they affect others, but are never moved themselves
-    var ima = a.kinematic ? 0. : a.inverse_mass;
-    var imb = b.kinematic ? 0. : b.inverse_mass;
-    var iia = a.kinematic ? 0. : a.inverse_inertia;
-    var iib = b.kinematic ? 0. : b.inverse_inertia;
+    // Kinematic and sleeping bodies are treated as having infinite mass - they affect others, but are never moved themselves
+    var ima = a.is_immovable() ? 0. : a.inverse_mass;
+    var imb = b.is_immovable() ? 0. : b.inverse_mass;
+    var iia = a.is_immovable() ? 0. : a.inverse_inertia;
+    var iib = b.is_immovable() ? 0. : b.inverse_inertia;
     if (ima + imb == 0) return;
 
     var nx = cd.normal.x;
@@ -241,8 +286,8 @@ class Physics {
       wb += iib * (rbx * fy - rby * fx);
     }
 
-    if (!a.kinematic) a.rotational_velocity = wa.rad_to_deg();
-    if (!b.kinematic) b.rotational_velocity = wb.rad_to_deg();
+    if (!a.is_immovable()) a.rotational_velocity = wa.rad_to_deg();
+    if (!b.is_immovable()) b.rotational_velocity = wb.rad_to_deg();
   }
 
   // TODO

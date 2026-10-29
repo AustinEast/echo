@@ -104,17 +104,27 @@ class World implements Disposable {
     var r = 0.0;
     var t = 0.0;
     var b = 0.0;
+    var has_bounds = false;
 
     for (m in members) {
       for (s in m.shapes) {
-        if (s.left < l) l = s.left;
-        if (s.right > r) r = s.right;
-        if (s.top < t) t = s.top;
-        if (s.bottom > b) b = s.bottom;
+        if (!has_bounds) {
+          l = s.left;
+          r = s.right;
+          t = s.top;
+          b = s.bottom;
+          has_bounds = true;
+        }
+        else {
+          if (s.left < l) l = s.left;
+          if (s.right > r) r = s.right;
+          if (s.top < t) t = s.top;
+          if (s.bottom > b) b = s.bottom;
+        }
       }
     }
 
-    set(l, t, r - l, b - t);
+    if (has_bounds) set(l, t, r - l, b - t);
   }
 
   public inline function center(?rect:Rect):Rect {

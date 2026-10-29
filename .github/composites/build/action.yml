@@ -23,5 +23,6 @@ runs:
         shell: bash
         run: |
           haxe test.hxml
+          haxe test-world-bounds.hxml
           haxe sample.hxml
           haxe dox.hxml

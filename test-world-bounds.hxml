@@ -1,0 +1,4 @@
+-cp .
+-cp test
+-main WorldBoundsTest
+--interp
